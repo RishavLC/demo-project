@@ -1,0 +1,199 @@
+/* ===== Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===== Layout ===== */
+body {
+  display: flex;
+  height: 100vh;
+  background: #f4f7fb;
+  color: #333;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 220px;
+  background: #2c3e50;
+  color: white;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: 0.3s;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar-header {
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #1a252f;
+  text-align: center;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 10px 0;
+}
+
+.sidebar ul li {
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.sidebar ul li:hover {
+  background: #34495e;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  color: white;
+  display: block;
+  font-size: 14px;
+}
+
+/* ===== Toggle Button (Fixed Position on Sidebar Edge) ===== */
+.toggle-btn {
+  position: absolute;
+  top: 15px;
+  right: 10px;          /* stays inside sidebar edge */
+  background: #4a90e2;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  text-align: center;
+  line-height: 28px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.sidebar.collapsed .toggle-btn {
+  right: -35px;          /* moves outside when collapsed */
+}
+
+/* ===== Main Content ===== */
+.main-content {
+  margin-left: 220px;
+  padding: 20px;
+  flex: 1;
+  transition: 0.3s;
+}
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 60px;
+}
+
+/* ===== Tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+table th, table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+table th {
+  background: #4a90e2;
+  color: white;
+}
+
+table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+table tr:hover {
+  background: #eef5ff;
+  transition: 0.2s;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.btn-add { background: #28a745; color: white; }
+.btn-add:hover { background: #218838; }
+
+.btn-edit { background: #ffc107; color: black; }
+.btn-edit:hover { background: #e0a800; }
+
+.btn-delete { background: #dc3545; color: white; }
+.btn-delete:hover { background: #c82333; }
+
+/* ===== Form Wrapper (Centering All Forms) ===== */
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;        /* full screen height */
+  width: 100%;
+  margin-left: 220px;   /* prevent overlap with sidebar */
+}
+
+.sidebar.collapsed ~ .form-container {
+  margin-left: 60px;
+}
+
+/* ===== Forms (Login, Register, Add/Edit) ===== */
+form {
+    margin-top: 10%;
+    margin-left: 40%;
+  width: 100%;
+  height: auto;
+  max-width: 350px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+/* Input & button styling */
+form input, form textarea, form button {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+form button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+form button:hover {
+  background: #357abd;
+}
+
+/* ===== Form Title ===== */
+form h2 {
+  margin-bottom: 20px;
+  color: #444;
+}
