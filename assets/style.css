@@ -189,39 +189,39 @@ table tr:hover {
 }
 
 /* ===== Forms (Login, Register, Add/Edit) ===== */
-form {
-    margin-top: 10%;
-    margin-left: 40%;
-  width: 100%;
-  height: auto;
-  max-width: 350px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-/* Input & button styling */
-form input, form textarea, form button {
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-form button {
-  background: #4a90e2;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-form button:hover {
-  background: #357abd;
-}
+        form {
+            margin: 40%;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+        form h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        form input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        form button {
+            background: #4CAF50;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background: #45a049;
+        }
 
 /* ===== Form Title ===== */
 form h2 {

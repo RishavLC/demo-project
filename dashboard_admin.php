@@ -27,9 +27,9 @@ $result = $conn->query($sql);
   </div>
   <ul>
     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
+    <li><a href="add_record.php">➕ Add New Record</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="logout.php">🚪 Logout</a></li>
-    <li><a href="add_record.php">➕ Add New Record</a></li>
   </ul>
 </div>
 

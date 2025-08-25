@@ -32,43 +32,46 @@ $result = $stmt->get_result();
   <style>
     /* Nice search bar card */
     /* ===== Search Bar Card ===== */
-.search-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 15px;
+.page-header {
+    display: flex;
+    justify-content: space-between; /* Title left, search right */
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 5px;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
-  width: 300px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  overflow: hidden;
+.page-header h2 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
 }
 
-.search-box input {
-  flex: 1;
-  border: none;
-  padding: 8px 12px;
-  font-size: 14px;
-  outline: none;
+/* Search bar */
+.search-form {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 6px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
-.search-box button {
-  border: none;
-  background: #4a90e2;
-  color: #fff;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.3s;
+.search-form i {
+    color: #888;
+    font-size: 14px;
+    margin-right: 6px;
 }
 
-.search-box button:hover {
-  background: #357abd;
+.search-form input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 170px;   /* Compact width */
+    background: transparent;
 }
+
 
 /* ===== Users Table ===== */
 table {
@@ -137,19 +140,22 @@ table tr:hover {
   </div>
   <ul>
     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
+    <li><a href="add_record.php">➕ Add New Record</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="logout.php">🚪 Logout</a></li>
   </ul>
 </div>
 
 <div class="main-content">
-  <h2>Manage Users</h2>
+ <div class="page-header">
+    <h2>Manage Users</h2>
+    <form method="GET" action="manage_users.php" class="search-form">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" placeholder="Search user..."
+               value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+    </form>
+</div>
 
-  <!-- Search bar -->
-  <form method="get" class="search-card">
-    <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by username or role">
-    <button type="submit">🔍</button>
-  </form>
 
   <table>
     <tr>
