@@ -22,3 +22,7 @@ CREATE TABLE records (
 -- Insert an admin user (password = admin123 after hashing)
 INSERT INTO users (username, password, role) 
 VALUES ('admin', MD5('admin123'), 'admin');
+
+--update users table column
+ALTER TABLE users 
+ADD created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
