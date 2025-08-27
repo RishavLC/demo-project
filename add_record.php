@@ -25,8 +25,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<h2>Add Record</h2>
 <form method="POST">
+    <h2>Add Record</h2>
     <input type="text" name="title" placeholder="Title" required><br><br>
     <textarea name="description" placeholder="Description"></textarea><br><br>
     <button type="submit">Save</button>

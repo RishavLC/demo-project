@@ -190,59 +190,46 @@ table tr:hover {
   background: #c82333;
 }
 
-/* ===== Form Wrapper (Centering All Forms) ===== */
-.form-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh; /* full screen height */
-  width: 100%;
-  margin-left: 220px; /* prevent overlap with sidebar */
-}
-
-.sidebar.collapsed ~ .form-container {
-  margin-left: 60px;
-}
-
 /* ===== Forms (Login, Register, Add/Edit) ===== */
 form {
-  margin: 40%;
   background: #fff;
   padding: 20px 30px;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   width: 300px;
   text-align: center;
-}
-form h2 {
-  margin-bottom: 15px;
-  color: #333;
-}
-form input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-form button {
-  background: #4caf50;
-  border: none;
-  padding: 10px;
-  width: 100%;
-  color: #fff;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-}
-form button:hover {
-  background: #45a049;
+height: 500px;
+  margin: 50px auto;   /* Center horizontally with some top space */
 }
 
 /* ===== Form Title ===== */
 form h2 {
   margin-bottom: 20px;
   color: #444;
+  font-size: 20px;
+}
+
+/* ===== Inputs ===== */
+form input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* ===== Button ===== */
+form button {
+  background: #4caf50;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+form button:hover {
+  background: #45a049;
 }
 
 /* Nice search bar card */
