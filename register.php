@@ -8,13 +8,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = md5($_POST["password"]);
 
     $sql = "INSERT INTO users (username, password, role) VALUES ('$username', '$password', 'user')";
-    if ($conn->query($sql) === TRUE) {
-        $message = "<div class='alert success'>🎉 Registration successful! 
-                       <a href='index.php'>Login here</a>
-                    </div>";
-    } else {
-        $message = "<div class='alert error'>⚠️ Error: " . $conn->error . "</div>";
-    }
+if ($conn->query($sql) === TRUE) {
+    // Get the last inserted user ID
+    $user_id = $conn->insert_id;
+
+    // Fetch created_at value
+    $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
+    $row = $result->fetch_assoc();
+    $created_at = $row['created_at'];
+
+    // Show styled success message
+    echo "<div style='
+            margin: 20px auto; 
+            width: 400px; 
+            padding: 15px; 
+            text-align: center; 
+            background: #e6ffed; 
+            border: 1px solid #28a745; 
+            border-radius: 8px; 
+            font-family: Arial, sans-serif; 
+            color: #155724;'>
+            🎉 Registration successful on <b>$created_at</b>! <br><br>
+            <a href='index.php' style='
+                display: inline-block; 
+                padding: 8px 15px; 
+                margin-top: 10px; 
+                background: #28a745; 
+                color: #fff; 
+                text-decoration: none; 
+                border-radius: 5px;'>Login here</a>
+          </div>";
+} else {
+    echo "Error: " . $conn->error;
+}
+
 }
 ?>
 <!DOCTYPE html>

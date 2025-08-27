@@ -88,7 +88,7 @@ body {
 }
 
 .sidebar.collapsed ul li {
-  justify-content: center;  /* center icons */
+  justify-content: center; /* center icons */
   padding: 12px 0;
 }
 
@@ -133,10 +133,11 @@ table {
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-table th, table td {
+table th,
+table td {
   padding: 12px 15px;
   text-align: left;
 }
@@ -165,23 +166,38 @@ table tr:hover {
   transition: 0.3s;
 }
 
-.btn-add { background: #28a745; color: white; }
-.btn-add:hover { background: #218838; }
+.btn-add {
+  background: #28a745;
+  color: white;
+}
+.btn-add:hover {
+  background: #218838;
+}
 
-.btn-edit { background: #ffc107; color: black; }
-.btn-edit:hover { background: #e0a800; }
+.btn-edit {
+  background: #ffc107;
+  color: black;
+}
+.btn-edit:hover {
+  background: #e0a800;
+}
 
-.btn-delete { background: #dc3545; color: white; }
-.btn-delete:hover { background: #c82333; }
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+.btn-delete:hover {
+  background: #c82333;
+}
 
 /* ===== Form Wrapper (Centering All Forms) ===== */
 .form-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;        /* full screen height */
+  height: 100vh; /* full screen height */
   width: 100%;
-  margin-left: 220px;   /* prevent overlap with sidebar */
+  margin-left: 220px; /* prevent overlap with sidebar */
 }
 
 .sidebar.collapsed ~ .form-container {
@@ -189,42 +205,84 @@ table tr:hover {
 }
 
 /* ===== Forms (Login, Register, Add/Edit) ===== */
-        form {
-            margin: 40%;
-            background: #fff;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 300px;
-            text-align: center;
-        }
-        form h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        form input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        form button {
-            background: #4CAF50;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        form button:hover {
-            background: #45a049;
-        }
+form {
+  margin: 40%;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
+}
+form h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+form input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+form button {
+  background: #4caf50;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+form button:hover {
+  background: #45a049;
+}
 
 /* ===== Form Title ===== */
 form h2 {
   margin-bottom: 20px;
   color: #444;
+}
+
+/* Nice search bar card */
+/* ===== Search Bar Card ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between; /* Title left, search right */
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 5px;
+}
+
+.page-header h2 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+/* Search bar */
+.search-form {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 6px 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.search-form i {
+  color: #888;
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.search-form input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 170px; /* Compact width */
+  background: transparent;
 }
