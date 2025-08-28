@@ -7,41 +7,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["username"];
     $password = md5($_POST["password"]);
 
-    $sql = "INSERT INTO users (username, password, role) VALUES ('$username', '$password', 'user')";
-if ($conn->query($sql) === TRUE) {
-    // Get the last inserted user ID
-    $user_id = $conn->insert_id;
+    // ✅ Get role_id for 'user'
+    $roleResult = $conn->query("SELECT id FROM roles WHERE role_name = 'user' LIMIT 1");
+    $roleRow = $roleResult->fetch_assoc();
+    $role_id = $roleRow['id'];
 
-    // Fetch created_at value
-    $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
-    $row = $result->fetch_assoc();
-    $created_at = $row['created_at'];
+    // ✅ Insert new user with role_id
+    $sql = "INSERT INTO users (username, password, role_id) VALUES ('$username', '$password', '$role_id')";
+    if ($conn->query($sql) === TRUE) {
+        // Get the last inserted user ID
+        $user_id = $conn->insert_id;
 
-    // Show styled success message
-    echo "<div style='
-            margin: 20px auto; 
-            width: 400px; 
-            padding: 15px; 
-            text-align: center; 
-            background: #e6ffed; 
-            border: 1px solid #28a745; 
-            border-radius: 8px; 
-            font-family: Arial, sans-serif; 
-            color: #155724;'>
-            🎉 Registration successful on <b>$created_at</b>! <br><br>
-            <a href='index.php' style='
-                display: inline-block; 
-                padding: 8px 15px; 
-                margin-top: 10px; 
-                background: #28a745; 
-                color: #fff; 
-                text-decoration: none; 
-                border-radius: 5px;'>Login here</a>
-          </div>";
-} else {
-    echo "Error: " . $conn->error;
-}
+        // Fetch created_at value
+        $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
+        $row = $result->fetch_assoc();
+        $created_at = $row['created_at'];
 
+        // Show styled success message
+        echo "<div style='
+                margin: 20px auto; 
+                width: 400px; 
+                padding: 15px; 
+                text-align: center; 
+                background: #e6ffed; 
+                border: 1px solid #28a745; 
+                border-radius: 8px; 
+                font-family: Arial, sans-serif; 
+                color: #155724;'>
+                🎉 Registration successful on <b>$created_at</b>! <br><br>
+                <a href='index.php' style='
+                    display: inline-block; 
+                    padding: 8px 15px; 
+                    margin-top: 10px; 
+                    background: #28a745; 
+                    color: #fff; 
+                    text-decoration: none; 
+                    border-radius: 5px;'>Login here</a>
+              </div>";
+    } else {
+        echo "Error: " . $conn->error;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -118,12 +123,12 @@ if ($conn->query($sql) === TRUE) {
     </style>
 </head>
 <body>
-    <form method="POST">
-        <h2>Register</h2>
-        <?php if ($message) echo $message; ?>
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <button type="submit">Register</button>
-    </form>
+<form method="POST">
+    <h2>Register</h2>
+    <?php if ($message) echo $message; ?>
+    <input type="text" name="username" placeholder="Username" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <button type="submit">Register</button>
+</form>
 </body>
 </html>

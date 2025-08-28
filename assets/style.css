@@ -10,11 +10,10 @@
 body {
   display: flex;
   height: 100vh;
-  background: #f4f7fb;
+  background: #fff;
   color: #333;
 }
 
-/* ===== Sidebar ===== */
 /* ===== Sidebar ===== */
 .sidebar {
   width: 220px;
@@ -165,15 +164,6 @@ table tr:hover {
   font-weight: 500;
   transition: 0.3s;
 }
-
-.btn-add {
-  background: #28a745;
-  color: white;
-}
-.btn-add:hover {
-  background: #218838;
-}
-
 .btn-edit {
   background: #ffc107;
   color: black;
@@ -191,25 +181,27 @@ table tr:hover {
 }
 
 /* ===== Forms (Login, Register, Add/Edit) ===== */
-form {
+.auth-form {
   background: #fff;
   padding: 20px 30px;
   border-radius: 10px;
   width: 300px;
   text-align: center;
-height: 500px;
-  margin: 50px auto;   /* Center horizontally with some top space */
+  height: 350px;
+  margin: 50px auto;   
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
 }
 
 /* ===== Form Title ===== */
-form h2 {
+.auth-form h2 {
   margin-bottom: 20px;
   color: #444;
   font-size: 20px;
 }
 
 /* ===== Inputs ===== */
-form input {
+.auth-form input {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
@@ -218,8 +210,17 @@ form input {
   font-size: 14px;
 }
 
+/* form textarea */
+.auth-form textarea{
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
 /* ===== Button ===== */
-form button {
+.auth-form button {
   background: #4caf50;
   border: none;
   padding: 10px;
@@ -228,48 +229,46 @@ form button {
   font-size: 16px;
   cursor: pointer;
 }
-form button:hover {
+.auth-form button:hover {
   background: #45a049;
-}
+} 
 
-/* Nice search bar card */
-/* ===== Search Bar Card ===== */
+/* Search==Bar */
 .page-header {
-  display: flex;
-  justify-content: space-between; /* Title left, search right */
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
 }
 
 .page-header h2 {
-  font-size: 22px;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
+    margin: 0;
+    font-size: 22px;
+    font-weight: bold;
 }
 
-/* Search bar */
 .search-form {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  padding: 6px 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;  /* spacing between inputs */
 }
 
-.search-form i {
-  color: #888;
-  font-size: 14px;
-  margin-right: 6px;
+.search-form input[type="text"],
+.search-form input[type="date"] {
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.search-form input {
-  border: none;
-  outline: none;
-  font-size: 14px;
-  width: 170px; /* Compact width */
-  background: transparent;
+.search-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.search-form button:hover {
+    background-color: #0056b3;
 }

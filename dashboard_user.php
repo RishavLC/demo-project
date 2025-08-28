@@ -5,13 +5,14 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     exit();
 }
 include "config.php";
-$role = ucfirst($_SESSION["role"]); // User
+$role = ucfirst($_SESSION["role"]); // Will still show "User"
 $user_id = $_SESSION["user_id"];
 
 // Fetch only this user's records
 $sql = "SELECT * FROM records WHERE user_id = $user_id";
 $result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>

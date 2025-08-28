@@ -25,7 +25,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-Update<form method="POST">
+<form method="POST" class="auth-form">
+    <h2>Update</h2>
     <input type="text" name="title" placeholder="Title" required><br><br>
     <textarea name="description" placeholder="Description"></textarea><br><br>
     <button type="submit">Update</button>
