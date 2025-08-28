@@ -1,13 +1,24 @@
 CREATE DATABASE crud_system;
 USE crud_system;
 
--- User table
+-- Roles table
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(255) DEFAULT NULL
+);
+
+-- Users table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'user') DEFAULT 'user'
+    role_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id)
 );
+
 
 -- Data table (records for CRUD)
 CREATE TABLE records (
@@ -19,10 +30,12 @@ CREATE TABLE records (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Insert an admin user (password = admin123 after hashing)
-INSERT INTO users (username, password, role) 
-VALUES ('admin', MD5('admin123'), 'admin');
+-- Insert roles
+INSERT INTO roles (role_name, description) VALUES
+('admin', 'Full access to system'),
+('user', 'Regular user with limited access');
 
---update users table column
-ALTER TABLE users 
-ADD created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+-- Insert users
+INSERT INTO users (username, password, role_id) VALUES
+('admin', MD5('admin'), 1), -- admin
+('user1', MD5('user2'), 2);    -- user
