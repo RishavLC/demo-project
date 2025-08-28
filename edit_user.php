@@ -1,5 +1,6 @@
 <?php
 session_start();
+include "config.php";
 
 // Only allow admin
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
@@ -7,19 +8,17 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
     exit();
 }
 
-include "config.php";
-
-// Check if ID is passed
+// Check if user ID is passed
 if (!isset($_GET['id'])) {
     header("Location: manage_users.php");
     exit();
 }
 
-$id = intval($_GET['id']);
+$user_id = intval($_GET['id']);
 
 // Fetch user data
-$stmt = $conn->prepare("SELECT id, username, role FROM users WHERE id = ?");
-$stmt->bind_param("i", $id);
+$stmt = $conn->prepare("SELECT id, username, role_id FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -29,20 +28,34 @@ if ($result->num_rows == 0) {
 }
 $user = $result->fetch_assoc();
 
+// Fetch all roles
+$roles_result = $conn->query("SELECT id, role_name FROM roles ORDER BY role_name ASC");
+
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
-    $role = trim($_POST['role']);
+    $role_id = intval($_POST['role_id']);
 
-    $updateStmt = $conn->prepare("UPDATE users SET username = ?, role = ? WHERE id = ?");
-    $updateStmt->bind_param("ssi", $username, $role, $id);
+    // Optional: check if role_id exists
+    $role_check = $conn->prepare("SELECT id FROM roles WHERE id = ?");
+    $role_check->bind_param("i", $role_id);
+    $role_check->execute();
+    $role_check_result = $role_check->get_result();
 
-    if ($updateStmt->execute()) {
-        echo "<script>alert('User updated successfully!'); window.location='manage_users.php';</script>";
+    if ($role_check_result->num_rows == 0) {
+        echo "<script>alert('Selected role is invalid!');</script>";
     } else {
-        echo "<script>alert('Error updating user!'); window.location='manage_users.php';</script>";
+        $updateStmt = $conn->prepare("UPDATE users SET username = ?, role_id = ? WHERE id = ?");
+        $updateStmt->bind_param("sii", $username, $role_id, $user_id);
+
+        if ($updateStmt->execute()) {
+            echo "<script>alert('User updated successfully!'); window.location='manage_users.php';</script>";
+        } else {
+            echo "<script>alert('Error updating user!');</script>";
+        }
+        $updateStmt->close();
     }
-    $updateStmt->close();
+    $role_check->close();
 }
 ?>
 
@@ -54,19 +67,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
 <div class="main-content">
+    <form method="POST" class="auth-form">
     <h2>Edit User</h2>
-    <form method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>" required><br><br>
-
-        <label>Role:</label>
-        <select name="role" required>
-            <option value="admin" <?= $user['role']=='admin'?'selected':'' ?>>Admin</option>
-            <option value="user" <?= $user['role']=='user'?'selected':'' ?>>User</option>
+        <input placeholder="Username" type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>" required><br><br>
+        <select name="role_id"  placeholder="Role" required>
+            <?php while ($role = $roles_result->fetch_assoc()): ?>
+                <option value="<?= $role['id'] ?>" <?= $role['id'] == $user['role_id'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($role['role_name']) ?>
+                </option>
+            <?php endwhile; ?>
         </select><br><br>
 
         <button type="submit">Update User</button>
-        <a href="manage_users.php">Cancel</a>
+        <a href="manage_users.php" class="btn">Cancel</a>
     </form>
 </div>
 </body>
