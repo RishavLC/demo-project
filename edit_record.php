@@ -10,14 +10,20 @@ if (!isset($_SESSION["user_id"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST["title"];
     $desc = $_POST["description"];
-    $user_id = $_SESSION["user_id"];
+    $record_id = $_POST["record_id"];  // hidden input in form
 
-    $sql = "UPDATE INTO records (user_id, title, description) VALUES ($user_id, '$title', '$desc')";
-    if ($conn->query($sql)) {
+    $stmt = $conn->prepare("UPDATE records SET title = ?, description = ? WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ssii", $title, $desc, $record_id, $_SESSION["user_id"]);
+
+    if ($stmt->execute()) {
         header("Location: " . ($_SESSION["role"] == "admin" ? "dashboard_admin.php" : "dashboard_user.php"));
+        exit();
+    } else {
+        echo "Error updating record.";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,9 +33,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <form method="POST" class="auth-form">
     <h2>Update</h2>
+    <input type="hidden" name="record_id" value="<?= $_GET['id'] ?>">
     <input type="text" name="title" placeholder="Title" required><br><br>
     <textarea name="description" placeholder="Description"></textarea><br><br>
     <button type="submit">Update</button>
 </form>
+
 </body>
 </html>
