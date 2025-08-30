@@ -18,12 +18,19 @@ $searchTerm = "%$search%";
 $conditions = "(users.username LIKE ? OR roles.role_name LIKE ?)";
 $params = ["ss", $searchTerm, $searchTerm];
 
-// handle dates
+$error_message = ""; // store error message for invalid dates
+
+// ✅ Handle dates safely
 if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
-    $conditions .= " AND DATE(users.created_at) BETWEEN ? AND ?";
-    $params[0] .= "ss";
-    $params[] = $_GET['start_date'];
-    $params[] = $_GET['end_date'];
+    if ($_GET['end_date'] < $_GET['start_date']) {
+        // invalid range
+        $error_message = "⚠ Invalid date range: End date cannot be earlier than Start date.";
+    } else {
+        $conditions .= " AND DATE(users.created_at) BETWEEN ? AND ?";
+        $params[0] .= "ss";
+        $params[] = $_GET['start_date'];
+        $params[] = $_GET['end_date'];
+    }
 } elseif (!empty($_GET['start_date'])) {
     $conditions .= " AND DATE(users.created_at) >= ?";
     $params[0] .= "s";
@@ -40,14 +47,19 @@ $sql = "SELECT users.id, users.username, roles.role_name, users.created_at, user
         WHERE $conditions 
         ORDER BY $sort $order";
 
-$stmt = $conn->prepare($sql);
-if(!$stmt) die("Prepare failed: ".$conn->error);
+// ✅ Only run query if no error
+if (empty($error_message)) {
+    $stmt = $conn->prepare($sql);
+    if(!$stmt) die("Prepare failed: ".$conn->error);
 
-$stmt->bind_param(...$params);
-$stmt->execute();
-$result = $stmt->get_result();
-
+    $stmt->bind_param(...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = false; // skip query
+}
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,18 +83,20 @@ $result = $stmt->get_result();
 <div class="main-content">
  <div class="page-header">
     <h2>Manage Users</h2>
-    <form method="GET" action="manage_users.php" class="search-form">
-        <input type="text" name="search" placeholder="Search user..."
-               value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-        
-        <label for="start_date">From:</label>
-        <input type="date" name="start_date" value="<?php echo isset($_GET['start_date']) ? $_GET['start_date'] : ''; ?>">
+<form method="GET" action="manage_users.php" id="searchForm" class="search-form">
+    <input type="text" name="search" placeholder="Search user..."
+           value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+    
+    <label for="start_date">From:</label>
+    <input type="date" id="start_date" name="start_date" 
+           value="<?php echo isset($_GET['start_date']) ? $_GET['start_date'] : ''; ?>">
 
-        <label for="end_date">To:</label>
-        <input type="date" name="end_date" value="<?php echo isset($_GET['end_date']) ? $_GET['end_date'] : ''; ?>">
+    <label for="end_date">To:</label>
+    <input type="date" id="end_date" name="end_date" 
+           value="<?php echo isset($_GET['end_date']) ? $_GET['end_date'] : ''; ?>">
 
-        <button type="submit" style="background-color:red;">🔍 Filter</button>
-    </form>
+    <button type="submit" style="background-color:red;">🔍 Filter</button>
+</form>
 </div>
 
 <table>
@@ -94,9 +108,11 @@ $result = $stmt->get_result();
     <th style="background-color:4a90e2;"><a style="color: white; text-decoration: none;" href="?search=<?= $search ?>&sort=updated_at&order=<?= $order=='ASC'?'desc':'asc' ?>">Updated At</a></th>
     <th>Action</th>
   </tr>
-
-  <?php while($row = $result->fetch_assoc()){ ?>
-  <tr>
+<?php if (!empty($error_message)): ?>
+    <p style="color:red; font-weight:bold;"><?= $error_message ?></p>
+<?php elseif ($result && $result->num_rows > 0): ?>
+    <?php while ($row = $result->fetch_assoc()): ?>
+        <tr>
     <td><?= $row['id'] ?></td>
     <td><?= htmlspecialchars($row['username']) ?></td>
     <td><?= $row['role_name'] ? ucfirst($row['role_name']) : '-' ?></td>
@@ -107,7 +123,10 @@ $result = $stmt->get_result();
       <a href="delete_user.php?id=<?= $row['id'] ?>" class="btn btn-delete" onclick="return confirm('Delete this user?');">🗑 Delete</a>
     </td>
   </tr>
-  <?php } ?>
+    <?php endwhile; ?>
+<?php else: ?>
+    <p>No users found.</p>
+ <?php endif; ?>
 </table>
 
 </div>
