@@ -87,11 +87,11 @@ $result = $stmt->get_result();
 
 <table>
   <tr>
-    <th><a href="?search=<?= $search ?>&sort=id&order=<?= $order=='ASC'?'desc':'asc' ?>">ID</a></th>
-    <th><a href="?search=<?= $search ?>&sort=username&order=<?= $order=='ASC'?'desc':'asc' ?>">Username</a></th>
-    <th><a href="?search=<?= $search ?>&sort=role_name&order=<?= $order=='ASC'?'desc':'asc' ?>">Role</a></th>
-    <th><a href="?search=<?= $search ?>&sort=created_at&order=<?= $order=='ASC'?'desc':'asc' ?>">Created At</a></th>
-    <th><a href="?search=<?= $search ?>&sort=updated_at&order=<?= $order=='ASC'?'desc':'asc' ?>">Updated At</a></th>
+    <th style="background-color:4a90e2;"><a style="color: white; text-decoration: none;" href="?search=<?= $search ?>&sort=id&order=<?= $order=='ASC'?'desc':'asc' ?>">ID</a></th>
+    <th style="background-color:4a90e2;"><a style="color: white; text-decoration: none;" href="?search=<?= $search ?>&sort=username&order=<?= $order=='ASC'?'desc':'asc' ?>">Username</a></th>
+    <th style="background-color:4a90e2;"><a style="color: white; text-decoration: none;" href="?search=<?= $search ?>&sort=role_name&order=<?= $order=='ASC'?'desc':'asc' ?>">Role</a></th>
+    <th style="background-color:4a90e2;"><a style="color: white; text-decoration: none;" href="?search=<?= $search ?>&sort=created_at&order=<?= $order=='ASC'?'desc':'asc' ?>">Created At</a></th>
+    <th style="background-color:4a90e2;"><a style="color: white; text-decoration: none;" href="?search=<?= $search ?>&sort=updated_at&order=<?= $order=='ASC'?'desc':'asc' ?>">Updated At</a></th>
     <th>Action</th>
   </tr>
 

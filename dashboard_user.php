@@ -36,7 +36,7 @@ $result = $conn->query($sql);
 
   <!-- Main Content -->
   <div class="main-content">
-     <h2>Welcome, <?= htmlspecialchars($_SESSION['username']) ?></h2>
+     <h2>Welcome, User</h2>
     <table>
       <tr>
         <th>ID</th><th>Title</th><th>Description</th><th>Action</th>
