@@ -30,6 +30,7 @@ $result = $conn->query($sql);
     <ul>
       <li><a href="dashboard_user.php">🏠 Dashboard</a></li>
       <li><a href="add_record.php">➕ Add Record</a></li>
+      <li><a href="auction_bid.php">Place bid</a></li>
       <li><a href="logout.php">🚪 Logout</a></li>
     </ul>
   </div>
