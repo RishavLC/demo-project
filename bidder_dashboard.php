@@ -9,89 +9,38 @@ $role = ucfirst($_SESSION["role"]);
 $user_id = $_SESSION["user_id"];
 
 // Fetch all auction items
-$sql = "SELECT * FROM auction_items"; // your table name
+$sql = "SELECT * FROM auction_items"; // replace with your auction items table
 $result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-  <title><?= $role ?> - Bidder Dashboard</title>
+  <title><?= $role ?> - Auction Bid</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .dashboard {
-      display: flex;
-      gap: 20px;
-      padding: 20px;
-    }
-    .sidebar-left {
-      width: 220px;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .sidebar-left h3 {
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    .sidebar-left input {
+    table {
       width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 15px;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
-    .sidebar-left ul {
-      list-style: none;
-      padding: 0;
-    }
-    .sidebar-left ul li {
-      margin: 8px 0;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .items-section {
-      flex: 1;
-    }
-    .items-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-    }
-    .item-card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 15px;
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px;
       text-align: center;
     }
-    .item-card img {
-      width: 150px;
-      height: 120px;
-      object-fit: contain;
-      margin-bottom: 10px;
+    table th {
+      background: #4a90e2;
+      color: white;
     }
-    .item-card h4 {
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-    .item-card p {
-      font-size: 13px;
-      color: #444;
-      margin: 3px 0;
-    }
-    .bid-btn {
-      margin-top: 8px;
-      display: inline-block;
-      padding: 8px 15px;
+    .btn-bid {
       background: #4a90e2;
       color: #fff;
-      border-radius: 6px;
+      padding: 6px 12px;
       text-decoration: none;
-      font-size: 13px;
+      border-radius: 5px;
     }
-    .bid-btn:hover {
+    .btn-bid:hover {
       background: #357abd;
     }
   </style>
@@ -113,45 +62,31 @@ $result = $conn->query($sql);
 
   <!-- Main Content -->
   <div class="main-content">
-    <div class="dashboard">
-      
-      <!-- Left filter -->
-      <div class="sidebar-left">
-        <h3>Search</h3>
-        <input type="text" placeholder="Search items...">
-        <h3>Browse Categories</h3>
-        <ul>
-          <li>All Categories</li>
-          <li>Electronics</li>
-          <li>Fashion</li>
-          <li>Health & Beauty</li>
-          <li>Home & Living</li>
-          <li>Mobiles</li>
-          <li>Other</li>
-        </ul>
-      </div>
-      
-      <!-- Right items -->
-      <div class="items-section">
-        <h2>Collections</h2>
-        <div class="items-grid">
-          <?php if($result && $result->num_rows > 0): ?>
-            <?php while($row = $result->fetch_assoc()): ?>
-              <div class="item-card">
-                <img src="uploads/<?= htmlspecialchars($row['image']) ?>" alt="<?= htmlspecialchars($row['title']) ?>">
-                <h4><?= htmlspecialchars($row['title']) ?></h4>
-                <p><?= $row['quantity'] ?> Qty</p>
-                <p>$<?= $row['price'] ?></p>
-                <a href="place_bid.php?item_id=<?= $row['id'] ?>" class="bid-btn">Place Bid</a>
-              </div>
-            <?php endwhile; ?>
-          <?php else: ?>
-            <p>No auction items available.</p>
-          <?php endif; ?>
-        </div>
-      </div>
-
-    </div>
+    <h2>Auction Items</h2>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Price ($)</th>
+        <th>Action</th>
+      </tr>
+      <?php if($result && $result->num_rows > 0): ?>
+        <?php while($row = $result->fetch_assoc()): ?>
+        <tr>
+          <td><?= $row['id'] ?></td>
+          <td><?= htmlspecialchars($row['title']) ?></td>
+          <td><?= $row['quantity'] ?></td>
+          <td><?= $row['price'] ?></td>
+          <td>
+            <a href="place_bid.php?item_id=<?= $row['id'] ?>" class="btn-bid">Place Bid</a>
+          </td>
+        </tr>
+        <?php endwhile; ?>
+      <?php else: ?>
+        <tr><td colspan="5">No auction items available.</td></tr>
+      <?php endif; ?>
+    </table>
   </div>
 
   <script src="assets/script.js"></script>
