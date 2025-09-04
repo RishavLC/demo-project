@@ -5,8 +5,17 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     exit();
 }
 include "config.php";
-$role = ucfirst($_SESSION["role"]); // Will still show "User"
+$role = ucfirst($_SESSION["role"]); 
 $user_id = $_SESSION["user_id"];
+
+// ✅ Fetch user’s name
+$user_sql = "SELECT username FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($username);
+$stmt->fetch();
+$stmt->close();
 
 // Fetch only this user's records
 $sql = "SELECT * FROM records WHERE user_id = $user_id";
@@ -37,7 +46,7 @@ $result = $conn->query($sql);
 
   <!-- Main Content -->
   <div class="main-content">
-     <h2>Welcome, User</h2>
+     <h2>Welcome, <?= htmlspecialchars($username) ?> 👋</h2>
     <table>
       <tr>
         <th>ID</th><th>Title</th><th>Description</th><th>Action</th>
