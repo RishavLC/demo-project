@@ -39,3 +39,20 @@ INSERT INTO roles (role_name, description) VALUES
 INSERT INTO users (username, password, role_id) VALUES
 ('admin', MD5('admin'), 1), -- admin
 ('user1', MD5('user2'), 2);    -- user
+
+-- auction iten
+CREATE TABLE auction_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seller_id INT NOT NULL,               -- user who listed the item
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    category VARCHAR(100),
+    start_price DECIMAL(10,2) NOT NULL,
+    current_price DECIMAL(10,2) DEFAULT 0.00,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL,
+    status ENUM('active','closed','sold') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
