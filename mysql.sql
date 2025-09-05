@@ -55,4 +55,13 @@ CREATE TABLE auction_items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
+-- bids
+CREATE TABLE bids (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    bid_amount DECIMAL(10,2) NOT NULL,
+    bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_id) REFERENCES auction_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES users(id) ON DELETE CASCADE
+);
