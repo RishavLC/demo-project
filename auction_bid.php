@@ -4,98 +4,141 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     header("Location: index.php");
     exit();
 }
+
 include "config.php";
-$role = ucfirst($_SESSION["role"]); 
 $user_id = $_SESSION["user_id"];
+$message = "";
+
+// ✅ Handle Bid Submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["bid_amount"], $_POST["item_id"])) {
+    $item_id = intval($_POST["item_id"]);
+    $bid_amount = floatval($_POST["bid_amount"]);
+
+    // Fetch current item info
+    $stmt = $conn->prepare("SELECT current_price, end_time FROM auction_items WHERE id=?");
+    $stmt->bind_param("i", $item_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $item = $result->fetch_assoc();
+
+    if ($item) {
+        $now = date("Y-m-d H:i:s");
+        if ($now > $item['end_time']) {
+            $message = "<p style='color:red;font-weight:bold;'>❌ Auction has already ended.</p>";
+        } elseif ($bid_amount <= $item['current_price']) {
+            $message = "<p style='color:red;font-weight:bold;'>⚠ Bid must be higher than current price.</p>";
+        } else {
+            // Insert bid
+            $stmt = $conn->prepare("INSERT INTO bids (item_id, bidder_id, bid_amount) VALUES (?, ?, ?)");
+            $stmt->bind_param("iid", $item_id, $user_id, $bid_amount);
+            if ($stmt->execute()) {
+                // Update current price
+                $stmt2 = $conn->prepare("UPDATE auction_items SET current_price=? WHERE id=?");
+                $stmt2->bind_param("di", $bid_amount, $item_id);
+                $stmt2->execute();
+
+                $message = "<p style='color:green;font-weight:bold;'>✅ Bid placed successfully!</p>";
+            }
+        }
+    }
+}
+
+// ✅ Fetch all active auction items
+$sql = "SELECT * FROM auction_items WHERE end_time > NOW() ORDER BY end_time ASC";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-  <title><?= $role ?> - Auction Bid</title>
-  <link rel="stylesheet" href="assets/style.css">
-  <style>
-    .auction-container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 25px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-    }
-    .auction-item {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .auction-item img {
-      width: 250px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-    .current-bid {
-      font-size: 20px;
-      margin: 15px 0;
-      color: #4a90e2;
-      font-weight: bold;
-    }
-    .bid-form {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    .bid-form input {
-      padding: 10px;
-      width: 150px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      text-align: right;
-    }
-    .bid-form button {
-      background: #4a90e2;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .bid-form button:hover {
-      background: #357abd;
-    }
-  </style>
+    <title>Place Bid</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .auction-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .auction-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+        }
+        .auction-card h3 {
+            margin: 0 0 10px;
+        }
+        .auction-card p {
+            margin: 5px 0;
+        }
+        .auction-card form {
+            margin-top: 10px;
+        }
+        .auction-card input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .auction-card button {
+            width: 100%;
+            padding: 8px;
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .auction-card button:hover {
+            background: #357ab7;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <?= $role ?> Panel
-      <div class="toggle-btn">☰</div>
-    </div>
-    <ul>
-      <li><a href="dashboard_user.php">🏠 Dashboard</a></li>
-      <li><a href="add_record.php">➕ Add Record</a></li>
-      <li><a href="auctionbid.php" class="active">💰 Auction Bid</a></li>
-      <li><a href="logout.php">🚪 Logout</a></li>
-    </ul>
+<div class="sidebar">
+  <div class="sidebar-header">
+    User Panel
+    <div class="toggle-btn">☰</div>
   </div>
+  <ul>
+    <li><a href="dashboard_user.php">🏠 Dashboard</a></li>
+    <li><a href="add_record.php">➕ Add Record</a></li>
+    <li><a href="add_auction_item.php">📦 Add Auction Item</a></li>
+    <li><a href="auction_bid.php">💰 Place Bid</a></li>
+    <li><a href="logout.php">🚪 Logout</a></li>
+  </ul>
+</div>
 
-  <!-- Main Content -->
-  <div class="main-content">
+<div class="main-content">
+    <h2>Active Auctions</h2>
+    <?= $message ?>
+
     <div class="auction-container">
-      <div class="auction-item">
-        <h2>Antique Vase</h2>
-        <img src="assets/sample-item.jpg" alt="Auction Item">
-        <p class="current-bid">Current Bid: $150</p>
-      </div>
-
-      <form class="bid-form" method="POST" action="place_bid.php">
-        <input type="hidden" name="item_id" value="1">
-        <input type="number" name="bid_amount" placeholder="Enter your bid" required min="151">
-        <button type="submit">Place Bid</button>
-      </form>
+        <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <div class="auction-card">
+                    <h3><?= htmlspecialchars($row['title']) ?></h3>
+                    <p><?= htmlspecialchars($row['description']) ?></p>
+                    <p><b>Category:</b> <?= htmlspecialchars($row['category']) ?></p>
+                    <p><b>Current Price:</b> $<?= number_format($row['current_price'], 2) ?></p>
+                    <p><b>Ends At:</b> <?= $row['end_time'] ?></p>
+                    
+                    <form method="POST">
+                        <input type="hidden" name="item_id" value="<?= $row['id'] ?>">
+                        <input type="number" step="0.01" name="bid_amount" placeholder="Enter your bid" required>
+                        <button type="submit">💰 Place Bid</button>
+                    </form>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <p>No active auctions at the moment.</p>
+        <?php endif; ?>
     </div>
-  </div>
+</div>
 
-  <script src="assets/script.js"></script>
+<script src="assets/script.js"></script>
 </body>
 </html>
