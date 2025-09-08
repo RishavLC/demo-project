@@ -65,3 +65,14 @@ CREATE TABLE bids (
     FOREIGN KEY (item_id) REFERENCES auction_items(id) ON DELETE CASCADE,
     FOREIGN KEY (bidder_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+--auctionresult
+CREATE TABLE auction_results (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    winner_id INT,
+    winning_bid DECIMAL(10,2),
+    closed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_id) REFERENCES auction_items(id),
+    FOREIGN KEY (winner_id) REFERENCES users(id)
+);
