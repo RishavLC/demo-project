@@ -67,6 +67,7 @@ CREATE TABLE bids (
 );
 
 --auctionresult
+
 CREATE TABLE auction_results (
     id INT AUTO_INCREMENT PRIMARY KEY,
     item_id INT NOT NULL,
@@ -76,3 +77,4 @@ CREATE TABLE auction_results (
     FOREIGN KEY (item_id) REFERENCES auction_items(id),
     FOREIGN KEY (winner_id) REFERENCES users(id)
 );
+
