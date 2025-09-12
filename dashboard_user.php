@@ -41,7 +41,6 @@ $result = $conn->query($sql);
       <li><a href="add_record.php">➕ Add Record</a></li>
       <li><a href="auction_bid.php">Place bid</a></li>
       <li><a href="auction_item.php">Place bid</a></li>
-      
       <li><a href="logout.php">🚪 Logout</a></li>
     </ul>
   </div>
