@@ -16,9 +16,12 @@ $stmt->execute();
 $stmt->bind_result($username);
 $stmt->fetch();
 $stmt->close();
-
-// Fetch only this user's records
-$sql = "SELECT * FROM records WHERE user_id = $user_id";
+// ✅ Fetch approved auction items from other users
+$sql = "SELECT ai.*, u.username 
+        FROM auction_items ai 
+        JOIN users u ON ai.seller_id = u.id 
+        WHERE ai.status='approved' AND ai.seller_id != $user_id
+        ORDER BY ai.end_time ASC";
 $result = $conn->query($sql);
 ?>
 
