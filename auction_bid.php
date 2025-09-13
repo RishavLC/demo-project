@@ -44,7 +44,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["bid_amount"], $_POST["
 }
 
 // ✅ Fetch all active auction items
-$sql = "SELECT * FROM auction_items WHERE end_time > NOW() ORDER BY end_time ASC";
+$sql = "SELECT * FROM auction_items 
+        WHERE status='active' AND seller_id != $user_id";
 $result = $conn->query($sql);
 ?>
 

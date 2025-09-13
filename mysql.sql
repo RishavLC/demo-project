@@ -1,80 +1,70 @@
-CREATE DATABASE crud_system;
-USE crud_system;
+<?php
+session_start();
+if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
+    header("Location: index.php");
+    exit();
+}
+include "config.php";
 
--- Roles table
-CREATE TABLE roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    role_name VARCHAR(50) NOT NULL UNIQUE,
-    description VARCHAR(255) DEFAULT NULL
-);
+// Approve or reject action
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+    $action = $_GET['action'];
 
--- Users table
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id)
-);
+    if ($action == "approve") {
+        $conn->query("UPDATE auction_items SET status='approved' WHERE id=$id");
+    } elseif ($action == "reject") {
+        $conn->query("UPDATE auction_items SET status='rejected' WHERE id=$id");
+    }
+}
 
+// Fetch all pending auction items
+$sql = "SELECT auction_items.*, users.username 
+        FROM auction_items 
+        JOIN users ON auction_items.seller_id = users.id
+        WHERE auction_items.status='pending'";
+$result = $conn->query($sql);
+?>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Auctions</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-header">
+    Admin Panel
+    <div class="toggle-btn">☰</div>
+  </div>
+  <ul>
+    <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
+    <li><a href="manage_users.php">👥 Manage Users</a></li>
+    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+    <li><a href="logout.php">🚪 Logout</a></li>
+  </ul>
+</div>
 
--- Data table (records for CRUD)
-CREATE TABLE records (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    title VARCHAR(100),
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+<div class="main-content">
+  <h2>Pending Auction Items</h2>
 
--- Insert roles
-INSERT INTO roles (role_name, description) VALUES
-('admin', 'Full access to system'),
-('user', 'Regular user with limited access');
-
--- Insert users
-INSERT INTO users (username, password, role_id) VALUES
-('admin', MD5('admin'), 1), -- admin
-('user1', MD5('user2'), 2);    -- user
-
--- auction iten
-CREATE TABLE auction_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    seller_id INT NOT NULL,               -- user who listed the item
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    category VARCHAR(100),
-    start_price DECIMAL(10,2) NOT NULL,
-    current_price DECIMAL(10,2) DEFAULT 0.00,
-    start_time DATETIME NOT NULL,
-    end_time DATETIME NOT NULL,
-    status ENUM('active','closed','sold') DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
-);
--- bids
-CREATE TABLE bids (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    item_id INT NOT NULL,
-    bidder_id INT NOT NULL,
-    bid_amount DECIMAL(10,2) NOT NULL,
-    bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (item_id) REFERENCES auction_items(id) ON DELETE CASCADE,
-    FOREIGN KEY (bidder_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
---auctionresult
-
-CREATE TABLE auction_results (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    item_id INT NOT NULL,
-    winner_id INT,
-    winning_bid DECIMAL(10,2),
-    closed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (item_id) REFERENCES auction_items(id),
-    FOREIGN KEY (winner_id) REFERENCES users(id)
-);
-
+  <table>
+    <tr>
+      <th>ID</th><th>Title</th><th>Seller</th><th>Start Price</th><th>Action</th>
+    </tr>
+    <?php while($row = $result->fetch_assoc()) { ?>
+    <tr>
+      <td><?= $row['id'] ?></td>
+      <td><?= htmlspecialchars($row['title']) ?></td>
+      <td><?= htmlspecialchars($row['username']) ?></td>
+      <td><?= $row['start_price'] ?></td>
+      <td>
+        <a href="?action=approve&id=<?= $row['id'] ?>" class="btn btn-edit">✅ Approve</a>
+        <a href="?action=reject&id=<?= $row['id'] ?>" class="btn btn-delete">❌ Reject</a>
+      </td>
+    </tr>
+    <?php } ?>
+  </table>
+</div>
+</body>
+</html>

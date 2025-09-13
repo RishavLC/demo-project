@@ -20,8 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($title && $start_price > 0 && $start_time && $end_time) {
         $stmt = $conn->prepare("INSERT INTO auction_items 
-            (seller_id, title, description, category, start_price, current_price, start_time, end_time) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            (seller_id, title, description, category, start_price, current_price, start_time, end_time, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?,'closed')");
         $stmt->bind_param("isssddss", $user_id, $title, $description, $category, $start_price, $start_price, $start_time, $end_time);
 
         if ($stmt->execute()) {
