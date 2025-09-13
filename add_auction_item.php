@@ -15,14 +15,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description = trim($_POST["description"]);
     $category = trim($_POST["category"]);
     $start_price = floatval($_POST["start_price"]);
-    $start_time = $_POST["start_time"];
-    $end_time = $_POST["end_time"];
-
-    if ($title && $start_price > 0 && $start_time && $end_time) {
-        $stmt = $conn->prepare("INSERT INTO auction_items 
-            (seller_id, title, description, category, start_price, current_price, start_time, end_time, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?,'closed')");
-        $stmt->bind_param("isssddss", $user_id, $title, $description, $category, $start_price, $start_price, $start_time, $end_time);
+    
+    if ($title && $start_price > 0) {
+    $stmt = $conn->prepare("INSERT INTO auction_items 
+        (seller_id, title, description, category, start_price, current_price, status) 
+        VALUES (?, ?, ?, ?, ?, ?, 'pending')");
+    $stmt->bind_param("isssdd", $user_id, $title, $description, $category, $start_price, $start_price);
 
         if ($stmt->execute()) {
             $message = "<p style='color:green;font-weight:bold;'>✅ Auction item added successfully!</p>";
@@ -114,12 +112,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <label>Start Price *</label>
             <input type="number" step="0.01" name="start_price" required>
-
-            <label>Start Time *</label>
-            <input type="datetime-local" name="start_time" required>
-
-            <label>End Time *</label>
-            <input type="datetime-local" name="end_time" required>
 
             <button type="submit">✅ Add Item</button>
         </form>

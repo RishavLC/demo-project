@@ -7,14 +7,23 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
 include "config.php";
 
 // ✅ Handle approval/rejection
-if (isset($_GET['approve'])) {
-    $id = intval($_GET['approve']);
-    $conn->query("UPDATE auction_items SET status='approved' WHERE id=$id");
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["approve"])) {
+    $id = intval($_POST["id"]);
+    $start_time = $_POST["start_time"];
+    $end_time = $_POST["end_time"];
+
+    $stmt = $conn->prepare("UPDATE auction_items 
+        SET status='active', start_time=?, end_time=? 
+        WHERE id=?");
+    $stmt->bind_param("ssi", $start_time, $end_time, $id);
+    $stmt->execute();
 }
+
 if (isset($_GET['reject'])) {
     $id = intval($_GET['reject']);
     $conn->query("UPDATE auction_items SET status='rejected' WHERE id=$id");
 }
+
 
 // ✅ Fetch all items
 $sql = "SELECT ai.*, u.username FROM auction_items ai 
@@ -47,19 +56,22 @@ $result = $conn->query($sql);
     </tr>
     <?php while($row = $result->fetch_assoc()) { ?>
     <tr>
-      <td><?= $row['id'] ?></td>
-      <td><?= htmlspecialchars($row['title']) ?></td>
-      <td><?= htmlspecialchars($row['username']) ?></td>
-      <td><?= ucfirst($row['status']) ?></td>
-      <td>
-        <?php if ($row['status'] == 'pending') { ?>
-          <a href="?approve=<?= $row['id'] ?>" class="btn btn-approve">✅ Approve</a>
-          <a href="?reject=<?= $row['id'] ?>" class="btn btn-reject">❌ Reject</a>
-        <?php } else { ?>
-          <?= ucfirst($row['status']) ?>
-        <?php } ?>
-      </td>
-    </tr>
+  <td><?= $row['id'] ?></td>
+  <td><?= htmlspecialchars($row['title']) ?></td>
+  <td><?= htmlspecialchars($row['username']) ?></td>
+  <td><?= $row['start_price'] ?></td>
+  <td>
+    <form method="POST">
+      <input type="hidden" name="id" value="<?= $row['id'] ?>">
+      <label>Start Time:</label>
+      <input type="datetime-local" name="start_time" required>
+      <label>End Time:</label>
+      <input type="datetime-local" name="end_time" required>
+      <button type="submit" name="approve">✅ Approve</button>
+    </form>
+    <a href="?reject=<?= $row['id'] ?>" class="btn btn-delete">❌ Reject</a>
+  </td>
+</tr>
     <?php } ?>
   </table>
 </div>
