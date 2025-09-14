@@ -24,7 +24,6 @@ if (isset($_GET['reject'])) {
     $conn->query("UPDATE auction_items SET status='rejected' WHERE id=$id");
 }
 
-
 // ✅ Fetch all items
 $sql = "SELECT ai.*, u.username FROM auction_items ai 
         JOIN users u ON ai.seller_id = u.id
@@ -36,10 +35,64 @@ $result = $conn->query($sql);
 <head>
   <title>Manage Auctions</title>
   <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #2c3e50;
+    }
+    .card p {
+      margin: 5px 0;
+    }
+    .actions {
+      margin-top: 15px;
+    }
+    input[type="datetime-local"] {
+      padding: 6px;
+      margin: 5px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button, .btn-delete {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    button[name="approve"] {
+      background: #27ae60;
+      color: white;
+      width: 100%;
+    }
+    .btn-delete {
+      background: #e74c3c;
+      color: white;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 <div class="sidebar">
-  <div class="sidebar-header">Admin Panel</div>
+  <div class="sidebar-header">
+    Admin Panel
+    <div class="toggle-btn">☰</div>
+  </div>
   <ul>
     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
@@ -50,30 +103,30 @@ $result = $conn->query($sql);
 
 <div class="main-content">
   <h2>Manage Auction Items</h2>
-  <table>
-    <tr>
-      <th>ID</th><th>Title</th><th>Seller</th><th>Status</th><th>Action</th>
-    </tr>
+  <div class="grid">
     <?php while($row = $result->fetch_assoc()) { ?>
-    <tr>
-  <td><?= $row['id'] ?></td>
-  <td><?= htmlspecialchars($row['title']) ?></td>
-  <td><?= htmlspecialchars($row['username']) ?></td>
-  <td><?= $row['start_price'] ?></td>
-  <td>
-    <form method="POST">
-      <input type="hidden" name="id" value="<?= $row['id'] ?>">
-      <label>Start Time:</label>
-      <input type="datetime-local" name="start_time" required>
-      <label>End Time:</label>
-      <input type="datetime-local" name="end_time" required>
-      <button type="submit" name="approve">✅ Approve</button>
-    </form>
-    <a href="?reject=<?= $row['id'] ?>" class="btn btn-delete">❌ Reject</a>
-  </td>
-</tr>
+    <div class="card">
+      <h3><?= htmlspecialchars($row['title']) ?></h3>
+      <p><strong>Seller:</strong> <?= htmlspecialchars($row['username']) ?></p>
+      <p><strong>Start Price:</strong> $<?= $row['start_price'] ?></p>
+      <p><strong>Status:</strong> <?= ucfirst($row['status']) ?></p>
+      
+      <div class="actions">
+        <form method="POST">
+          <input type="hidden" name="id" value="<?= $row['id'] ?>">
+          <label>Start Time:</label>
+          <input type="datetime-local" name="start_time" required>
+          <label>End Time:</label>
+          <input type="datetime-local" name="end_time" required>
+          <button type="submit" name="approve">✅ Approve</button>
+        </form>
+        <a href="?reject=<?= $row['id'] ?>" class="btn-delete">❌ Reject</a>
+      </div>
+    </div>
     <?php } ?>
-  </table>
+  </div>
 </div>
+
+  <script src="assets/script.js"></script>
 </body>
 </html>
