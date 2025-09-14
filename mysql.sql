@@ -55,6 +55,10 @@ CREATE TABLE auction_items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 );
+ALTER TABLE auction_items 
+ADD COLUMN winner_id INT NULL,
+ADD FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL;
+
 
 -- bids
 CREATE TABLE bids (
