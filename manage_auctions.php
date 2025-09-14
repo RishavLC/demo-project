@@ -6,7 +6,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
 }
 include "config.php";
 
-// ✅ Handle approval/rejection
+// ✅ Handle approval
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["approve"])) {
     $id = intval($_POST["id"]);
     $start_time = $_POST["start_time"];
@@ -19,13 +19,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["approve"])) {
     $stmt->execute();
 }
 
+// ✅ Handle rejection
 if (isset($_GET['reject'])) {
     $id = intval($_GET['reject']);
     $conn->query("UPDATE auction_items SET status='rejected' WHERE id=$id");
 }
 
-// ✅ Fetch all items
-$sql = "SELECT ai.*, u.username FROM auction_items ai 
+// ✅ Fetch all auction items with seller name
+$sql = "SELECT ai.*, u.username 
+        FROM auction_items ai 
         JOIN users u ON ai.seller_id = u.id
         ORDER BY ai.created_at DESC";
 $result = $conn->query($sql);
@@ -38,7 +40,7 @@ $result = $conn->query($sql);
   <style>
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 20px;
     }
     .card {
@@ -85,6 +87,15 @@ $result = $conn->query($sql);
       display: block;
       text-align: center;
     }
+    .winner {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      background: #ecf0f1;
+    }
+    .winner strong {
+      color: #2c3e50;
+    }
   </style>
 </head>
 <body>
@@ -110,8 +121,36 @@ $result = $conn->query($sql);
       <p><strong>Seller:</strong> <?= htmlspecialchars($row['username']) ?></p>
       <p><strong>Start Price:</strong> $<?= $row['start_price'] ?></p>
       <p><strong>Status:</strong> <?= ucfirst($row['status']) ?></p>
-      
+      <p><strong>Ends:</strong> <?= $row['end_time'] ?></p>
+
+      <?php
+      // ✅ Check if auction ended
+      if ($row['status'] == 'closed' || ($row['end_time'] && strtotime($row['end_time']) < time())) {
+          // Fetch highest bid
+          $bidSql = "SELECT b.bid_amount, u.username AS bidder 
+                     FROM bids b 
+                     JOIN users u ON b.bidder_id = u.id 
+                     WHERE b.item_id = ? 
+                     ORDER BY b.bid_amount DESC LIMIT 1";
+          $stmt = $conn->prepare($bidSql);
+          $stmt->bind_param("i", $row['id']);
+          $stmt->execute();
+          $winnerResult = $stmt->get_result();
+          
+          if ($winnerResult->num_rows > 0) {
+              $winner = $winnerResult->fetch_assoc();
+              echo "<div class='winner'>
+                      🏆 <strong>Winner:</strong> " . htmlspecialchars($winner['bidder']) . 
+                      " <br><strong>Winning Bid:</strong> $" . $winner['bid_amount'] . "
+                    </div>";
+          } else {
+              echo "<div class='winner'>⚠️ No bids placed.</div>";
+          }
+      }
+      ?>
+
       <div class="actions">
+        <?php if ($row['status'] == 'pending') { ?>
         <form method="POST">
           <input type="hidden" name="id" value="<?= $row['id'] ?>">
           <label>Start Time:</label>
@@ -121,6 +160,7 @@ $result = $conn->query($sql);
           <button type="submit" name="approve">✅ Approve</button>
         </form>
         <a href="?reject=<?= $row['id'] ?>" class="btn-delete">❌ Reject</a>
+        <?php } ?>
       </div>
     </div>
     <?php } ?>
