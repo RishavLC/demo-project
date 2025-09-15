@@ -71,7 +71,7 @@ CREATE TABLE bids (
     FOREIGN KEY (bidder_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
---auctionresult
+--auction result
 
 CREATE TABLE auction_results (
     id INT AUTO_INCREMENT PRIMARY KEY,
