@@ -102,6 +102,7 @@ if(!$closed_result){
   </div>
   <ul>
     <li><a href="dashboard_user.php">🏠 Dashboard</a></li>
+    <li><a href="my_bids.php">📜 My Bidding History</a></li>
     <li><a href="add_record.php">➕ Add Record</a></li> 
     <li><a href="add_auction_item.php">📦 Add Auctions Items</a></li>
     <li><a href="auction_bid.php">💰 Place Bids</a></li>
