@@ -72,7 +72,6 @@ CREATE TABLE bids (
 );
 
 --auction result
-
 CREATE TABLE auction_results (
     id INT AUTO_INCREMENT PRIMARY KEY,
     item_id INT NOT NULL,
