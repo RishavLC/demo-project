@@ -82,3 +82,12 @@ CREATE TABLE auction_results (
     FOREIGN KEY (winner_id) REFERENCES users(id)
 );
 
+--notification table
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    message VARCHAR(255) NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
