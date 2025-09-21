@@ -24,6 +24,12 @@ if (isset($_GET['reject'])) {
     $id = intval($_GET['reject']);
     $conn->query("UPDATE auction_items SET status='rejected' WHERE id=$id");
 }
+// Notify all users about new auction
+$users = $conn->query("SELECT id FROM users WHERE id != {$row['seller_id']}");
+while ($u = $users->fetch_assoc()) {
+    $msg = "New auction started: " . $row['title'];
+    $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$u['id']}, '$msg')");
+}
 
 // ✅ Fetch all auction items with seller name
 $sql = "SELECT ai.*, u.username 
