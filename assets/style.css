@@ -14,6 +14,58 @@ body {
   color: #333;
 }
 
+/* Header Bar */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;            /* white header */
+  color: #2c3e50;
+  padding: 14px 25px;
+  border-bottom: 2px solid #e0e0e0; /* thin gray border below */
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08); /* subtle shadow */
+  position: sticky;  /* stays on top when scrolling */
+  top: 0;
+  z-index: 1000;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Notification Bell */
+.notification {
+  position: relative;
+  font-size: 22px;
+}
+
+.notification a {
+  color: #2c3e50;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.notification a:hover {
+  color: #12f377; /* gold hover effect */
+}
+
+/* Badge on bell */
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
 /* ===== Sidebar ===== */
 .sidebar {
   width: 220px;

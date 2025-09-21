@@ -116,24 +116,21 @@ $unread_count = $result['unread'];
     <li><a href="logout.php">🚪 Logout</a></li>
   </ul>
 </div>
-<!-- Header -->
-<div class="header" style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#222; color:white;">
-  <h2>Welcome, <?php echo $username; ?></h2>
+</div>
+<div class="main-content">
+  <!-- Header -->
+<div class="header">
+  <h2>Welcome, <?php echo htmlspecialchars($username); ?></h2>
   
   <!-- Notification Bell -->
-  <div style="position:relative;">
-    <a href="notifications.php" style="color:white; text-decoration:none; font-size:22px;">
-      🔔
-    </a>
+  <div class="notification">
+    <a href="notifications.php">🔔</a>
     <?php if($unread_count > 0) { ?>
-      <span style="position:absolute; top:-5px; right:-5px; background:red; color:white; font-size:12px; padding:2px 6px; border-radius:50%;">
-        <?php echo $unread_count; ?>
-      </span>
+      <span class="badge"><?php echo $unread_count; ?></span>
     <?php } ?>
   </div>
 </div>
 
-<div class="main-content">
   <h2>Active Auctions</h2>
   <div class="grid">
     <?php while($row = $active_result->fetch_assoc()) { ?>
