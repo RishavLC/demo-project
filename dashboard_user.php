@@ -53,6 +53,13 @@ $closed_result = $conn->query($closed_sql);
 if(!$closed_result){
     die("SQL Error: " . $conn->error);
 }
+// unread notification count
+$sql = "SELECT COUNT(*) AS unread FROM notifications WHERE user_id=? AND is_read=0";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result()->fetch_assoc();
+$unread_count = $result['unread'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -108,6 +115,22 @@ if(!$closed_result){
     <li><a href="auction_bid.php">💰 Place Bids</a></li>
     <li><a href="logout.php">🚪 Logout</a></li>
   </ul>
+</div>
+<!-- Header -->
+<div class="header" style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#222; color:white;">
+  <h2>Welcome, <?php echo $username; ?></h2>
+  
+  <!-- Notification Bell -->
+  <div style="position:relative;">
+    <a href="notifications.php" style="color:white; text-decoration:none; font-size:22px;">
+      🔔
+    </a>
+    <?php if($unread_count > 0) { ?>
+      <span style="position:absolute; top:-5px; right:-5px; background:red; color:white; font-size:12px; padding:2px 6px; border-radius:50%;">
+        <?php echo $unread_count; ?>
+      </span>
+    <?php } ?>
+  </div>
 </div>
 
 <div class="main-content">
