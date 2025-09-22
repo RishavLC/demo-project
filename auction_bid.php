@@ -42,6 +42,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["bid_amount"], $_POST["
         }
     }
 }
+// // Notify seller
+// $seller_id = $item['seller_id'];
+// $msg = "New bid placed on your item: " . $item['title'];
+// $conn->query("INSERT INTO notifications (user_id, message) VALUES ($seller_id, '$msg')");
+
+// // Notify other bidders
+// $other_bidders = $conn->query("SELECT DISTINCT bidder_id FROM bids WHERE item_id={$item_id} AND bidder_id != $user_id");
+// while ($ob = $other_bidders->fetch_assoc()) {
+//     $msg = "Another user placed a bid on item: " . $item['title'];
+//     $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$ob['bidder_id']}, '$msg')");
+// }
 
 // ✅ Fetch all active auction items
 $sql = "SELECT * FROM auction_items 

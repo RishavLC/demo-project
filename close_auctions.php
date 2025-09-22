@@ -38,4 +38,19 @@ while ($auction = $result->fetch_assoc()) {
     }
 }
 echo "✅ Auction status updated.";
+//for notification 
+if ($winner_id) {
+    // Notify winner
+    $msg = "You won the auction for: " . $item['title'] . " with $" . $winning_bid;
+    $conn->query("INSERT INTO notifications (user_id, message) VALUES ($winner_id, '$msg')");
+
+    // Notify seller
+    $msg = "Your item '" . $item['title'] . "' was sold to " . $winner_id . " for $" . $winning_bid;
+    $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$item['seller_id']}, '$msg')");
+} else {
+    // Notify seller if no bids
+    $msg = "Your item '" . $item['title'] . "' auction closed with no winner.";
+    $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$item['seller_id']}, '$msg')");
+}
+
 ?>

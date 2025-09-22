@@ -118,18 +118,44 @@ $unread_count = $result['unread'];
 </div>
 </div>
 <div class="main-content">
-  <!-- Header -->
+<!-- Header -->
 <div class="header">
-  <h2>Welcome, <?php echo htmlspecialchars($username); ?></h2>
-  
+  <h2>Welcome, <?= htmlspecialchars($username) ?></h2>
+
   <!-- Notification Bell -->
-  <div class="notification">
-    <a href="notifications.php">🔔</a>
-    <?php if($unread_count > 0) { ?>
-      <span class="badge"><?php echo $unread_count; ?></span>
-    <?php } ?>
+  <div class="notification-wrapper">
+    <div class="notification-bell" onclick="toggleDropdown()">
+      🔔
+      <?php if ($unread_count > 0) { ?>
+        <span class="badge"><?= $unread_count ?></span>
+      <?php } ?>
+    </div>
+
+    <!-- Dropdown -->
+    <div id="notificationDropdown" class="notification-dropdown">
+      <?php
+      $noti_sql = "SELECT * FROM notifications 
+                   WHERE user_id=? 
+                   ORDER BY created_at DESC 
+                   LIMIT 5";
+      $stmt = $conn->prepare($noti_sql);
+      $stmt->bind_param("i", $user_id);
+      $stmt->execute();
+      $noti_result = $stmt->get_result();
+
+      if ($noti_result->num_rows > 0) {
+        while ($n = $noti_result->fetch_assoc()) {
+          echo "<p>".htmlspecialchars($n['message'])."</p>";
+        }
+      } else {
+        echo "<p>No notifications</p>";
+      }
+      ?>
+      <a href="notifications.php" class="view-all">View All</a>
+    </div>
   </div>
 </div>
+
 
   <h2>Active Auctions</h2>
   <div class="grid">
@@ -168,6 +194,19 @@ $unread_count = $result['unread'];
   </div>
 </div>
 
-<script src="assets/script.js"></script>
+<script src="assets/script.js">
+function toggleDropdown() {
+  var dropdown = document.getElementById("notificationDropdown");
+  dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+  }
+
+// Close dropdown if clicked outside
+window.onclick = function(e) {
+  if (!e.target.closest('.notification-wrapper')) {
+    document.getElementById("notificationDropdown").style.display = "none";
+    }
+  }
+
+</script>
 </body>
 </html>

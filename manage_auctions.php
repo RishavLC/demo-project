@@ -12,23 +12,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["approve"])) {
     $start_time = $_POST["start_time"];
     $end_time = $_POST["end_time"];
 
+    // Activate auction
     $stmt = $conn->prepare("UPDATE auction_items 
         SET status='active', start_time=?, end_time=? 
         WHERE id=?");
     $stmt->bind_param("ssi", $start_time, $end_time, $id);
     $stmt->execute();
+
+    // ✅ Fetch auction details
+    $item = $conn->query("SELECT title, seller_id FROM auction_items WHERE id=$id")->fetch_assoc();
+
+    // ✅ Notify all users except seller
+    $users = $conn->query("SELECT id FROM users WHERE id != {$item['seller_id']}");
+    if ($users) {
+        while ($u = $users->fetch_assoc()) {
+            $msg = "New auction started: " . $item['title'];
+            $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$u['id']}, '$msg')");
+        }
+    }
 }
 
 // ✅ Handle rejection
 if (isset($_GET['reject'])) {
     $id = intval($_GET['reject']);
     $conn->query("UPDATE auction_items SET status='rejected' WHERE id=$id");
-}
-// Notify all users about new auction
-$users = $conn->query("SELECT id FROM users WHERE id != {$row['seller_id']}");
-while ($u = $users->fetch_assoc()) {
-    $msg = "New auction started: " . $row['title'];
-    $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$u['id']}, '$msg')");
+
+    // ✅ Notify seller about rejection
+    $seller = $conn->query("SELECT seller_id, title FROM auction_items WHERE id=$id")->fetch_assoc();
+    $msg = "Your auction '" . $seller['title'] . "' was rejected.";
+    $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$seller['seller_id']}, '$msg')");
 }
 
 // ✅ Fetch all auction items with seller name
@@ -38,6 +50,7 @@ $sql = "SELECT ai.*, u.username
         ORDER BY ai.created_at DESC";
 $result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
