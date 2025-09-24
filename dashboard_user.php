@@ -194,19 +194,6 @@ $unread_count = $result['unread'];
   </div>
 </div>
 
-<script src="assets/script.js">
-function toggleDropdown() {
-  var dropdown = document.getElementById("notificationDropdown");
-  dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
-  }
-
-// Close dropdown if clicked outside
-window.onclick = function(e) {
-  if (!e.target.closest('.notification-wrapper')) {
-    document.getElementById("notificationDropdown").style.display = "none";
-    }
-  }
-
-</script>
+<script src="assets/script.js"></script>
 </body>
 </html>
