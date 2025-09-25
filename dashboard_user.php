@@ -131,29 +131,29 @@ $unread_count = $result['unread'];
       <?php } ?>
     </div>
 
-    <!-- Dropdown -->
-    <div id="notificationDropdown" class="notification-dropdown">
-      <?php
-      $noti_sql = "SELECT * FROM notifications 
-                   WHERE user_id=? 
-                   ORDER BY created_at DESC 
-                   LIMIT 5";
-      $stmt = $conn->prepare($noti_sql);
-      $stmt->bind_param("i", $user_id);
-      $stmt->execute();
-      $noti_result = $stmt->get_result();
+<div id="notificationDropdown" class="notification-dropdown">
+  <?php
+  $noti_sql = "SELECT * FROM notifications 
+               WHERE user_id=? 
+               ORDER BY created_at DESC 
+               LIMIT 5";
+  $stmt = $conn->prepare($noti_sql);
+  $stmt->bind_param("i", $user_id);
+  $stmt->execute();
+  $noti_result = $stmt->get_result();
 
-      if ($noti_result->num_rows > 0) {
-        while ($n = $noti_result->fetch_assoc()) {
-          echo "<p>".htmlspecialchars($n['message'])."</p>";
-        }
-      } else {
-        echo "<p>No notifications</p>";
-      }
-      ?>
-      <a href="notifications.php" class="view-all">View All</a>
-    </div>
-  </div>
+  if ($noti_result->num_rows > 0) {
+    while ($n = $noti_result->fetch_assoc()) {
+      echo "<p>".htmlspecialchars($n['message'])."</p>";
+    }
+  } else {
+    echo "<p>No notifications</p>";
+  }
+  ?>
+  <a href="notifications.php" class="view-all">View All</a>
+  <a href="mark_notifications.php" class="mark-read">Mark All as Read</a>
+</div>
+</div>
 </div>
 
 
