@@ -156,6 +156,22 @@ $unread_count = $result['unread'];
 </div>
 </div>
 
+<!-- Summary cards -->
+<div class="summary-cards">
+  <div class="summary-card">
+    <h3><?= $participated ?></h3>
+    <p>Participated Auctions</p>
+  </div>
+  <div class="summary-card">
+    <h3><?= $won ?></h3>
+    <p>Auctions Won</p>
+  </div>
+  <div class="summary-card">
+    <h3>$<?= number_format($total_investment, 2) ?></h3>
+    <p>Total Investment</p>
+  </div>
+</div>
+
 
   <h2>Active Auctions</h2>
   <div class="grid">
