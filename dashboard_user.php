@@ -186,18 +186,51 @@ $stmt->close();
 </div>
 
 
-  <h2>Active Auctions</h2>
-  <div class="grid">
-    <?php while($row = $active_result->fetch_assoc()) { ?>
-    <div class="card">
-      <h3><?= htmlspecialchars($row['title']) ?></h3>
-      <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
-      <p><strong>Start Price:</strong> $<?= $row['start_price'] ?></p>
-      <p><strong>Ends At:</strong> <?= $row['end_time'] ?></p>
-      <a href="auction_bid.php?auction_id=<?= $row['id'] ?>" class="btn">Place Bid</a>
-    </div>
-    <?php } ?>
+<h2>Active Auctions</h2>
+<table class="auction-table">
+  <tr>
+    <th>SN</th>
+    <th>Auction Item</th>
+    <th>Starting Price</th>
+    <th>End Date</th>
+    <th>Action</th>
+  </tr>
+  <?php 
+  $sn = 1;
+  while($row = $active_result->fetch_assoc()) { ?>
+    <tr>
+      <td><?= $sn++ ?></td>
+      <td><?= htmlspecialchars($row['title']) ?></td>
+      <td>$<?= $row['start_price'] ?></td>
+      <td><?= $row['end_time'] ?></td>
+      <td>
+        <button class="btn" 
+                onclick="openAuctionModal(
+                  '<?= $row['title'] ?>',
+                  '<?= $row['description'] ?>',
+                  '<?= $row['seller'] ?>',
+                  '<?= $row['start_price'] ?>',
+                  '<?= $row['end_time'] ?>',
+                  '<?= $row['id'] ?>'
+                )">Bid</button>
+      </td>
+    </tr>
+  <?php } ?>
+</table>
+<!-- Auction Details Modal -->
+<div id="auctionModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeAuctionModal()">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p><strong>Description:</strong> <span id="modalDescription"></span></p>
+    <p><strong>Seller:</strong> <span id="modalSeller"></span></p>
+    <p><strong>Starting Price:</strong> $<span id="modalPrice"></span></p>
+    <p><strong>Highest Bid:</strong> $<span id="modalHighest"></span></p>
+    <p><strong>Ends At:</strong> <span id="modalEnd"></span></p>
+    <a id="bidLink" href="#" class="btn">Place Bid</a>
   </div>
+</div>
+
 
   <h2 style="margin-top:40px;">Closed Auctions</h2>
   <div class="grid">
