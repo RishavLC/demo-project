@@ -60,46 +60,59 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
 $unread_count = $result['unread'];
+
+// summary cards 1. Participated Auctions
+$sql = "SELECT COUNT(DISTINCT item_id) AS participated 
+        FROM bids WHERE bidder_id=?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$participated = $stmt->get_result()->fetch_assoc()['participated'];
+$stmt->close();
+
+// 2. Auctions Won
+$sql = "SELECT COUNT(*) AS won
+        FROM auction_items ai
+        WHERE ai.status='closed'
+        AND ai.id IN (
+            SELECT b.item_id 
+            FROM bids b
+            WHERE b.bidder_id=? 
+            GROUP BY b.item_id 
+            HAVING MAX(b.bid_amount) = (
+                SELECT MAX(b2.bid_amount) FROM bids b2 WHERE b2.item_id=b.item_id
+            )
+        )";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$won = $stmt->get_result()->fetch_assoc()['won'];
+$stmt->close();
+
+// 3. Total Investment
+$sql = "SELECT SUM(bid_amount) AS total_investment
+        FROM bids b
+        WHERE b.bidder_id=? 
+        AND b.bid_amount = (
+            SELECT MAX(b2.bid_amount) 
+            FROM bids b2 
+            WHERE b2.item_id=b.item_id
+        )
+        AND b.item_id IN (
+            SELECT id FROM auction_items WHERE status='closed'
+        )";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$total_investment = $stmt->get_result()->fetch_assoc()['total_investment'] ?? 0;
+$stmt->close();
+
 ?>
 <!DOCTYPE html>
 <html>
 <head>
   <title>User Dashboard</title>
   <link rel="stylesheet" href="assets/style.css">
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: #fff;
-      padding: 18px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      color: #2c3e50;
-    }
-    .card p {
-      margin: 5px 0;
-    }
-    .btn {
-      display: inline-block;
-      padding: 8px 14px;
-      margin-top: 8px;
-      border-radius: 6px;
-      text-decoration: none;
-      color: white;
-      background: #3498db;
-    }
-    .btn-disabled {
-      background: #7f8c8d;
-      cursor: not-allowed;
-    }
-  </style>
 </head>
 <body>
 <div class="sidebar">

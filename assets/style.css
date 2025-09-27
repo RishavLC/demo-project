@@ -54,7 +54,7 @@ body {
   color: black;
   min-width: 250px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   padding: 10px;
   z-index: 1000;
 }
@@ -251,9 +251,8 @@ table tr:hover {
   width: 300px;
   text-align: center;
   height: 350px;
-  margin: 50px auto;   
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-
+  margin: 50px auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== Form Title ===== */
@@ -273,7 +272,7 @@ table tr:hover {
 }
 
 /* form textarea */
-.auth-form textarea{
+.auth-form textarea {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
@@ -283,7 +282,7 @@ table tr:hover {
 }
 
 /* ==select== */
-.auth-form select{
+.auth-form select {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
@@ -303,46 +302,46 @@ table tr:hover {
 }
 .auth-form button:hover {
   background: #45a049;
-} 
+}
 
 /* Search==Bar */
 .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
 }
 
 .page-header h2 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: bold;
+  margin: 0;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .search-form {
-    display: flex;
-    align-items: center;
-    gap: 10px;  /* spacing between inputs */
+  display: flex;
+  align-items: center;
+  gap: 10px; /* spacing between inputs */
 }
 
 .search-form input[type="text"],
 .search-form input[type="date"] {
-    padding: 5px 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .search-form button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 5px;
-    cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .search-form button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 /* summary card in user dashboard */
@@ -357,7 +356,7 @@ table tr:hover {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .summary-card h3 {
   font-size: 24px;
@@ -367,4 +366,37 @@ table tr:hover {
 .summary-card p {
   margin: 6px 0 0;
   color: #7f8c8d;
+}
+/* cards for active and closed auction */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #2c3e50;
+}
+.card p {
+  margin: 5px 0;
+}
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  margin-top: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: white;
+  background: #3498db;
+}
+.btn-disabled {
+  background: #7f8c8d;
+  cursor: not-allowed;
 }
