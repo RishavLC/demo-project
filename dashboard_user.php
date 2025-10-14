@@ -121,15 +121,15 @@ $stmt->close();
     <div class="toggle-btn">☰</div>
   </div>
   <ul>
-    <li><a href="dashboard_user.php">🏠 Dashboard</a></li>
-    <li><a href="my_bids.php">📜 My Bidding History</a></li>
-    <li><a href="add_record.php">➕ Add Record</a></li> 
-    <li><a href="add_auction_item.php">📦 Add Auctions Items</a></li>
-    <li><a href="auction_bid.php">💰 Place Bids</a></li>
-    <li><a href="logout.php">🚪 Logout</a></li>
+    <li><a href="dashboard_user.php" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
+    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
+    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
+    <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
+    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
+    <li><a href="logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
-</div>
+
 <div class="main-content">
 <!-- Header -->
 <div class="header">
