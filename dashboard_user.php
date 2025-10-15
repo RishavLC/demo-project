@@ -23,13 +23,27 @@ $stmt->fetch();
 $stmt->close();
 
 /* 🔹 2. Fetch Active Auctions (others only, not expired) */
-$active_sql = "SELECT ai.*, u.username AS seller 
-               FROM auction_items ai
-               JOIN users u ON ai.seller_id = u.id
-               WHERE ai.status='active' 
-                 AND ai.seller_id != ? 
-                 AND ai.end_time > NOW()
-               ORDER BY ai.end_time ASC";
+$sort_by = $_GET['sort_by'] ?? 'end_time';
+
+if ($sort_by === 'highest_bid') {
+    $order_clause = "ORDER BY (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) DESC";
+} elseif ($sort_by === 'lowest_bid') {
+    $order_clause = "ORDER BY (SELECT COALESCE(MIN(bid_amount), ai.start_price) FROM bids WHERE item_id = ai.id) ASC";
+} else {
+    $order_clause = "ORDER BY ai.end_time ASC";
+}
+
+$active_sql = "
+  SELECT ai.*, u.username AS seller,
+         (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
+  FROM auction_items ai
+  JOIN users u ON ai.seller_id = u.id
+  WHERE ai.status='active' 
+    AND ai.seller_id != ? 
+    AND ai.end_time > NOW()
+  $order_clause
+";
+
 $stmt = $conn->prepare($active_sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
