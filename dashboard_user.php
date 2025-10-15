@@ -187,6 +187,16 @@ $stmt->close();
 
 
 <h2>Active Auctions</h2>
+<div class="sort-filter">
+  <form method="GET" style="display:flex; align-items:center; gap:10px;">
+    <label for="sort_by"><strong>Sort By:</strong></label>
+    <select name="sort_by" id="sort_by" onchange="this.form.submit()">
+      <option value="end_time" <?= (!isset($_GET['sort_by']) || $_GET['sort_by'] == 'end_time') ? 'selected' : '' ?>>Ending Soon</option>
+      <option value="highest_bid" <?= (isset($_GET['sort_by']) && $_GET['sort_by'] == 'highest_bid') ? 'selected' : '' ?>>Highest Bid</option>
+      <option value="lowest_bid" <?= (isset($_GET['sort_by']) && $_GET['sort_by'] == 'lowest_bid') ? 'selected' : '' ?>>Lowest Bid</option>
+    </select>
+  </form>
+</div>
 <table class="auction-table">
   <tr>
     <th>SN</th>
