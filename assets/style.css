@@ -482,3 +482,23 @@ table tr:hover {
   font-size: 20px;
   cursor: pointer;
 }
+.sort-filter {
+  margin: 15px 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.sort-filter label {
+  font-weight: 600;
+  color: #333;
+}
+
+.sort-filter select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
