@@ -22,7 +22,7 @@ $stmt->bind_result($username);
 $stmt->fetch();
 $stmt->close();
 
-/* 🔹 2. Fetch Active Auctions (others only, not expired) */
+/* 🔹 2. Fetch Active Auctions (others only, not expired) by sorting */
 $sort_by = $_GET['sort_by'] ?? 'end_time';
 
 if ($sort_by === 'highest_bid') {
@@ -32,6 +32,10 @@ if ($sort_by === 'highest_bid') {
 } else {
     $order_clause = "ORDER BY ai.end_time ASC";
 }
+// --- Pagination Setup ---
+$records_per_page = 5; // number of auctions per page
+$current_page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($current_page - 1) * $records_per_page;
 
 $active_sql = "
   SELECT ai.*, u.username AS seller,
