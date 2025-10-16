@@ -502,3 +502,28 @@ table tr:hover {
   cursor: pointer;
   font-size: 14px;
 }
+/* pagination */
+.pagination {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.pagination a {
+  display: inline-block;
+  margin: 0 5px;
+  padding: 6px 12px;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+.pagination a:hover {
+  background-color: #2980b9;
+}
+
+.pagination a.active {
+  background-color: #3669d8;
+  font-weight: bold;
+}
