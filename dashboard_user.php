@@ -216,6 +216,7 @@ $stmt->close();
     <th>SN</th>
     <th>Auction Item</th>
     <th>Starting Price</th>
+    <th>Current Bid</th>
     <th>End Date</th>
     <th>Action</th>
   </tr>
@@ -226,6 +227,7 @@ $stmt->close();
       <td><?= $sn++ ?></td>
       <td><?= htmlspecialchars($row['title']) ?></td>
       <td>$<?= $row['start_price'] ?></td>
+      <td>$<?= ($row['highest_bid'] ?? 0) ?></td>
       <td><?= $row['end_time'] ?></td>
       <td>
         <button class="btn" 
