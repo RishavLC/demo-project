@@ -46,13 +46,32 @@ $active_sql = "
     AND ai.seller_id != ? 
     AND ai.end_time > NOW()
   $order_clause
+  LIMIT ? OFFSET ?
 ";
 
 $stmt = $conn->prepare($active_sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("iii", $user_id, $records_per_page, $offset);
 $stmt->execute();
 $active_result = $stmt->get_result();
 $stmt->close();
+
+//counting active auction item if more than five then pagination link is appeared
+$count_sql = "
+  SELECT COUNT(*) AS total
+  FROM auction_items ai
+  WHERE ai.status='active' 
+    AND ai.seller_id != ? 
+    AND ai.end_time > NOW()
+";
+$stmt = $conn->prepare($count_sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$total_result = $stmt->get_result();
+$total_row = $total_result->fetch_assoc();
+$total_records = $total_row['total'];
+$total_pages = ceil($total_records / $records_per_page);
+$stmt->close();
+
 
 /* 🔹 3. Fetch Closed Auctions (with winners) */
 $closed_sql = "SELECT ai.*, u.username AS seller,
@@ -247,6 +266,23 @@ $stmt->close();
     </tr>
   <?php } ?>
 </table>
+<!-- pagination block -->
+<div class="pagination">
+  <?php if ($current_page > 1): ?>
+    <a href="?page=<?= $current_page - 1 ?>&sort_by=<?= $sort_by ?>">&laquo; Prev</a>
+  <?php endif; ?>
+
+  <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+    <a href="?page=<?= $i ?>&sort_by=<?= $sort_by ?>" class="<?= ($i == $current_page) ? 'active' : '' ?>">
+      <?= $i ?>
+    </a>
+  <?php endfor; ?>
+
+  <?php if ($current_page < $total_pages): ?>
+    <a href="?page=<?= $current_page + 1 ?>&sort_by=<?= $sort_by ?>">Next &raquo;</a>
+  <?php endif; ?>
+</div>
+
 <!-- Auction Details Modal -->
 <div id="auctionModal" class="modal">
   <div class="modal-content">
