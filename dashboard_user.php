@@ -234,6 +234,7 @@ $stmt->close();
     </select>
   </form>
 </div>
+search
 <table class="auction-table">
   <tr>
     <th>SN</th>
