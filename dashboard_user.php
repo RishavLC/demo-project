@@ -23,7 +23,13 @@ $stmt->fetch();
 $stmt->close();
 
 /* 🔹 2. Fetch Active Auctions (others only, not expired) by sorting */
+/* 🔹 2. Fetch Active Auctions (others only, not expired) with search + sort + pagination */
+
 $sort_by = $_GET['sort_by'] ?? 'end_time';
+$allowed_sorts = ['end_time', 'highest_bid', 'lowest_bid'];
+if (!in_array($sort_by, $allowed_sorts)) {
+    $sort_by = 'end_time';
+}
 
 if ($sort_by === 'highest_bid') {
     $order_clause = "ORDER BY (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) DESC";
@@ -32,42 +38,75 @@ if ($sort_by === 'highest_bid') {
 } else {
     $order_clause = "ORDER BY ai.end_time ASC";
 }
-// --- Pagination Setup ---
-$records_per_page = 5; // number of auctions per page
+
+/* --- Pagination Setup --- */
+$records_per_page = 5;
 $current_page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($current_page - 1) * $records_per_page;
 
+/* --- Search Setup --- */
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$search_clause = "";
+$search_param = "";
+$param_types = "";
+$params = [];
+
+if (!empty($search)) {
+    $search_clause = "AND ai.title LIKE ?";
+    $search_param = "%" . $search . "%";
+}
+
+/* --- Build Active Auction SQL --- */
 $active_sql = "
   SELECT ai.*, u.username AS seller,
          (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
   FROM auction_items ai
   JOIN users u ON ai.seller_id = u.id
-  WHERE ai.status='active' 
-    AND ai.seller_id != ? 
+  WHERE ai.status='active'
+    AND ai.seller_id != ?
     AND ai.end_time > NOW()
     $search_clause
   $order_clause
   LIMIT ? OFFSET ?
 ";
 
+/* --- Prepare & Bind --- */
+$stmt = $conn->prepare($active_sql);
+
 if (!empty($search)) {
-    $stmt = $conn->prepare($active_sql);
-    $stmt->bind_param("issii", $user_id, $search_param, $records_per_page, $offset);
+    $stmt->bind_param("isii", $user_id, $search_param, $records_per_page, $offset);
 } else {
-    $stmt = $conn->prepare("
-      SELECT ai.*, u.username AS seller,
-             (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
-      FROM auction_items ai
-      JOIN users u ON ai.seller_id = u.id
-      WHERE ai.status='active' 
-        AND ai.seller_id != ? 
-        AND ai.end_time > NOW()
-      $order_clause
-      LIMIT ? OFFSET ?
-    ");
     $stmt->bind_param("iii", $user_id, $records_per_page, $offset);
 }
 
+/* --- Execute and Fetch --- */
+$stmt->execute();
+$active_result = $stmt->get_result();
+$stmt->close();
+
+/* --- Count total active auctions for pagination --- */
+$count_sql = "
+  SELECT COUNT(*) AS total
+  FROM auction_items ai
+  WHERE ai.status='active'
+    AND ai.seller_id != ?
+    AND ai.end_time > NOW()
+    $search_clause
+";
+$stmt = $conn->prepare($count_sql);
+
+if (!empty($search)) {
+    $stmt->bind_param("is", $user_id, $search_param);
+} else {
+    $stmt->bind_param("i", $user_id);
+}
+
+$stmt->execute();
+$count_result = $stmt->get_result();
+$total_records = $count_result->fetch_assoc()['total'] ?? 0;
+$stmt->close();
+
+$total_pages = ($total_records > 0) ? ceil($total_records / $records_per_page) : 1;
 
 //counting active auction item if more than five then pagination link is appeared
 $count_sql = "
@@ -157,17 +196,6 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $total_investment = $stmt->get_result()->fetch_assoc()['total_investment'] ?? 0;
 $stmt->close();
-
-// --- Search Setup ---
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$search_clause = "";
-$search_param = "";
-
-if (!empty($search)) {
-    $search_clause = "AND ai.title LIKE ?";
-    $search_param = "%" . $search . "%";
-}
-
 
 ?>
 <!DOCTYPE html>
