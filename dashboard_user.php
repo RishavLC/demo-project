@@ -45,15 +45,29 @@ $active_sql = "
   WHERE ai.status='active' 
     AND ai.seller_id != ? 
     AND ai.end_time > NOW()
+    $search_clause
   $order_clause
   LIMIT ? OFFSET ?
 ";
 
-$stmt = $conn->prepare($active_sql);
-$stmt->bind_param("iii", $user_id, $records_per_page, $offset);
-$stmt->execute();
-$active_result = $stmt->get_result();
-$stmt->close();
+if (!empty($search)) {
+    $stmt = $conn->prepare($active_sql);
+    $stmt->bind_param("issii", $user_id, $search_param, $records_per_page, $offset);
+} else {
+    $stmt = $conn->prepare("
+      SELECT ai.*, u.username AS seller,
+             (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
+      FROM auction_items ai
+      JOIN users u ON ai.seller_id = u.id
+      WHERE ai.status='active' 
+        AND ai.seller_id != ? 
+        AND ai.end_time > NOW()
+      $order_clause
+      LIMIT ? OFFSET ?
+    ");
+    $stmt->bind_param("iii", $user_id, $records_per_page, $offset);
+}
+
 
 //counting active auction item if more than five then pagination link is appeared
 $count_sql = "
@@ -62,16 +76,16 @@ $count_sql = "
   WHERE ai.status='active' 
     AND ai.seller_id != ? 
     AND ai.end_time > NOW()
+    $search_clause
 ";
-$stmt = $conn->prepare($count_sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$total_result = $stmt->get_result();
-$total_row = $total_result->fetch_assoc();
-$total_records = $total_row['total'];
-$total_pages = ceil($total_records / $records_per_page);
-$stmt->close();
 
+if (!empty($search)) {
+    $stmt = $conn->prepare($count_sql);
+    $stmt->bind_param("is", $user_id, $search_param);
+} else {
+    $stmt = $conn->prepare($count_sql);
+    $stmt->bind_param("i", $user_id);
+}
 
 /* 🔹 3. Fetch Closed Auctions (with winners) */
 $closed_sql = "SELECT ai.*, u.username AS seller,
