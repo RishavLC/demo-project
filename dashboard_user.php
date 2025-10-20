@@ -144,6 +144,17 @@ $stmt->execute();
 $total_investment = $stmt->get_result()->fetch_assoc()['total_investment'] ?? 0;
 $stmt->close();
 
+// --- Search Setup ---
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$search_clause = "";
+$search_param = "";
+
+if (!empty($search)) {
+    $search_clause = "AND ai.title LIKE ?";
+    $search_param = "%" . $search . "%";
+}
+
+
 ?>
 <!DOCTYPE html>
 <html>
