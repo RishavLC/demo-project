@@ -55,6 +55,14 @@ if (!empty($search)) {
     $search_clause = "AND ai.title LIKE ?";
     $search_param = "%" . $search . "%";
 }
+// category setup
+$category = isset($_GET['category']) ? trim($_GET['category']) : '';
+$category_clause = "";
+$category_param = "";
+
+if (!empty($category)) {
+    $category_clause = "AND ai.category = ?";
+}
 
 /* --- Build Active Auction SQL --- */
 $active_sql = "
@@ -62,20 +70,43 @@ $active_sql = "
          (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
   FROM auction_items ai
   JOIN users u ON ai.seller_id = u.id
-  WHERE ai.status='active'
-    AND ai.seller_id != ?
+  WHERE ai.status='active' 
+    AND ai.seller_id != ? 
     AND ai.end_time > NOW()
     $search_clause
-  $order_clause
+    $category_clause
+    $order_clause
   LIMIT ? OFFSET ?
 ";
+
 
 /* --- Prepare & Bind --- */
 $stmt = $conn->prepare($active_sql);
 
-if (!empty($search)) {
-    $stmt->bind_param("isii", $user_id, $search_param, $records_per_page, $offset);
-} else {
+if (!empty($search) && !empty($category)) {//If both search and category filters are active:
+    $stmt = $conn->prepare($active_sql);
+    $stmt->bind_param("isssii", $user_id, $search_param, $category, $records_per_page, $offset);
+}
+elseif (!empty($search)) {//IF ONLY SEARCH FILTER IS ACTIVE
+    $stmt = $conn->prepare($active_sql);
+    $stmt->bind_param("issii", $user_id, $search_param, $records_per_page, $offset);
+}
+elseif (!empty($category)) {//if only category filter is active
+    $stmt = $conn->prepare($active_sql);
+    $stmt->bind_param("isii", $user_id, $category, $records_per_page, $offset);
+}
+else {//no filter
+    $stmt = $conn->prepare("
+      SELECT ai.*, u.username AS seller,
+             (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
+      FROM auction_items ai
+      JOIN users u ON ai.seller_id = u.id
+      WHERE ai.status='active' 
+        AND ai.seller_id != ? 
+        AND ai.end_time > NOW()
+      $order_clause
+      LIMIT ? OFFSET ?
+    ");
     $stmt->bind_param("iii", $user_id, $records_per_page, $offset);
 }
 
