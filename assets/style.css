@@ -552,3 +552,25 @@ table tr:hover {
 .search-form button:hover {
   background-color: #2980b9;
 }
+
+/* ===== Category Dropdown Styling ===== */
+#category {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#category:hover {
+  border-color: #3498db;
+}
+
+#category:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.4);
+}
