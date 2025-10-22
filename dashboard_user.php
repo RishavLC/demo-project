@@ -287,6 +287,18 @@ $stmt->close();
     </select>
   </form>
 </div>
+
+<!-- Category Dropdown -->
+  <label><strong>Category:</strong></label>
+  <select name="category" onchange="this.form.submit()">
+    <option value="">All</option>
+    <option value="Electronics" <?= (isset($_GET['category']) && $_GET['category']=='Electronics') ? 'selected' : '' ?>>Electronics</option>
+    <option value="Furniture" <?= (isset($_GET['category']) && $_GET['category']=='Furniture') ? 'selected' : '' ?>>Furniture</option>
+    <option value="Vehicles" <?= (isset($_GET['category']) && $_GET['category']=='Vehicles') ? 'selected' : '' ?>>Vehicles</option>
+    <option value="clothes" <?= (isset($_GET['category']) && $_GET['category']=='Art') ? 'selected' : '' ?>>Clothes</option>
+    <option value="Others" <?= (isset($_GET['category']) && $_GET['category']=='Others') ? 'selected' : '' ?>>Others</option>
+  </select>
+
 <!-- search form -->
  <form method="GET" class="search-form" style="margin-bottom: 15px; text-align: right;">
   <input type="text" name="search" placeholder="Search auction item..." 
