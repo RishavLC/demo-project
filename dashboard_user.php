@@ -65,6 +65,7 @@ if (!empty($category)) {
 }
 
 /* --- Build Active Auction SQL --- */
+/* --- Build Active Auction SQL --- */
 $active_sql = "
   SELECT ai.*, u.username AS seller,
          (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
@@ -73,44 +74,31 @@ $active_sql = "
   WHERE ai.status='active' 
     AND ai.seller_id != ? 
     AND ai.end_time > NOW()
-    $search_clause
-    $category_clause
-    $order_clause
-  LIMIT ? OFFSET ?
 ";
 
+/* --- Add optional filters dynamically --- */
+$params = [$user_id];
+$param_types = "i";
 
-/* --- Prepare & Bind --- */
+if (!empty($search)) {
+    $active_sql .= " AND ai.title LIKE ?";
+    $params[] = "%$search%";
+    $param_types .= "s";
+}
+if (!empty($category)) {
+    $active_sql .= " AND ai.category = ?";
+    $params[] = $category;
+    $param_types .= "s";
+}
+
+$active_sql .= " $order_clause LIMIT ? OFFSET ?";
+$params[] = $records_per_page;
+$params[] = $offset;
+$param_types .= "ii";
+
+/* --- Prepare and Bind --- */
 $stmt = $conn->prepare($active_sql);
-
-if (!empty($search) && !empty($category)) {//If both search and category filters are active:
-    $stmt = $conn->prepare($active_sql);
-    $stmt->bind_param("isssii", $user_id, $search_param, $category, $records_per_page, $offset);
-}
-elseif (!empty($search)) {//IF ONLY SEARCH FILTER IS ACTIVE
-    $stmt = $conn->prepare($active_sql);
-    $stmt->bind_param("issii", $user_id, $search_param, $records_per_page, $offset);
-}
-elseif (!empty($category)) {//if only category filter is active
-    $stmt = $conn->prepare($active_sql);
-    $stmt->bind_param("isii", $user_id, $category, $records_per_page, $offset);
-}
-else {//no filter
-    $stmt = $conn->prepare("
-      SELECT ai.*, u.username AS seller,
-             (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
-      FROM auction_items ai
-      JOIN users u ON ai.seller_id = u.id
-      WHERE ai.status='active' 
-        AND ai.seller_id != ? 
-        AND ai.end_time > NOW()
-      $order_clause
-      LIMIT ? OFFSET ?
-    ");
-    $stmt->bind_param("iii", $user_id, $records_per_page, $offset);
-}
-
-/* --- Execute and Fetch --- */
+$stmt->bind_param($param_types, ...$params);
 $stmt->execute();
 $active_result = $stmt->get_result();
 $stmt->close();
