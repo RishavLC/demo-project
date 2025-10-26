@@ -296,29 +296,33 @@ $stmt->close();
 
 
 <h2>Active Auctions</h2>
-<div class="sort-filter">
-  <form method="GET" style="display:flex; align-items:center; gap:10px;">
+<form method="GET" action="">
+  <div class="auction-filter">
+    <!-- Sort by bid and time -->
     <label for="sort_by"><strong>Sort By:</strong></label>
     <select name="sort_by" id="sort_by" onchange="this.form.submit()">
       <option value="end_time" <?= (!isset($_GET['sort_by']) || $_GET['sort_by'] == 'end_time') ? 'selected' : '' ?>>Ending Soon</option>
       <option value="highest_bid" <?= (isset($_GET['sort_by']) && $_GET['sort_by'] == 'highest_bid') ? 'selected' : '' ?>>Highest Bid</option>
       <option value="lowest_bid" <?= (isset($_GET['sort_by']) && $_GET['sort_by'] == 'lowest_bid') ? 'selected' : '' ?>>Lowest Bid</option>
     </select>
-  </form>
-</div>
-
 <!-- Category Dropdown -->
-  <label><strong>Category:</strong></label>
-  <select name="category" onchange="this.form.submit()">
-    <option value="">All</option>
-    <option value="Electronics" <?= (isset($_GET['category']) && $_GET['category']=='Electronics') ? 'selected' : '' ?>>Electronics</option>
-    <option value="Furniture" <?= (isset($_GET['category']) && $_GET['category']=='Furniture') ? 'selected' : '' ?>>Furniture</option>
-    <option value="Vehicles" <?= (isset($_GET['category']) && $_GET['category']=='Vehicles') ? 'selected' : '' ?>>Vehicles</option>
-    <option value="clothes" <?= (isset($_GET['category']) && $_GET['category']=='Art') ? 'selected' : '' ?>>Clothes</option>
-    <option value="Others" <?= (isset($_GET['category']) && $_GET['category']=='Others') ? 'selected' : '' ?>>Others</option>
-  </select>
+    <label for="category">Category:</label>
+    <select name="category" id="category">
+      <option value="">All</option>
+      <option value="Electronics" <?= (isset($_GET['category']) && $_GET['category'] == 'Electronics') ? 'selected' : '' ?>>Electronics</option>
+      <option value="Furniture" <?= (isset($_GET['category']) && $_GET['category'] == 'Furniture') ? 'selected' : '' ?>>Furniture</option>
+      <option value="Vehicles" <?= (isset($_GET['category']) && $_GET['category'] == 'Vehicles') ? 'selected' : '' ?>>Vehicles</option>
+    </select>
 
 <!-- search form -->
+    <input type="text" name="search" placeholder="Search auction item..." 
+           value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+
+    <button type="submit" class="search-btn">🔍 Search</button>
+  </div>
+</form>
+
+
  <form method="GET" class="search-form" style="margin-bottom: 15px; text-align: right;">
   <input type="text" name="search" placeholder="Search auction item..." 
          value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
