@@ -482,26 +482,7 @@ table tr:hover {
   font-size: 20px;
   cursor: pointer;
 }
-.sort-filter {
-  margin: 15px 0;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
 
-.sort-filter label {
-  font-weight: 600;
-  color: #333;
-}
-
-.sort-filter select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-  font-size: 14px;
-}
 /* pagination */
 .pagination {
   margin: 20px 0;
@@ -553,24 +534,33 @@ table tr:hover {
   background-color: #2980b9;
 }
 
-/* ===== Category Dropdown Styling ===== */
-#category {
-  padding: 8px 12px;
-  border-radius: 6px;
+/* ==Auction filter == */
+.auction-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+.auction-filter select,
+.auction-filter input {
+  padding: 6px 10px;
   border: 1px solid #ccc;
-  font-size: 14px;
-  background-color: #fff;
-  color: #333;
+  border-radius: 6px;
+}
+
+.search-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-#category:hover {
-  border-color: #3498db;
-}
-
-#category:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 5px rgba(52, 152, 219, 0.4);
+.search-btn:hover {
+  background-color: #0056b3;
 }
