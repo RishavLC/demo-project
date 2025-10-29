@@ -4,48 +4,65 @@ include "config.php";
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST["username"];
+    $username = trim($_POST["username"]);
+    $email = trim($_POST["email"]);
     $password = md5($_POST["password"]);
 
-    // ✅ Get role_id for 'user'
-    $roleResult = $conn->query("SELECT id FROM roles WHERE role_name = 'user' LIMIT 1");
-    $roleRow = $roleResult->fetch_assoc();
-    $role_id = $roleRow['id'];
-
-    // ✅ Insert new user with role_id
-    $sql = "INSERT INTO users (username, password, role_id) VALUES ('$username', '$password', '$role_id')";
-    if ($conn->query($sql) === TRUE) {
-        // Get the last inserted user ID
-        $user_id = $conn->insert_id;
-
-        // Fetch created_at value
-        $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
-        $row = $result->fetch_assoc();
-        $created_at = $row['created_at'];
-
-        // Show styled success message
-        echo "<div style='
-                margin: 20px auto; 
-                width: 400px; 
-                padding: 15px; 
-                text-align: center; 
-                background: #e6ffed; 
-                border: 1px solid #28a745; 
-                border-radius: 8px; 
-                font-family: Arial, sans-serif; 
-                color: #155724;'>
-                🎉 Registration successful on <b>$created_at</b>! <br><br>
-                <a href='index.php' style='
-                    display: inline-block; 
-                    padding: 8px 15px; 
-                    margin-top: 10px; 
-                    background: #28a745; 
-                    color: #fff; 
-                    text-decoration: none; 
-                    border-radius: 5px;'>Login here</a>
-              </div>";
+    // ✅ Validate input
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "<div class='alert error'>Invalid email format.</div>";
     } else {
-        echo "Error: " . $conn->error;
+        // ✅ Check if username or email already exists
+        $check = $conn->prepare("SELECT * FROM users WHERE username=? OR email=?");
+        $check->bind_param("ss", $username, $email);
+        $check->execute();
+        $result = $check->get_result();
+
+        if ($result->num_rows > 0) {
+            $message = "<div class='alert error'>Username or Email already exists!</div>";
+        } else {
+            // ✅ Get role_id for 'user'
+            $roleResult = $conn->query("SELECT id FROM roles WHERE role_name = 'user' LIMIT 1");
+            $roleRow = $roleResult->fetch_assoc();
+            $role_id = $roleRow['id'];
+
+            // ✅ Insert new user
+            $sql = $conn->prepare("INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)");
+            $sql->bind_param("sssi", $username, $email, $password, $role_id);
+
+            if ($sql->execute()) {
+                // ✅ Get created_at
+                $user_id = $conn->insert_id;
+                $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
+                $row = $result->fetch_assoc();
+                $created_at = $row['created_at'];
+
+                // ✅ Success message
+                echo "<div style='
+                        margin: 20px auto; 
+                        width: 420px; 
+                        padding: 15px; 
+                        text-align: center; 
+                        background: #e6ffed; 
+                        border: 1px solid #28a745; 
+                        border-radius: 8px; 
+                        font-family: Arial, sans-serif; 
+                        color: #155724;'>
+                        🎉 Registration successful on <b>$created_at</b>! <br><br>
+                        <a href='index.php' style='
+                            display: inline-block; 
+                            padding: 8px 15px; 
+                            margin-top: 10px; 
+                            background: #28a745; 
+                            color: #fff; 
+                            text-decoration: none; 
+                            border-radius: 5px;'>Login here</a>
+                      </div>";
+                exit();
+            } else {
+                $message = "<div class='alert error'>Error: " . $conn->error . "</div>";
+            }
+        }
     }
 }
 ?>
@@ -64,16 +81,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             height: 100vh;
         }
         form {
-            margin: 40%;
             background: #fff;
-            padding: 20px 30px;
+            padding: 25px 35px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 300px;
+            width: 320px;
             text-align: center;
         }
         form h2 {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: #333;
         }
         form input {
@@ -112,23 +128,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        .alert a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .alert a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
 <form method="POST">
     <h2>Register</h2>
-    <?php if ($message) echo $message; ?>
-    <input type="text" name="username" placeholder="Username" required><br>
-    <input type="password" name="password" placeholder="Password" required><br>
+    <?= $message ?>
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
     <button type="submit">Register</button>
 </form>
 </body>
 </html>
+<!-- user rigistration can can e done easily by email , username and password but role will be defaultly be normal user 
+ and only admin can change roles -->

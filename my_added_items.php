@@ -8,7 +8,14 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-
+// for username import
+$user_sql = "SELECT username FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($username);
+$stmt->fetch();
+$stmt->close();
 // Fetch all items the user has added
 $sql = "
   SELECT ai.*, 
@@ -162,5 +169,6 @@ $result = $stmt->get_result();
       <div class="no-record">No items added yet.</div>
     <?php endif; ?>
   </div>
+<script src="assets/script.js"></script>
 </body>
 </html>
