@@ -508,31 +508,6 @@ table tr:hover {
   background-color: #3669d8;
   font-weight: bold;
 }
-/* search box */
-.search-form {
-  text-align: right;
-  margin-bottom: 10px;
-}
-
-.search-form input {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 250px;
-}
-
-.search-form button {
-  background-color: #3498db;
-  border: none;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.search-form button:hover {
-  background-color: #2980b9;
-}
 
 /* ==Auction filter == */
 .auction-filter {

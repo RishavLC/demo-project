@@ -321,17 +321,6 @@ $stmt->close();
     <button type="submit" class="search-btn">🔍 Search</button>
   </div>
 </form>
-
-
- <form method="GET" class="search-form" style="margin-bottom: 15px; text-align: right;">
-  <input type="text" name="search" placeholder="Search auction item..." 
-         value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
-         style="padding: 6px; border-radius: 5px; border: 1px solid #ccc; width: 250px;">
-  <button type="submit" style="padding: 6px 10px; border: none; background: #3498db; color: white; border-radius: 5px;">
-    🔍 Search
-  </button>
-</form>
-
 <table class="auction-table">
   <tr>
     <th>SN</th>
