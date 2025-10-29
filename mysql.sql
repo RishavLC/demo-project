@@ -18,7 +18,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
-
+ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE AFTER username;
 
 -- Data table (records for CRUD)
 CREATE TABLE records (
