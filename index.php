@@ -177,7 +177,13 @@ $result = $conn->query($sql);
 <body>
 
 <header>
-  <div class="logo">BlueBid</div>
+  <div class="logo">EasyBid</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="aboutus.html">About Us</a>
+    <a href="#auctions">Auctions</a>
+    <a href="#">Contact Us</a>
+  </nav>
   <form class="search-bar" method="GET">
     <select name="category">
       <option value="">All Categories</option>
@@ -190,12 +196,11 @@ $result = $conn->query($sql);
   </form>
   <nav>
     <a href="login.php">Login</a>
-    <a href="register.php">Register</a>
   </nav>
 </header>
 
 <section class="hero">
-  <h1>Welcome to BlueBid</h1>
+  <h1>Welcome to EasyBid</h1>
   <p>Bid smart. Win big. Trusted online auction platform.</p>
   <button onclick="window.location='#auctions'">View Active Auctions</button>
 </section>
@@ -218,7 +223,7 @@ $result = $conn->query($sql);
 </section>
 
 <footer>
-  © <?php echo date("Y"); ?> BlueBid Auction | All Rights Reserved
+  © <?php echo date("Y"); ?> EasyBid Auction | All Rights Reserved
 </footer>
 
 </body>
