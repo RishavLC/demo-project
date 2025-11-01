@@ -3,7 +3,7 @@ include "config.php"; // Your DB connection
 $category = isset($_GET['category']) ? $_GET['category'] : '';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-$sql = "SELECT * FROM items WHERE status='active'";
+$sql = "SELECT * FROM auction_items WHERE status='active'";
 if ($category != '') {
     $sql .= " AND category LIKE '%" . $conn->real_escape_string($category) . "%'";
 }
@@ -181,11 +181,9 @@ $result = $conn->query($sql);
   <form class="search-bar" method="GET">
     <select name="category">
       <option value="">All Categories</option>
-      <option value="electronics">Electronics</option>
-      <option value="furniture">Furniture</option>
-      <option value="fashion">Fashion</option>
-      <option value="art">Art</option>
-      <option value="vehicles">Vehicles</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Furnitures">Furniture</option>
+      <option value="Vehicles">Vehicles</option>
     </select>
     <input type="text" name="search" placeholder="Search items..." value="<?php echo htmlspecialchars($search); ?>">
     <button type="submit">Search</button>
@@ -209,8 +207,8 @@ $result = $conn->query($sql);
       while($row = $result->fetch_assoc()) { ?>
       <div class="auction-card">
         <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Item Image">
-        <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-        <p>Starting Price: $<?php echo number_format($row['starting_price'], 2); ?></p>
+        <h3><?php echo htmlspecialchars($row['title']); ?></h3>
+        <p>Starting Price: $<?php echo number_format($row['start_price'], 2); ?></p>
         <a href="login.php">Bid Now</a>
       </div>
     <?php } } else { ?>
