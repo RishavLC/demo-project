@@ -17,6 +17,8 @@ $result = $conn->query($sql);
 <head>
   <meta charset="UTF-8">
   <title>BlueBid Auction</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -165,13 +167,110 @@ $result = $conn->query($sql);
       background: #0056b3;
     }
 
-    footer {
+    /* footer {
       background: #003366;
       color: #fff;
       text-align: center;
       padding: 15px 0;
       margin-top: 50px;
-    }
+    } */
+    /* ================== FOOTER STYLES ================== */
+.site-footer {
+  background: #0b3d91; /* Deep blue theme */
+  color: #fff;
+  padding: 50px 20px 10px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-col h3 {
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #1e90ff;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.footer-col p,
+.footer-col li,
+.footer-col a {
+  color: #dcdcdc;
+  font-size: 14px;
+  line-height: 1.7;
+  text-decoration: none;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-col ul li {
+  margin-bottom: 10px;
+}
+
+.footer-col a:hover {
+  color: #1e90ff;
+}
+
+/* Social Icons */
+.social-links a {
+  color: white;
+  margin-right: 10px;
+  font-size: 18px;
+  transition: 0.3s;
+}
+
+.social-links a:hover {
+  color: #1e90ff;
+}
+
+/* Newsletter */
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.newsletter-form input {
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  margin-bottom: 10px;
+  outline: none;
+}
+
+.newsletter-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: #1e90ff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.newsletter-form button:hover {
+  background: #0077cc;
+}
+
+/* Bottom Footer */
+.footer-bottom {
+  text-align: center;
+  margin-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 15px;
+  font-size: 13px;
+  color: #bbb;
+}
+
   </style>
 </head>
 <body>
@@ -222,8 +321,62 @@ $result = $conn->query($sql);
   </div>
 </section>
 
-<footer>
-  © <?php echo date("Y"); ?> EasyBid Auction | All Rights Reserved
+  <!-- ================== FOOTER SECTION ================== -->
+<footer class="site-footer">
+  <div class="footer-container">
+
+    <!-- About Us -->
+    <div class="footer-col">
+      <h3>About AuctionEase</h3>
+      <p>
+        AuctionEase is a secure and user-friendly online auction platform 
+        where buyers and sellers connect easily. We believe in transparency, 
+        fair bidding, and great deals every day.
+      </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="footer-col">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="aboutus.php">About Us</a></li>
+        <li><a href="contactus.php">Contact</a></li>
+        <li><a href="login.php">Login</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="footer-col">
+      <h3>Contact Us</h3>
+      <p><i class="fas fa-map-marker-alt"></i> Kathmandu, Nepal</p>
+      <p><i class="fas fa-phone"></i> +977-9812345678</p>
+      <p><i class="fas fa-envelope"></i> support@easybid.com</p>
+
+      <div class="social-links">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-linkedin"></i></a>
+      </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="footer-col">
+      <h3>Stay Updated</h3>
+      <p>Subscribe to our newsletter to get the latest auction alerts.</p>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p>© <?php echo date('Y'); ?> Easybid. All Rights Reserved</p>
+  </div>
+
 </footer>
 
 </body>
