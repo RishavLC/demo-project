@@ -1,5 +1,5 @@
 <?php
-include "config.php"; // Your DB connection
+include "config.php"; 
 $category = isset($_GET['category']) ? $_GET['category'] : '';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
@@ -11,6 +11,72 @@ if ($search != '') {
     $sql .= " AND name LIKE '%" . $conn->real_escape_string($search) . "%'";
 }
 $result = $conn->query($sql);
+
+//for register form
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST["username"]);
+    $email = trim($_POST["email"]);
+    $password = md5($_POST["password"]);
+
+    // ✅ Validate input
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "<div class='alert error'>Invalid email format.</div>";
+    } else {
+        // ✅ Check if username or email already exists
+        $check = $conn->prepare("SELECT * FROM users WHERE username=? OR email=?");
+        $check->bind_param("ss", $username, $email);
+        $check->execute();
+        $result = $check->get_result();
+
+        if ($result->num_rows > 0) {
+            $message = "<div class='alert error'>Username or Email already exists!</div>";
+        } else {
+            // ✅ Get role_id for 'user'
+            $roleResult = $conn->query("SELECT id FROM roles WHERE role_name = 'user' LIMIT 1");
+            $roleRow = $roleResult->fetch_assoc();
+            $role_id = $roleRow['id'];
+
+            // ✅ Insert new user
+            $sql = $conn->prepare("INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)");
+            $sql->bind_param("sssi", $username, $email, $password, $role_id);
+
+            if ($sql->execute()) {
+                // ✅ Get created_at
+                $user_id = $conn->insert_id;
+                $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
+                $row = $result->fetch_assoc();
+                $created_at = $row['created_at'];
+
+                // ✅ Success message
+                echo "<div style='
+                        margin: 20px auto; 
+                        width: 420px; 
+                        padding: 15px; 
+                        text-align: center; 
+                        background: #e6ffed; 
+                        border: 1px solid #28a745; 
+                        border-radius: 8px; 
+                        font-family: Arial, sans-serif; 
+                        color: #155724;'>
+                        🎉 Registration successful on <b>$created_at</b>! <br><br>
+                        <a href='index.php' style='
+                            display: inline-block; 
+                            padding: 8px 15px; 
+                            margin-top: 10px; 
+                            background: #28a745; 
+                            color: #fff; 
+                            text-decoration: none; 
+                            border-radius: 5px;'>Login here</a>
+                      </div>";
+                exit();
+            } else {
+                $message = "<div class='alert error'>Error: " . $conn->error . "</div>";
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -363,11 +429,13 @@ $result = $conn->query($sql);
 
     <!-- Newsletter -->
     <div class="footer-col">
-      <h3>Stay Updated</h3>
-      <p>Subscribe to our newsletter to get the latest auction alerts.</p>
-      <form class="newsletter-form">
-        <input type="email" placeholder="Enter your email" required>
-        <button type="submit">Subscribe</button>
+      <form method="POST">
+          <h2>Register</h2>
+          <?= $message ?>
+          <input type="text" name="username" placeholder="Username" required>
+          <input type="email" name="email" placeholder="Email" required>
+          <input type="password" name="password" placeholder="Password" required><br>
+          <button type="submit">Register</button>
       </form>
     </div>
 
