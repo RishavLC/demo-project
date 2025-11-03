@@ -82,9 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BlueBid Auction</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <title>EasyBid</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -152,32 +150,90 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     /* Hero Section */
-    .hero {
-      background: linear-gradient(rgba(0,0,50,0.5), rgba(0,0,50,0.5)), url('images/banner.jpg') center/cover no-repeat;
-      color: white;
-      text-align: center;
-      padding: 140px 20px;
-    }
-    .hero h1 {
-      font-size: 50px;
-      font-weight: 700;
-    }
-    .hero p {
-      font-size: 18px;
-      margin: 10px 0 20px;
-    }
-    .hero button {
-      padding: 10px 20px;
-      background: #007bff;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-weight: 500;
-      cursor: pointer;
-    }
-    .hero button:hover {
-      background: #0056b3;
-    }
+.hero {
+  position: relative;
+  width: 100%;
+  height: 90vh; /* Full screen height */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Background Image */
+.hero img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures full coverage without stretching */
+  top: 0;
+  left: 0;
+  z-index: -2;
+  filter: brightness(70%); /* Darkens image for better text visibility */
+  transition: transform 8s ease-in-out;
+}
+
+/* Subtle zoom animation */
+.hero:hover img {
+  transform: scale(1.05);
+}
+
+/* Overlay effect */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 64, 128, 0.35); /* soft blue overlay */
+  z-index: -1;
+}
+
+/* Make hero-content stack vertically */
+.hero-content {
+  display: flex;
+  flex-direction: column; /* stacks h1, p, button vertically */
+  align-items: center;    /* center horizontally */
+  justify-content: center;/* center vertically */
+  z-index: 1;
+}
+/* Heading */
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Paragraph */
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+  line-height: 1.6;
+  color: #f0f8ff;
+}
+
+/* Button */
+.hero button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.hero button:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
 
     /* Active Auctions */
     .auction-section {
@@ -233,13 +289,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       background: #0056b3;
     }
 
-    /* footer {
-      background: #003366;
-      color: #fff;
-      text-align: center;
-      padding: 15px 0;
-      margin-top: 50px;
-    } */
     /* ================== FOOTER STYLES ================== */
 .site-footer {
   background: #0b3d91; /* Deep blue theme */
@@ -365,9 +414,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </header>
 
 <section class="hero">
+  <div class="content">
+  <img src="front.jpg" alt="">
   <h1>Welcome to EasyBid</h1>
   <p>Bid smart. Win big. Trusted online auction platform.</p>
   <button onclick="window.location='#auctions'">View Active Auctions</button>
+  </div>
 </section>
 
 <section class="auction-section" id="auctions">
