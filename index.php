@@ -439,7 +439,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </div>
 </section>
 
-  <!-- ================== FOOTER SECTION ================== -->
+  <!--  FOOTER SECTION  -->
 <footer class="site-footer">
   <div class="footer-container">
 
@@ -447,7 +447,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="footer-col">
       <h3>About AuctionEase</h3>
       <p>
-        AuctionEase is a secure and user-friendly online auction platform 
+        EasyBid is a secure and user-friendly online auction platform 
         where buyers and sellers connect easily. We believe in transparency, 
         fair bidding, and great deals every day.
       </p>
