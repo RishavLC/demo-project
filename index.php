@@ -98,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      position: sticky;
+      position: sticky;/* relative for header to while scrolling */
       top: 0;
       z-index: 100;
     }
