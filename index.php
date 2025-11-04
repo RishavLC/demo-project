@@ -396,7 +396,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <a href="#">Home</a>
     <a href="aboutus.html">About Us</a>
     <a href="#auctions">Auctions</a>
-    <a href="#">Contact Us</a>
+    <a href="contactus.html">Contact Us</a>
   </nav>
   <form class="search-bar" method="GET">
     <select name="category">

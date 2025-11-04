@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us | EasyBid</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f8ff;
+      color: #333;
+    }
+
+    /* Header */
+    header {
+      background: #007bff;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    /* Contact Section */
+    .contact-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 10%;
+      flex-wrap: wrap;
+      gap: 40px;
+      background: linear-gradient(135deg, #e3f2fd, #f9fbff);
+    }
+
+    /* Contact Info */
+    .contact-info {
+      flex: 1;
+      min-width: 300px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      text-align: left;
+      transition: 0.3s;
+    }
+
+    .contact-info:hover {
+      transform: translateY(-5px);
+    }
+
+    .contact-info h2 {
+      color: #007bff;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    .contact-info p {
+      line-height: 1.7;
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .contact-info i {
+      color: #007bff;
+      margin-right: 10px;
+    }
+
+    /* Contact Form */
+    .contact-form {
+      flex: 1;
+      min-width: 300px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      transition: 0.3s;
+    }
+
+    .contact-form:hover {
+      transform: translateY(-5px);
+    }
+
+    .contact-form h2 {
+      color: #007bff;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+    }
+
+    .contact-form button {
+      background: #007bff;
+      color: #fff;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .contact-form button:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+
+    /* Map Section */
+    .map {
+      width: 100%;
+      height: 300px;
+      border: none;
+      margin-top: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Footer */
+    footer {
+      background: #007bff;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.95rem;
+      margin-top: 50px;
+    }
+
+    @media (max-width: 768px) {
+      .contact-section {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>Contact EasyBid</header>
+
+  <section class="contact-section">
+    <div class="contact-info">
+      <h2>Get in Touch</h2>
+      <p><i>📍</i> EasyBid HQ, Katahari, Nepal</p>
+      <p><i>📞</i> +977-9800000000</p>
+      <p><i>✉️</i> support@easybid.com</p>
+      <p>We’re here to help you with bidding issues, account queries, or partnership opportunities. Reach out anytime!</p>
+    </div>
+
+    <div class="contact-form">
+      <h2>Send a Message</h2>
+      <form action="send_message.php" method="POST">
+        <input type="text" name="name" placeholder="Your Name" required>
+        <input type="email" name="email" placeholder="Your Email" required>
+        <input type="text" name="subject" placeholder="Subject" required>
+        <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <iframe class="map" 
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.3575932773777!2d85.32396067464042!3d27.706195076186065!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb190bfddc45db%3A0x3b61b43b4d7f6c8a!2sKathmandu!5e0!3m2!1sen!2snp!4v1700000000000"
+    allowfullscreen="" loading="lazy">
+  </iframe>
+
+  <footer>
+    &copy; 2025 EasyBid | All Rights Reserved
+  </footer>
+
+</body>
+</html>
