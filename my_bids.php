@@ -105,8 +105,8 @@ $stmt->close();
     <div class="card">
       <h3><?= htmlspecialchars($row['title']) ?></h3>
       <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
-      <p><strong>Your Highest Bid:</strong> <?= $row['my_highest_bid'] ? "$".$row['my_highest_bid'] : "N/A" ?></p>
-      <p><strong>Winning Bid:</strong> <?= $row['winning_bid'] ? "$".$row['winning_bid'] : "N/A" ?></p>
+      <p><strong>Your Highest Bid:</strong> <?= $row['my_highest_bid'] ? "Rs. ".$row['my_highest_bid'] : "N/A" ?></p>
+      <p><strong>Winning Bid:</strong> <?= $row['winning_bid'] ? "Rs. ".$row['winning_bid'] : "N/A" ?></p>
       <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
       <p><strong>Status:</strong> <?= $status ?></p>
       <p><em>Auction Ended: <?= $row['end_time'] ?></em></p>

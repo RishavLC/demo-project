@@ -41,11 +41,11 @@ echo "✅ Auction status updated.";
 //for notification 
 if ($winner_id) {
     // Notify winner
-    $msg = "You won the auction for: " . $item['title'] . " with $" . $winning_bid;
+    $msg = "You won the auction for: " . $item['title'] . " with Rs. " . $winning_bid;
     $conn->query("INSERT INTO notifications (user_id, message) VALUES ($winner_id, '$msg')");
 
     // Notify seller
-    $msg = "Your item '" . $item['title'] . "' was sold to " . $winner_id . " for $" . $winning_bid;
+    $msg = "Your item '" . $item['title'] . "' was sold to " . $winner_id . " for Rs. " . $winning_bid;
     $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$item['seller_id']}, '$msg')");
 } else {
     // Notify seller if no bids

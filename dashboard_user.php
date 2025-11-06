@@ -290,7 +290,7 @@ $stmt->close();
     <p>Auctions Won</p>
   </div>
   <div class="summary-card">
-    <h3>$<?= number_format($total_investment, 2) ?></h3>
+    <h3>Rs. <?= number_format($total_investment, 2) ?></h3>
     <p>Total Investment</p>
   </div>
 </div>
@@ -337,8 +337,8 @@ $stmt->close();
     <tr>
       <td><?= $sn++ ?></td>
       <td><?= htmlspecialchars($row['title']) ?></td>
-      <td>$<?= $row['start_price'] ?></td>
-      <td>$<?= ($row['highest_bid'] ?? 0) ?></td>
+      <td>Rs. <?= $row['start_price'] ?></td>
+      <td>Rs. <?= ($row['highest_bid'] ?? 0) ?></td>
       <td><?= $row['end_time'] ?></td>
       <td>
         <button class="btn" 
@@ -378,8 +378,8 @@ $stmt->close();
     <h2 id="modalTitle"></h2>
     <p><strong>Description:</strong> <span id="modalDescription"></span></p>
     <p><strong>Seller:</strong> <span id="modalSeller"></span></p>
-    <p><strong>Starting Price:</strong> $<span id="modalPrice"></span></p>
-    <p><strong>Highest Bid:</strong> $<span id="modalHighest"></span></p>
+    <p><strong>Starting Price:</strong> Rs.Rs. <span id="modalPrice"></span></p>
+    <p><strong>Highest Bid:</strong> Rs. <span id="modalHighest"></span></p>
     <p><strong>Ends At:</strong> <span id="modalEnd"></span></p>
     <a id="bidLink" href="#" class="btn">Place Bid</a>
   </div>
@@ -402,7 +402,7 @@ $stmt->close();
     <div class="card">
       <h3><?= htmlspecialchars($row['title']) ?></h3>
       <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
-      <p><strong>Final Price:</strong> <?= $row['winning_bid'] ? "$".$row['winning_bid'] : "N/A" ?></p>
+      <p><strong>Final Price:</strong> <?= $row['winning_bid'] ? "Rs. ".$row['winning_bid'] : "N/A" ?></p>
       <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
       <p><em>Closed on <?= $row['end_time'] ?></em></p>
     </div>

@@ -137,7 +137,7 @@ $result = $conn->query($sql);
                     <h3><?= htmlspecialchars($row['title']) ?></h3>
                     <p><?= htmlspecialchars($row['description']) ?></p>
                     <p><b>Category:</b> <?= htmlspecialchars($row['category']) ?></p>
-                    <p><b>Current Price:</b> $<?= number_format($row['current_price'], 2) ?></p>
+                    <p><b>Current Price:</b> Rs. <?= number_format($row['current_price'], 2) ?></p>
                     <p><b>Ends At:</b> <?= $row['end_time'] ?></p>
                     
                     <form method="POST">

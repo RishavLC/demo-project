@@ -68,7 +68,7 @@ $result = $conn->query($sql);
         <th>ID</th>
         <th>Item</th>
         <th>Quantity</th>
-        <th>Price ($)</th>
+        <th>Price (Rs)</th>
         <th>Action</th>
       </tr>
       <?php if($result && $result->num_rows > 0): ?>

@@ -430,7 +430,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="auction-card">
         <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Item Image">
         <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-        <p>Starting Price: $<?php echo number_format($row['start_price'], 2); ?></p>
+        <p>Starting Price: Rs. <?php echo number_format($row['start_price'], 2); ?></p>
         <a href="login.php">Bid Now</a>
       </div>
     <?php } } else { ?>
