@@ -172,6 +172,7 @@ $result = $conn->query($sql);
         <?php if ($row['status'] == 'pending') { ?>
         <form method="POST">
           <input type="hidden" name="id" value="<?= $row['id'] ?>">
+          <!-- date is managed by auctioneer -->
           <label>Start Time:</label>
           <input type="datetime-local" name="start_time" required>
           <label>End Time:</label>
