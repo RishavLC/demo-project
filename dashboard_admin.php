@@ -99,7 +99,7 @@ $result = $conn->query($sql);
 </div>
 
 <div class="main-content">
-  <h2>Admin Dashboard Overview</h2>
+  <h2>Admin Dashboard</h2>
   
   <div class="stats">
     <div class="card">
