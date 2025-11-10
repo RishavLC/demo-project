@@ -52,24 +52,3 @@ window.onclick = function(e) {
     closeAuctionModal();
   }
 }
-
-//AutoBid thruogh button
-document.querySelectorAll('.auto-bid-btn').forEach(button => {
-  button.addEventListener('click', function() {
-    const form = this.closest('.bid-form');
-    const input = form.querySelector('input[name="bid_amount"]');
-    const current = parseFloat(this.dataset.current);
-    const increment = parseFloat(this.dataset.increment);
-    let newBid = parseFloat(input.value);
-
-    // If user hasn’t changed it yet
-    if (isNaN(newBid) || newBid <= current) {
-      newBid = current + increment;
-    } else {
-      newBid += increment;
-    }
-
-    input.value = newBid.toFixed(2);
-  });
-});
-
