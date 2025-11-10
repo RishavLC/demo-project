@@ -59,6 +59,8 @@ ALTER TABLE auction_items
 ADD COLUMN winner_id INT NULL,
 ADD FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL;
 
+ALTER TABLE auction_items ADD COLUMN min_increment DECIMAL(10,2) DEFAULT 50;
+
 
 -- bids
 CREATE TABLE bids (

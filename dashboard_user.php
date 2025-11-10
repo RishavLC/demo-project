@@ -65,7 +65,6 @@ if (!empty($category)) {
 }
 
 /* --- Build Active Auction SQL --- */
-/* --- Build Active Auction SQL --- */
 $active_sql = "
   SELECT ai.*, u.username AS seller,
          (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
@@ -307,13 +306,23 @@ $stmt->close();
       <option value="lowest_bid" <?= (isset($_GET['sort_by']) && $_GET['sort_by'] == 'lowest_bid') ? 'selected' : '' ?>>Lowest Bid</option>
     </select>
 <!-- Category Dropdown -->
-    <label for="category">Category:</label>
-    <select name="category" id="category">
-      <option value="">All</option>
-      <option value="Electronics" <?= (isset($_GET['category']) && $_GET['category'] == 'Electronics') ? 'selected' : '' ?>>Electronics</option>
-      <option value="Furniture" <?= (isset($_GET['category']) && $_GET['category'] == 'Furniture') ? 'selected' : '' ?>>Furniture</option>
-      <option value="Vehicles" <?= (isset($_GET['category']) && $_GET['category'] == 'Vehicles') ? 'selected' : '' ?>>Vehicles</option>
-    </select>
+    <label for="category">Category *</label>
+<select name="category" id="category" required>
+  <option value="">Select Category</option>
+
+  <option value="Electronics" <?= (isset($_GET['category']) && $_GET['category'] == 'Electronics') ? 'selected' : '' ?>>Electronics</option>
+  <option value="Furniture" <?= (isset($_GET['category']) && $_GET['category'] == 'Furniture') ? 'selected' : '' ?>>Furniture</option>
+  <option value="Vehicles" <?= (isset($_GET['category']) && $_GET['category'] == 'Vehicles') ? 'selected' : '' ?>>Vehicles</option>
+  <option value="Antiques" <?= (isset($_GET['category']) && $_GET['category'] == 'Antiques') ? 'selected' : '' ?>>Antiques</option>
+  <option value="Art" <?= (isset($_GET['category']) && $_GET['category'] == 'Art') ? 'selected' : '' ?>>Art & Collectibles</option>
+  <option value="Fashion" <?= (isset($_GET['category']) && $_GET['category'] == 'Fashion') ? 'selected' : '' ?>>Fashion & Accessories</option>
+  <option value="Books" <?= (isset($_GET['category']) && $_GET['category'] == 'Books') ? 'selected' : '' ?>>Books & Magazines</option>
+  <option value="Sports" <?= (isset($_GET['category']) && $_GET['category'] == 'Sports') ? 'selected' : '' ?>>Sports & Fitness</option>
+  <option value="RealEstate" <?= (isset($_GET['category']) && $_GET['category'] == 'RealEstate') ? 'selected' : '' ?>>Real Estate</option>
+  <option value="MusicalInstruments" <?= (isset($_GET['category']) && $_GET['category'] == 'MusicalInstruments') ? 'selected' : '' ?>>Musical Instruments</option>
+  <option value="Other" <?= (isset($_GET['category']) && $_GET['category'] == 'Other') ? 'selected' : '' ?>>Other</option>
+</select>
+
 
 <!-- search form -->
     <input type="text" name="search" placeholder="Search auction item..." 

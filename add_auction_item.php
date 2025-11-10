@@ -15,12 +15,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description = trim($_POST["description"]);
     $category = trim($_POST["category"]);
     $start_price = floatval($_POST["start_price"]);
+    $min_increment = floatval($_POST["min_increment"]);
     
     if ($title && $start_price > 0) {
     $stmt = $conn->prepare("INSERT INTO auction_items 
-        (seller_id, title, description, category, start_price, current_price, status) 
-        VALUES (?, ?, ?, ?, ?, ?, 'pending')");
-    $stmt->bind_param("isssdd", $user_id, $title, $description, $category, $start_price, $start_price);
+    (seller_id, title, description, category, start_price, current_price, min_increment, status) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+$stmt->bind_param("isssddd", $user_id, $title, $description, $category, $start_price, $start_price, $min_increment);
 
         if ($stmt->execute()) {
             $message = "<p style='color:green;font-weight:bold;'>✅ Auction item added successfully!</p>";
@@ -102,19 +103,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?= $message ?>
 
         <form method="POST">
-            <label>Item Title *</label>
+            <label>Item Title</label>
             <input type="text" name="title" required>
 
             <label>Description</label>
             <textarea name="description"></textarea>
 
-            <label>Category</label>
-            <input type="text" name="category">
+             <label>Category</label>
+            <select name="category" required>
+                <option value="">Select Category</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Vehicles">Vehicles</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Books">Books</option>
+                <option value="MusicalInstruments">Musical Instruments</option>
+                <option value="Antiques">Antiques</option>
+                <option value="Art">Art & Collectibles</option>
+                <option value="Sports">Sports</option>
+                <option value="Real Estate">Real Estate</option>
+                <option value="Others">Others</option>
+            </select>
 
-            <label>Start Price *</label>
-            <input type="number" step="0.01" name="start_price" required>
+            <label>Start Price</label>
+            <input type="number" step="0.1" name="start_price" required>
+            <label>Minimum Increment *</label>
+            <input type="number" step="0.01" name="min_increment" placeholder="e.g. 50 or 500" required>
 
-            <button type="submit">✅ Add Item</button>
+            <button type="submit">Add Item</button>
         </form>
     </div>
 </div>

@@ -13,8 +13,11 @@ $message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["bid_amount"], $_POST["item_id"])) {
     $item_id = intval($_POST["item_id"]);
     $bid_amount = floatval($_POST["bid_amount"]);
+    $min_increment = floatval($_POST["min_increment"]);
+
 
     // Fetch current item info
+    $stmt = $conn->prepare("SELECT current_price, end_time, min_increment FROM auction_items WHERE id=?");
     $stmt = $conn->prepare("SELECT current_price, end_time FROM auction_items WHERE id=?");
     $stmt->bind_param("i", $item_id);
     $stmt->execute();
@@ -25,9 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["bid_amount"], $_POST["
         $now = date("Y-m-d H:i:s");
         if ($now > $item['end_time']) {
             $message = "<p style='color:red;font-weight:bold;'>❌ Auction has already ended.</p>";
-        } elseif ($bid_amount <= $item['current_price']) {
-            $message = "<p style='color:red;font-weight:bold;'>⚠ Bid must be higher than current price.</p>";
-        } else {
+        } 
+        elseif ($bid_amount < $item['current_price'] + $item['min_increment']) {
+            $message = "<p style='color:red;font-weight:bold;'>⚠ Bid must be at least Rs. " . number_format($item['min_increment'], 2) . " higher than the current price.</p>";
+            }
+        else {
             // Insert bid
             $stmt = $conn->prepare("INSERT INTO bids (item_id, bidder_id, bid_amount) VALUES (?, ?, ?)");
             $stmt->bind_param("iid", $item_id, $user_id, $bid_amount);
@@ -140,11 +145,27 @@ $result = $conn->query($sql);
                     <p><b>Current Price:</b> Rs. <?= number_format($row['current_price'], 2) ?></p>
                     <p><b>Ends At:</b> <?= $row['end_time'] ?></p>
                     
-                    <form method="POST">
+                    <form method="POST" class="bid-form">
                         <input type="hidden" name="item_id" value="<?= $row['id'] ?>">
-                        <input type="number" step="0.01" name="bid_amount" placeholder="Enter your bid" required>
+
+                        <p><b>Min Increment:</b> ₹<?= number_format($row['min_increment'], 2) ?></p>
+                        <p><b>Your Next Minimum Bid:</b> ₹<?= number_format($row['current_price'] + $row['min_increment'], 2) ?></p>
+
+                        <input type="number" 
+                               step="0.01" 
+                               name="bid_amount" 
+                               placeholder="Enter your bid" 
+                               value="<?= number_format($row['current_price'] + $row['min_increment'], 2) ?>" 
+                               required>
+                        <button type="button"class="auto-bid-btn"
+                                data-current="<?= $row['current_price'] ?>" 
+                                data-increment="<?= $row['min_increment'] ?>">
+                            🔼 Increase Bid +₹<?= number_format($row['min_increment'], 2) ?>
+                        </button>
+
                         <button type="submit">💰 Place Bid</button>
                     </form>
+
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
