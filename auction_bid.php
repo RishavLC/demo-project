@@ -70,6 +70,7 @@ $stmt->close();
     <meta charset="utf-8" />
     <title>Place Bid</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js"></script>
     <style>
         .auction-container {
             display: grid;
@@ -188,37 +189,41 @@ $stmt->close();
 </div>
 
 <script>
-// Helper to parse float safely
 function pf(v){ return parseFloat(String(v).replace(/,/g,'')) || 0; }
 
-// Increase / decrease buttons work per-item using data-increment
-document.querySelectorAll('.increase-btn').forEach(btn=>{
-    btn.addEventListener('click', function(){
-        const inc = pf(this.dataset.increment);
-        const form = this.closest('.bid-form');
-        const input = form.querySelector('input[name="bid_amount"]');
-        let val = pf(input.value);
-        // if current value is <= current_price, set to current_price + increment
-        const currentPrice = pf(input.dataset.current);
-        if (val <= currentPrice) val = currentPrice;
-        val = val + inc;
-        input.value = val.toFixed(2);
-        // update min attribute
-        input.min = (pf(currentPrice) + pf(input.dataset.mininc)).toFixed(2);
-    });
+document.querySelectorAll('.increase-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    const inc = pf(this.dataset.increment);
+    const form = this.closest('.bid-form');
+    const input = form.querySelector('input[name="bid_amount"]');
+    let val = pf(input.value);
+    const currentPrice = pf(input.dataset.current);
+    const minInc = pf(input.dataset.mininc);
+
+    // ✅ First click sets to next minimum (current + minInc)
+    if (val <= currentPrice || val < currentPrice + minInc) {
+        val = currentPrice + minInc;
+    } else {
+        val += inc; // normal increment for further clicks
+    }
+
+    input.value = val.toFixed(2);
+    input.min = (currentPrice + minInc).toFixed(2);
+  });
 });
 
-document.querySelectorAll('.decrease-btn').forEach(btn=>{
-    btn.addEventListener('click', function(){
-        const inc = pf(this.dataset.increment);
-        const form = this.closest('.bid-form');
-        const input = form.querySelector('input[name="bid_amount"]');
-        let val = pf(input.value);
-        const minAllowed = pf(input.min);
-        val = val - inc;
-        if (val < minAllowed) val = minAllowed;
-        input.value = val.toFixed(2);
-    });
+document.querySelectorAll('.decrease-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    const inc = pf(this.dataset.increment);
+    const form = this.closest('.bid-form');
+    const input = form.querySelector('input[name="bid_amount"]');
+    let val = pf(input.value);
+    const minAllowed = pf(input.min);
+
+    val -= inc;
+    if (val < minAllowed) val = minAllowed;
+    input.value = val.toFixed(2);
+  });
 });
 
 // client-side validation before submit
