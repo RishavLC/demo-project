@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $conn->prepare("INSERT INTO auction_items 
     (seller_id, title, description, category, start_price, current_price, start_time, end_time, min_increment, status) 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
-    $stmt->bind_param("isssddddd", $user_id, $title, $description, $category, $start_price, $start_price, $start_time, $end_time, $min_increment);
+    $stmt->bind_param("isssddssd", $user_id, $title, $description, $category, $start_price, $start_price, $start_time, $end_time, $min_increment);
 
         if ($stmt->execute()) {
             $message = "<p style='color:green;font-weight:bold;'>✅ Auction item added successfully!</p>";

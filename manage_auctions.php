@@ -12,6 +12,11 @@ $conn->query("UPDATE auction_items
               SET status='closed' 
               WHERE status='active' AND end_time < NOW()");
 
+// ✅ Auto-activate upcoming auctions once their start time arrives
+$conn->query("UPDATE auction_items 
+              SET status='active' 
+              WHERE status='upcoming' AND start_time <= NOW()");
+
 // ✅ Approve auction
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["approve"])) {
     $id = intval($_POST["id"]);
@@ -21,19 +26,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["approve"])) {
     $start_time = !empty($check['start_time']) ? $check['start_time'] : $_POST["start_time"];
     $end_time   = !empty($check['end_time']) ? $check['end_time'] : $_POST["end_time"];
 
-    // Activate auction
-    $stmt = $conn->prepare("UPDATE auction_items SET status='active', start_time=?, end_time=? WHERE id=?");
-    $stmt->bind_param("ssi", $start_time, $end_time, $id);
+    // ✅ Determine correct status
+    $now = date("Y-m-d H:i:s");
+    if ($start_time > $now) {
+        $status = 'upcoming'; // future auction
+    } else {
+        $status = 'active'; // starts now
+    }
+
+    // ✅ Update auction record
+    $stmt = $conn->prepare("UPDATE auction_items SET status=?, start_time=?, end_time=? WHERE id=?");
+    $stmt->bind_param("sssi", $status, $start_time, $end_time, $id);
     $stmt->execute();
 
-    // Notify all users except seller
+    // ✅ Notify all users except seller
     $users = $conn->query("SELECT id FROM users WHERE id != {$check['seller_id']}");
     while ($u = $users->fetch_assoc()) {
-        $msg = "New auction started: " . $check['title'];
+        $msg = ($status == 'upcoming') 
+            ? "📢 New auction scheduled soon: " . $check['title']
+            : "🔥 New auction started: " . $check['title'];
         $conn->query("INSERT INTO notifications (user_id, message) VALUES ({$u['id']}, '$msg')");
     }
 
-    $_SESSION['msg'] = "✅ Auction approved successfully!";
+    $_SESSION['msg'] = "✅ Auction approved successfully as " . ucfirst($status) . "!";
     header("Location: manage_auctions.php");
     exit();
 }
@@ -117,6 +132,7 @@ $result = $conn->query($sql);
     .winner strong { color: #2c3e50; }
 
     .status-active { color: #27ae60; font-weight: bold; }
+    .status-upcoming { color: #2980b9; font-weight: bold; }
     .status-pending { color: #f39c12; font-weight: bold; }
     .status-rejected { color: #e74c3c; font-weight: bold; }
     .status-closed { color: #95a5a6; font-weight: bold; }
@@ -140,6 +156,7 @@ $result = $conn->query($sql);
     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+    <li><a href="auction_history.php">📜 Auction History</a></li>
     <li><a href="logout.php">🚪 Logout</a></li>
   </ul>
 </div>
@@ -166,6 +183,7 @@ $result = $conn->query($sql);
       <p><strong>Status:</strong> 
         <span class="status-<?= strtolower($row['status']) ?>"><?= ucfirst($row['status']) ?></span>
       </p>
+      <p><strong>Starts:</strong> <?= $row['start_time'] ?: 'Not set' ?></p>
       <p><strong>Ends:</strong> <?= $row['end_time'] ?: 'Not set' ?></p>
 
       <?php
@@ -197,10 +215,6 @@ $result = $conn->query($sql);
         <?php if ($row['status'] == 'pending') { ?>
         <form method="POST">
           <input type="hidden" name="id" value="<?= $row['id'] ?>">
-          <label>Start Time:</label>
-          <input type="datetime-local" name="start_time" required>
-          <label>End Time:</label>
-          <input type="datetime-local" name="end_time" required>
           <button type="submit" name="approve">✅ Approve</button>
         </form>
         <a href="?reject=<?= $row['id'] ?>" class="btn-delete">❌ Reject</a>

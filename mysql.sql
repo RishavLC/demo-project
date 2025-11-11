@@ -49,9 +49,9 @@ CREATE TABLE auction_items (
     category VARCHAR(100),
     start_price DECIMAL(10,2) NOT NULL,
     current_price DECIMAL(10,2) DEFAULT 0.00,
-    start_time DATETIME NULL,             -- set when admin approves
-    end_time DATETIME NULL,               -- set when admin approves
-    status ENUM('pending','active','closed','sold','rejected') DEFAULT 'pending',
+    start_time DATETIME NULL,            
+    end_time DATETIME NULL,               
+    status ENUM('pending','upcoming','active','closed','sold','rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
 );
