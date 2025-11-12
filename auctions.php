@@ -119,7 +119,6 @@ if ($result && $result->num_rows > 0) {
                 <p><strong>Highest Bidder:</strong> {$highest_bidder}</p>
                 <p><strong>Total Bids:</strong> {$total_bids}</p>
                 <p><strong>Ends At:</strong> " . htmlspecialchars($row['end_time']) . "</p>
-                <button class='more-btn' data-id='{$item_id}'>View More</button>
 
                 <div class='details' id='details-{$item_id}'></div>
               </div>";
@@ -130,32 +129,5 @@ if ($result && $result->num_rows > 0) {
 ?>
 </div>
 </div>
-
-<script>
-// View More: fetch bid history dynamically using AJAX
-document.querySelectorAll('.more-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = this.dataset.id;
-        const detailDiv = document.getElementById('details-' + id);
-
-        if (detailDiv.style.display === 'block') {
-            detailDiv.style.display = 'none';
-            return;
-        }
-
-        fetch('bid_details.php?item_id=' + id)
-            .then(res => res.text())
-            .then(data => {
-                detailDiv.innerHTML = data;
-                detailDiv.style.display = 'block';
-            })
-            .catch(() => {
-                detailDiv.innerHTML = "<p style='color:red;'>Error loading details.</p>";
-                detailDiv.style.display = 'block';
-            });
-    });
-});
-</script>
-
 </body>
 </html>
