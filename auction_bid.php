@@ -242,3 +242,4 @@ function validateBid(form){
 </script>
 </body>
 </html>
+]\

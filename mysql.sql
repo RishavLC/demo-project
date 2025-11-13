@@ -60,6 +60,7 @@ ADD COLUMN winner_id INT NULL,
 ADD FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE auction_items ADD COLUMN min_increment DECIMAL(10,2) DEFAULT 50;
+ALTER TABLE auction_items ADD COLUMN buy_now_price DECIMAL(10,2) DEFAULT NULL;
 
 
 -- bids

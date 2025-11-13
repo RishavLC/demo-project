@@ -119,13 +119,13 @@ $result = $conn->query($sql);
     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
-    <li><a href="auction_history.php">📜 Auction History</a></li>
+    <li><a href="auction_history.php">📜 Auction Status</a></li>
     <li><a href="logout.php">🚪 Logout</a></li>
   </ul>
 </div>
 
 <div class="main-content">
-  <h2>🧾 Complete Auction History</h2>
+  <h2>🧾 All Auction Status</h2>
 
   <table>
     <thead>
@@ -136,7 +136,7 @@ $result = $conn->query($sql);
         <th>Category</th>
         <th>Start Price</th>
         <th>Current / Final Price</th>
-        <th>Winner</th>
+        <th>Current / Final Winner</th>
         <th>Start Time</th>
         <th>End Time</th>
         <th>Status</th>
