@@ -8,41 +8,92 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
 include "config.php";
 
 // ------------------------------
-// APPLY FILTER IF SELECTED
+// GET FILTER INPUTS
 // ------------------------------
-$filter = isset($_GET['filter']) ? $_GET['filter'] : "";
-$where = "";
+$filter = $_GET['filter'] ?? "";
+$search = $_GET['search'] ?? "";
+$sort   = $_GET['sort'] ?? "newest";
+
+// ------------------------------
+// BUILD WHERE CLAUSE
+// ------------------------------
+$whereParts = [];
 
 if ($filter == "active") {
-    $where = "WHERE ai.status='active'";
+    $whereParts[] = "ai.status='active'";
 }
 else if ($filter == "closed") {
-    $where = "WHERE ai.status='closed'";
+    $whereParts[] = "ai.status='closed'";
 }
 else if ($filter == "pending") {
-    $where = "WHERE ai.status='pending'";
+    $whereParts[] = "ai.status='pending'";
 }
 else if ($filter == "rejected") {
-    $where = "WHERE ai.status='rejected'";
+    $whereParts[] = "ai.status='rejected'";
 }
 else if ($filter == "sold") {
-    $where = "WHERE ai.status='sold'";
+    $whereParts[] = "ai.status='sold'";
 }
 else if ($filter == "upcoming") {
-    // UPCOMING = status upcoming OR active but start_time > now
-    $where = "WHERE (ai.status='upcoming' OR (ai.status='active' AND ai.start_time > NOW()))";
+    $whereParts[] = "(ai.status='upcoming' OR (ai.status='active' AND ai.start_time > NOW()))";
 }
 
+// SEARCH FILTER (title, category, seller)
+if ($search != "") {
+    $searchText = "%" . $conn->real_escape_string($search) . "%";
+    $whereParts[] = "(ai.title LIKE '$searchText' OR ai.category LIKE '$searchText' OR u.username LIKE '$searchText')";
+}
+
+$whereSQL = "";
+if (count($whereParts) > 0) {
+    $whereSQL = "WHERE " . implode(" AND ", $whereParts);
+}
 
 // ------------------------------
-// MAIN SQL QUERY WITH FILTER
+// SORT LOGIC
 // ------------------------------
-$sql = "SELECT ai.*, u.username AS seller_name 
-        FROM auction_items ai 
-        JOIN users u ON ai.seller_id = u.id 
-        $where
-        ORDER BY ai.created_at DESC";
+$sortSQL = "ORDER BY ai.created_at DESC"; // default newest
 
+if ($sort == "oldest") {
+    $sortSQL = "ORDER BY ai.created_at ASC";
+} 
+else if ($sort == "high_price") {
+    $sortSQL = "ORDER BY ai.current_price DESC";
+}
+else if ($sort == "low_price") {
+    $sortSQL = "ORDER BY ai.current_price ASC";
+}
+
+// ------------------------------
+// PAGINATION
+// ------------------------------
+$limit = 8; // items per page
+$page = $_GET['page'] ?? 1;
+$page = max(1, intval($page));
+$offset = ($page - 1) * $limit;
+
+// Count total
+$countSQL = "
+    SELECT COUNT(*) AS total
+    FROM auction_items ai
+    JOIN users u ON ai.seller_id = u.id
+    $whereSQL
+";
+$countResult = $conn->query($countSQL);
+$totalRows = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalRows / $limit);
+
+// ------------------------------
+// MAIN SQL QUERY
+// ------------------------------
+$sql = "
+    SELECT ai.*, u.username AS seller_name 
+    FROM auction_items ai 
+    JOIN users u ON ai.seller_id = u.id
+    $whereSQL
+    $sortSQL
+    LIMIT $limit OFFSET $offset
+";
 $result = $conn->query($sql);
 ?>
 
@@ -52,38 +103,39 @@ $result = $conn->query($sql);
   <title>Auction History</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    body {
-      background: #f8f9fa;
-      font-family: 'Poppins', sans-serif;
+    body { background:#f8f9fa; font-family: 'Poppins', sans-serif; }
+    .main-content { padding:20px; }
+    h2 { text-align:center; color:#2c3e50; }
+
+    .row { display:flex; justify-content:space-between; margin-bottom:15px; }
+    input, select {
+        padding:8px; border-radius:8px; border:1px solid #ccc; font-size:14px;
     }
-    .main-content { padding: 20px; }
-    h2 { text-align: center; margin-bottom: 25px; color: #2c3e50; }
-    table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-    th, td { padding: 12px 15px; }
-    th { background:#4a90e2; color:white; text-transform:uppercase; }
+    table {
+        width:100%; border-collapse:collapse; background:white;
+        border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
+    th,td { padding:12px 15px; }
+    th { background:#4a90e2; color:white; }
     tr:nth-child(even){ background:#f2f6fc; }
-    tr:hover { background:#e8f0fe; }
+    .status { padding:6px 10px; border-radius:6px; font-weight:bold; }
 
-    .status { font-weight:bold; padding:6px 10px; border-radius:6px; display:inline-block; }
-    .status-active { background:#d4edda; color:#155724; }
-    .status-pending { background:#fff3cd; color:#856404; }
-    .status-rejected { background:#f8d7da; color:#721c24; }
-    .status-closed { background:#d1ecf1; color:#0c5460; }
-    .status-upcoming { background:#e0f7fa; color:#006064; }
-    .status-sold { background:#e8eaf6; color:#1a237e; }
-
-    .winner-box {
-      padding:5px 8px;
-      background:#ecf0f1;
-      border-radius:6px;
-      font-size:13px;
+    .pagination { text-align:center; margin-top:20px; }
+    .pagination a {
+        padding:8px 12px; background:white; margin:0 3px; border-radius:6px;
+        text-decoration:none; color:#333; border:1px solid #ccc;
+    }
+    .active-page {
+        background:#4a90e2; color:white !important; font-weight:bold;
     }
   </style>
 </head>
 <body>
-
 <div class="sidebar">
-  <div class="sidebar-header">Admin Panel<div class="toggle-btn">☰</div></div>
+  <div class="sidebar-header">
+    Admin Panel
+    <div class="toggle-btn">☰</div>
+  </div>
   <ul>
     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
@@ -92,26 +144,45 @@ $result = $conn->query($sql);
     <li><a href="logout.php">🚪 Logout</a></li>
   </ul>
 </div>
-
 <div class="main-content">
-  <h2>🧾 All Auction Status</h2>
+  <h2>📜 Auction Status</h2>
 
-  <!-- FILTER AREA -->
-  <form method="GET" style="margin-bottom: 15px; text-align:right;">
-    <select name="filter" onchange="this.form.submit()"
-      style="padding:8px; border-radius:8px; font-size:14px;">
-        <option value="">🔍 Filter Auctions</option>
+  <!-- TOP CONTROLS -->
+  <form method="GET">
+    <div class="row">
+
+      <!-- SEARCH BAR -->
+      <input type="text" name="search" placeholder="Search Title / Category / Seller"
+             value="<?= htmlspecialchars($search) ?>" style="width:40%;">
+
+      <!-- FILTER -->
+      <select name="filter" style="width:20%;" onchange="this.form.submit()">
+        <option value=""> Filter </option>
         <option value="active"   <?= ($filter=="active") ? "selected":"" ?>>Active</option>
         <option value="closed"   <?= ($filter=="closed") ? "selected":"" ?>>Closed</option>
         <option value="upcoming" <?= ($filter=="upcoming") ? "selected":"" ?>>Upcoming</option>
         <option value="pending"  <?= ($filter=="pending") ? "selected":"" ?>>Pending</option>
         <option value="sold"     <?= ($filter=="sold") ? "selected":"" ?>>Sold</option>
         <option value="rejected" <?= ($filter=="rejected") ? "selected":"" ?>>Rejected</option>
-    </select>
+      </select>
+
+      <!-- SORT -->
+      <select name="sort" style="width:20%;" onchange="this.form.submit()">
+        <option value="newest" <?= ($sort=="newest")?"selected":"" ?>>Newest First</option>
+        <option value="oldest" <?= ($sort=="oldest")?"selected":"" ?>>Oldest First</option>
+        <option value="high_price" <?= ($sort=="high_price")?"selected":"" ?>>Highest Price</option>
+        <option value="low_price" <?= ($sort=="low_price")?"selected":"" ?>>Lowest Price</option>
+      </select>
+
+      <button style="padding:8px 14px; border:none; border-radius:6px; background:#4a90e2; color:white;">
+        Search
+      </button>
+
+    </div>
   </form>
 
+  <!-- TABLE -->
   <table>
-    <thead>
     <tr>
       <th>#</th>
       <th>Item</th>
@@ -119,71 +190,53 @@ $result = $conn->query($sql);
       <th>Category</th>
       <th>Start Price</th>
       <th>Current Price</th>
-      <th>Winner</th>
       <th>Start</th>
       <th>End</th>
       <th>Status</th>
     </tr>
-    </thead>
 
-    <tbody>
     <?php
     if ($result->num_rows > 0) {
-        $count = 1;
+        $sn = $offset + 1;
 
         while ($row = $result->fetch_assoc()) {
 
-            // AUTO UPDATE UPCOMING DETECTION
-            $current_time = date('Y-m-d H:i:s');
-
-            if ($row['start_time'] > $current_time && $row['status'] == 'active') {
+            // UPCOMING AUTO
+            if ($row['start_time'] > date('Y-m-d H:i:s') && $row['status'] == 'active') {
                 $row['status'] = 'upcoming';
-            }
-
-            $status_class = "status-" . strtolower($row['status']);
-
-            // Winner fetch
-            $winnerQuery = $conn->prepare("
-                SELECT b.bid_amount, u.username
-                FROM bids b 
-                JOIN users u ON b.bidder_id = u.id
-                WHERE b.item_id = ?
-                ORDER BY b.bid_amount DESC
-                LIMIT 1
-            ");
-            $winnerQuery->bind_param("i", $row['id']);
-            $winnerQuery->execute();
-            $winnerResult = $winnerQuery->get_result();
-
-            $winner = "—";
-            if ($winnerResult->num_rows > 0) {
-                $w = $winnerResult->fetch_assoc();
-                $winner = "<div class='winner-box'>🏆 " . $w['username'] .
-                          "<br>Rs. " . number_format($w['bid_amount'], 2) . "</div>";
             }
 
             echo "
             <tr>
-                <td>{$count}</td>
-                <td>{$row['title']}</td>
-                <td>{$row['seller_name']}</td>
-                <td>{$row['category']}</td>
-                <td>Rs. " . number_format($row['start_price']) . "</td>
-                <td>Rs. " . number_format($row['current_price']) . "</td>
-                <td>$winner</td>
-                <td>{$row['start_time']}</td>
-                <td>{$row['end_time']}</td>
-                <td><span class='status {$status_class}'>" . ucfirst($row['status']) . "</span></td>
+              <td>$sn</td>
+              <td>{$row['title']}</td>
+              <td>{$row['seller_name']}</td>
+              <td>{$row['category']}</td>
+              <td>Rs. {$row['start_price']}</td>
+              <td>Rs. {$row['current_price']}</td>
+              <td>{$row['start_time']}</td>
+              <td>{$row['end_time']}</td>
+              <td><span class='status status-{$row['status']}'>".ucfirst($row['status'])."</span></td>
             </tr>";
-            $count++;
+            $sn++;
         }
     } else {
-        echo "<tr><td colspan='10' style='text-align:center;'>No auction records found.</td></tr>";
+        echo "<tr><td colspan='9' style='text-align:center;'>No records found.</td></tr>";
     }
     ?>
-    </tbody>
   </table>
-</div>
 
+  <!-- PAGINATION -->
+  <div class="pagination">
+    <?php
+    for ($i = 1; $i <= $totalPages; $i++) {
+        $active = ($i == $page) ? "active-page" : "";
+        echo "<a class='$active' href='?page=$i&filter=$filter&search=$search&sort=$sort'>$i</a>";
+    }
+    ?>
+  </div>
+
+</div>
+<script src="assets/script.js"></script>
 </body>
 </html>
