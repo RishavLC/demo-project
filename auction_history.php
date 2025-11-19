@@ -67,7 +67,7 @@ else if ($sort == "low_price") {
 // ------------------------------
 // PAGINATION
 // ------------------------------
-$limit = 8; // items per page
+$limit = 10; // items per page
 $page = $_GET['page'] ?? 1;
 $page = max(1, intval($page));
 $offset = ($page - 1) * $limit;
