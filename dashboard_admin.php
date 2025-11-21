@@ -125,7 +125,7 @@ $result = $conn->query($sql);
     </div>
   </div>
 
-  <canvas id="auctionChart" width="400" height="150"></canvas>
+  <canvas id="auctionChart" width="100" height="100"></canvas>
 
   <h2 style="margin-top:40px;">All Records</h2>
   <table>
