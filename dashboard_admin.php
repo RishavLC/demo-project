@@ -82,6 +82,13 @@ $result = $conn->query($sql);
     canvas {
       margin-top: 40px;
     }
+    #auctionChart {
+    max-width: 1500px;   /* Reduce width */
+    max-height: 1500px;  /* Reduce height */
+    margin: 0 auto;
+    display: block;
+    }
+
   </style>
 </head>
 <body>
