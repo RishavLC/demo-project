@@ -83,9 +83,9 @@ $result = $conn->query($sql);
       margin-top: 40px;
     }
     #auctionChart {
-    max-width: 1500px;   /* Reduce width */
-    max-height: 1500px;  /* Reduce height */
-    margin: 0 auto;
+    max-width: 350px;   /* Reduce width */
+    max-height: 350px;  /* Reduce height */
+    margin: 10 auto;
     display: block;
     }
 
