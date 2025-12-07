@@ -24,3 +24,5 @@ ethic started
 8-20
 be complete
 finance working capital 
+8*21
+finance and bis complete
