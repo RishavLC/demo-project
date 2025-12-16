@@ -35,3 +35,6 @@ it and bis reading
 8-28
 bis
 8-29
+bis complete
+9-01
+ethic read
