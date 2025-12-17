@@ -38,3 +38,5 @@ bis
 bis complete
 9-01
 ethic read
+9-02
+last exam
