@@ -7,7 +7,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 
 // Check if ID is passed
 if (isset($_GET['id'])) {

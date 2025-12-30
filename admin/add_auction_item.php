@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
-    header("Location: index.php");
+    header("Location: ../common/index.php");
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 $user_id = $_SESSION["user_id"]; // seller = logged in user
 $message = "";
 
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Add Auction Item</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="../assets/style.css">
     <style>
         .form-container {
             width: 500px;
@@ -143,6 +143,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 </body>
 </html>

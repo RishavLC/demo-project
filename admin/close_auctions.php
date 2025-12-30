@@ -1,5 +1,5 @@
 <?php
-include "config.php";
+include "../common/config.php";
 
 // ✅ Step 1: Fetch all expired auctions
 $sql = "SELECT id FROM auction_items 

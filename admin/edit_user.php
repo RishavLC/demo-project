@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "../common/config.php";
 
 // Only allow admin
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Edit User</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
 <div class="main-content">

@@ -5,7 +5,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 $user_id = $_SESSION["user_id"];
 $message = "";
 
@@ -69,8 +69,8 @@ $stmt->close();
 <head>
     <meta charset="utf-8" />
     <title>Place Bid</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <script src="assets/script.js"></script>
+    <link rel="stylesheet" href="../assets/style.css">
+    <script src="../assets/script.js"></script>
     <style>
         .auction-container {
             display: grid;
@@ -242,4 +242,3 @@ function validateBid(form){
 </script>
 </body>
 </html>
-]\

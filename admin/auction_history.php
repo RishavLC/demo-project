@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
-    header("Location: index.php");
+    header("Location: ../common/index.php");
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 
 // ------------------------------
 // GET FILTER INPUTS
@@ -101,7 +101,7 @@ $result = $conn->query($sql);
 <html>
 <head>
   <title>Auction History</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
   <style>
     body { background:#f8f9fa; font-family: 'Poppins', sans-serif; }
     .main-content { padding:20px; }
@@ -237,6 +237,6 @@ $result = $conn->query($sql);
   </div>
 
 </div>
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 </body>
 </html>

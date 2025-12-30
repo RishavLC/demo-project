@@ -1,5 +1,5 @@
 <?php
-include "config.php";
+include "../common/config.php";
 
 $auction_id = intval($_GET['auction_id']);
 $sql = "SELECT MAX(bid_amount) AS highest FROM bids WHERE item_id=?";

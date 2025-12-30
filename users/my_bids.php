@@ -4,7 +4,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     header("Location: index.php");
     exit();
 }
-include "config.php";
+include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
 
@@ -38,7 +38,7 @@ $stmt->close();
 <html>
 <head>
   <title>My Bidding History</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
   <style>
     .grid {
       display: grid;

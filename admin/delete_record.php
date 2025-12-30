@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "../common/config.php";
 
 $id = $_GET["id"];
 $conn->query("DELETE FROM records WHERE id=$id");

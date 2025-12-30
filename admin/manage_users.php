@@ -4,7 +4,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
     header("Location: index.php");
     exit();
 }
-include "config.php";
+include "../common/config.php";
 
 $role = ucfirst($_SESSION["role"]); 
 
@@ -64,7 +64,7 @@ if (empty($error_message)) {
 <html>
 <head>
   <title>Manage Users - <?= $role ?></title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
 <div class="sidebar">
@@ -131,7 +131,7 @@ if (empty($error_message)) {
 </table>
 
 </div>
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 
 </body>
 </html>

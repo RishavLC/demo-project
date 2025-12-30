@@ -5,7 +5,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
 $message = "";
@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["item_id"])) {
 <head>
     <meta charset="utf-8">
     <title>Buy Now Confirmation</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="../assets/style.css">
     <style>
         body {
             font-family: "Segoe UI", sans-serif;

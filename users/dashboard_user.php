@@ -4,7 +4,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     header("Location: index.php");
     exit();
 }
-include "config.php";
+include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
 
@@ -220,7 +220,7 @@ $stmt->close();
 <html>
 <head>
   <title>User Dashboard</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
 <div class="sidebar">
@@ -420,6 +420,6 @@ $stmt->close();
   </div>
 </div>
 
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 </body>
 </html>

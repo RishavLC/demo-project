@@ -5,7 +5,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 
 // ✅ Auto-close expired auctions
 $conn->query("UPDATE auction_items 
@@ -81,7 +81,7 @@ $result = $conn->query($sql);
 <html>
 <head>
   <title>Manage Auctions</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
   <style>
     body { background: #f5f6fa; }
     .grid {
@@ -228,6 +228,6 @@ $result = $conn->query($sql);
   </div>
 </div>
 
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
 
@@ -20,7 +20,7 @@ $result = $stmt->get_result();
 <html>
 <head>
   <title>My Notifications</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
   <style>
     body {
       font-family: Arial, sans-serif;

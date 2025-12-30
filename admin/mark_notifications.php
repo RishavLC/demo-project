@@ -5,7 +5,7 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
-include "config.php";
+include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
 

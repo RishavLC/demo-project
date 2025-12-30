@@ -4,7 +4,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     header("Location: index.php");
     exit();
 }
-include "config.php";
+include "../common/config.php";
 
 // Fetch all ongoing auctions
 $sql = "
@@ -28,7 +28,7 @@ $result = $conn->query($sql);
 <head>
 <meta charset="UTF-8">
 <title> Detailed Auction View</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="../assets/style.css">
 <style>
     body { font-family: Arial, sans-serif; background: #f9f9f9; }
     .main-content { padding: 20px; }

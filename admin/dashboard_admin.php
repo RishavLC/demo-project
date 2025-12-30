@@ -1,10 +1,10 @@
 <?php
 session_start();
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
-    header("Location: index.php");
+    header("Location: ../common/index.php");
     exit();
 }
-include "config.php";
+include "../common/config.php";
 
 // Count Users
 $user_count = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
@@ -32,7 +32,7 @@ $result = $conn->query($sql);
 <html>
 <head>
   <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .stats {
@@ -154,7 +154,7 @@ $result = $conn->query($sql);
   </table>
 </div>
 
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 <script>
 const ctx = document.getElementById('auctionChart').getContext('2d');
 new Chart(ctx, {

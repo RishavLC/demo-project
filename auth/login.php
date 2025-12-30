@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "../common/config.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["username"];
@@ -34,50 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Login</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <!-- <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f9fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        form {
-            margin: 40%;
-            background: #fff;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 300px;
-            text-align: center;
-        }
-        form h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        form input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        form button {
-            background: #4CAF50;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        form button:hover {
-            background: #45a049;
-        }
-        </style> -->
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>    
     <form method="POST" class="auth-form">

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../common/config.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -37,7 +37,7 @@ $result = $stmt->get_result();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Added Items</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css">
   <style>
     body {
       font-family: "Poppins", sans-serif;
@@ -170,6 +170,6 @@ $result = $stmt->get_result();
       <div class="no-record">No items added yet.</div>
     <?php endif; ?>
   </div>
-<script src="assets/script.js"></script>
+<script src="../assets/script.js"></script>
 </body>
 </html>

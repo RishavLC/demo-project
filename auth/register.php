@@ -1,5 +1,5 @@
 <?php
-include "config.php";
+include "../common/config.php";
 
 $message = "";
 
@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Register</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="../assets/style.css">
     <style>
         body {
             font-family: Arial, sans-serif;

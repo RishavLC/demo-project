@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "../common/config.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Update Record</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
 <form method="POST" class="auth-form">
