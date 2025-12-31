@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
-    header("Location: index.php");
+   header("Location: ../auth/login.php");
     exit();
 }
 include "../common/config.php";
@@ -22,7 +22,6 @@ $stmt->bind_result($username);
 $stmt->fetch();
 $stmt->close();
 
-/* 🔹 2. Fetch Active Auctions (others only, not expired) by sorting */
 /* 🔹 2. Fetch Active Auctions (others only, not expired) with search + sort + pagination */
 
 $sort_by = $_GET['sort_by'] ?? 'end_time';
@@ -236,7 +235,7 @@ $stmt->close();
     <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
     <li><a href="auctions.php" class="active">📊 Auction Details</a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
-    <li><a href="logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
+    <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
 
@@ -273,8 +272,8 @@ $stmt->close();
     echo "<p>No notifications</p>";
   }
   ?>
-  <a href="notifications.php" class="view-all">View All</a>
-  <a href="mark_notifications.php" class="mark-read">Mark All as Read</a>
+  <a href="../admin/notifications.php" class="view-all">View All</a>
+  <a href="../admin/mark_notifications.php" class="mark-read">Mark All as Read</a>
 </div>
 </div>
 </div>

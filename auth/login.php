@@ -20,9 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["role"] = $user["role_name"]; // now stores "admin" or "user"
 
         if ($user["role_name"] == "admin") {
-            header("Location: dashboard_admin.php");
+            header("Location: ../admin/dashboard_admin.php");
         } else {
-            header("Location: dashboard_user.php");
+            header("Location: ../users/dashboard_user.php");
         }
     } else {
         echo "Invalid username or password!";

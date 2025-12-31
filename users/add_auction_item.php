@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
-    header("Location: ../auth/index.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -97,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
     <li><a href="auctions.php" class="active">📊 Auction Details</a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
-    <li><a href="logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
+    <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
 

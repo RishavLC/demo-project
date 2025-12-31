@@ -155,8 +155,8 @@ $result = $stmt->get_result();
           <td><?= $sn++ ?></td>
           <td><?= htmlspecialchars($row['title']) ?></td>
           <td><?= htmlspecialchars($row['category']) ?></td>
-          <td>Rs. <?= $row['highest_bid'] ? number_format($row['highest_bid'], 2) : '-' ?></td>
           <td>Rs. <?= number_format($row['start_price'], 2) ?></td>
+          <td>Rs. <?= $row['highest_bid'] ? number_format($row['highest_bid'], 2) : '-' ?></td>
           <td><?= $row['total_bids'] ?></td>
           <td class="<?= $row['status'] === 'active' ? 'status-active' : 'status-closed' ?>">
             <?= ucfirst($row['status']) ?>
