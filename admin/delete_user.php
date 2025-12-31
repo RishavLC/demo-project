@@ -3,7 +3,7 @@ session_start();
 
 // Only allow admin
 if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
-    header("Location: index.php");
+    header("Location: ../auth/index.php");
     exit();
 }
 
@@ -32,6 +32,6 @@ if (isset($_GET['id'])) {
     $stmt->close();
 }
 else {
-    header("Location: manage_users.php");
+    header("Location: ../admin/manage_users.php");
     exit();
 }
