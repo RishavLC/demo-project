@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         font-family: Arial, sans-serif; 
                         color: #155724;'>
                         🎉 Registration successful on <b>$created_at</b>! <br><br>
-                        <a href='index.php' style='
+                        <a href='login.php' style='
                             display: inline-block; 
                             padding: 8px 15px; 
                             margin-top: 10px; 
@@ -141,5 +141,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </form>
 </body>
 </html>
-<!-- user rigistration can can e done easily by email , username and password but role will be defaultly be normal user 
+<!-- user registration can can e done easily by email , username and password but role will be defaultly be normal user 
  and only admin can change roles -->

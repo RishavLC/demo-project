@@ -9,7 +9,7 @@ include "../common/config.php";
 $user_id = $_SESSION["user_id"]; // seller = logged in user
 $message = "";
 
-// ✅ Handle form submission
+// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = trim($_POST["title"]);
     $description = trim($_POST["description"]);
@@ -25,10 +25,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
     $stmt->bind_param("isssddssd", $user_id, $title, $description, $category, $start_price, $start_price, $start_time, $end_time, $min_increment);
 
-        if ($stmt->execute()) {
-            $message = "<p style='color:green;font-weight:bold;'>✅ Auction item added successfully!</p>";
-        } else {
-            $message = "<p style='color:red;font-weight:bold;'>❌ Error: " . $stmt->error . "</p>";
+    if ($stmt->execute()) {
+
+    $item_id = $conn->insert_id; // ✅ newly created auction ID
+
+    // 🔹 Handle image uploads
+    if (!empty($_FILES['images']['name'][0])) {
+
+        $upload_dir = "../uploads/auctions/";
+
+        foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+
+            $file_name = time() . "_" . basename($_FILES['images']['name'][$key]);
+            $target = $upload_dir . $file_name;
+
+            $file_type = mime_content_type($tmp_name);
+
+            // basic validation
+            if (strpos($file_type, "image") === false) {
+                continue;
+            }
+
+            if (move_uploaded_file($tmp_name, $target)) {
+
+                $is_primary = ($key == 0) ? 1 : 0;
+
+                $img_stmt = $conn->prepare(
+                    "INSERT INTO auction_images (item_id, image_path, is_primary) VALUES (?, ?, ?)"
+                );
+                $img_stmt->bind_param("isi", $item_id, $target, $is_primary);
+                $img_stmt->execute();
+            }
+        }
+    }
+
+                $message = "<p style='color:green;font-weight:bold;'>✅ Auction item with images added successfully!</p>";
+       }
+ else {
+            $message = "<p style='color:red;font-weight:bold;'>Error: " . $stmt->error . "</p>";
         }
     } else {
         $message = "<p style='color:red;font-weight:bold;'>⚠ Please fill all required fields.</p>";
@@ -113,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label>Description</label>
             <textarea name="description"></textarea>
 
-             <label>Category</label>
+            <label>Category</label>
             <select name="category" required>
                 <option value="">Select Category</option>
                 <option value="Electronics">Electronics</option>
@@ -128,6 +162,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="Real Estate">Real Estate</option>
                 <option value="Others">Others</option>
             </select>
+
+            <label>Item Images</label>
+            <input type="file" name="images[]" multiple accept="image/*" required>
 
             <label>Start Price</label>
             <input type="number" step="0.1" name="start_price" required>
