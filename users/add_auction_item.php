@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Add Auction Item</h2>
         <?= $message ?>
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <label>Item Title</label>
             <input type="text" name="title" required>
 

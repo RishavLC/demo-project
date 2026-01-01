@@ -415,7 +415,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <section class="hero">
   <div class="content">
-  <img src="front.jpg" alt="">
+  <img src="../images/front.jpg" alt="">
   <h1>Welcome to EasyBid</h1>
   <p>Bid smart. Win big. Trusted online auction platform.</p>
   <button onclick="window.location='#auctions'">View Active Auctions</button>
