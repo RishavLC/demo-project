@@ -66,12 +66,15 @@ if (!empty($category)) {
 /* --- Build Active Auction SQL --- */
 $active_sql = "
   SELECT ai.*, u.username AS seller,
-         (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid
-  FROM auction_items ai
-  JOIN users u ON ai.seller_id = u.id
-  WHERE ai.status='active' 
-    AND ai.seller_id != ? 
-    AND ai.end_time > NOW()
+       (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid,
+       img.image_path
+       FROM auction_items ai
+       JOIN users u ON ai.seller_id = u.id
+       LEFT JOIN auction_images img 
+       ON ai.id = img.item_id AND img.is_primary = 1
+       WHERE ai.status='active'
+       AND ai.seller_id != ?
+       AND ai.end_time > NOW()
 ";
 
 /* --- Add optional filters dynamically --- */
@@ -334,6 +337,7 @@ $stmt->close();
 <table class="auction-table">
   <tr>
     <th>SN</th>
+    <th>Image</th>
     <th>Auction Item</th>
     <th>Starting Price</th>
     <th>Current Bid</th>
@@ -345,6 +349,15 @@ $stmt->close();
   while($row = $active_result->fetch_assoc()) { ?>
     <tr>
       <td><?= $sn++ ?></td>
+      <td>
+      <?php if (!empty($row['image_path'])): ?>
+          <img src="../<?= $row['image_path'] ?>" 
+            width="70" height="60" 
+            style="object-fit:cover;border-radius:6px;">
+      <?php else: ?>
+          <img src="../assets/no-image.png" width="70">
+      <?php endif; ?>
+      </td>
       <td><?= htmlspecialchars($row['title']) ?></td>
       <td>Rs. <?= $row['start_price'] ?></td>
       <td>Rs. <?= ($row['highest_bid'] ?? 0) ?></td>
