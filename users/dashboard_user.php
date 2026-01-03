@@ -349,29 +349,29 @@ $stmt->close();
   while($row = $active_result->fetch_assoc()) { ?>
     <tr>
       <td><?= $sn++ ?></td>
-      <td>
-      <?php if (!empty($row['image_path'])): ?>
-          <img src="../<?= $row['image_path'] ?>" 
-            width="70" height="60" 
-            style="object-fit:cover;border-radius:6px;">
-      <?php else: ?>
-          <img src="../assets/no-image.png" width="70">
-      <?php endif; ?>
-      </td>
+<td>
+<?php
+if (!empty($row['image_path'])) {
+    $clean_path = str_replace(['../', './'], '', $row['image_path']);
+    $img_url = "../" . $clean_path;
+} else {
+    $img_url = "../assets/no-image.png";
+}
+?>
+<img src="<?= $img_url ?>" 
+     width="70" height="60" 
+     style="object-fit:cover;border-radius:6px;">
+</td>
+
       <td><?= htmlspecialchars($row['title']) ?></td>
       <td>Rs. <?= $row['start_price'] ?></td>
       <td>Rs. <?= ($row['highest_bid'] ?? 0) ?></td>
       <td><?= $row['end_time'] ?></td>
       <td>
-        <button class="btn" 
-                onclick="openAuctionModal(
-                  '<?= $row['title'] ?>',
-                  '<?= $row['description'] ?>',
-                  '<?= $row['seller'] ?>',
-                  '<?= $row['start_price'] ?>',
-                  '<?= $row['end_time'] ?>',
-                  '<?= $row['id'] ?>'
-                )">Bid</button>
+      <a class="btn" href="auction_details.php?item_id=<?= $row['id'] ?>">
+  View & Bid
+</a>
+
       </td>
     </tr>
   <?php } ?>
