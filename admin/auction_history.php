@@ -141,7 +141,7 @@ $result = $conn->query($sql);
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
     <li><a href="auction_history.php">📜 Auction Status</a></li>
-    <li><a href="logout.php">🚪 Logout</a></li>
+    <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
 <div class="main-content">

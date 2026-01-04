@@ -6,69 +6,100 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
 }
 
 include "../common/config.php";
-$user_id = $_SESSION["user_id"]; // seller = logged in user
+$user_id = $_SESSION["user_id"];
 $message = "";
 
-// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $title = trim($_POST["title"]);
-    $description = trim($_POST["description"]);
-    $category = trim($_POST["category"]);
-    $start_price = floatval($_POST["start_price"]);
-    $start_time = $_POST["start_time"];
-    $end_time = $_POST["end_time"];
+
+    $title         = trim($_POST["title"]);
+    $description   = trim($_POST["description"]);
+    $category      = trim($_POST["category"]);
+    $start_price   = floatval($_POST["start_price"]);
+    $start_time    = $_POST["start_time"];
+    $end_time      = $_POST["end_time"];
     $min_increment = floatval($_POST["min_increment"]);
-    
+
     if ($title && $start_price > 0) {
-    $stmt = $conn->prepare("INSERT INTO auction_items 
-    (seller_id, title, description, category, start_price, current_price, start_time, end_time, min_increment, status) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
-    $stmt->bind_param("isssddssd", $user_id, $title, $description, $category, $start_price, $start_price, $start_time, $end_time, $min_increment);
 
-    if ($stmt->execute()) {
+        // ✅ DATE VALIDATION
+        $start_ts = strtotime($start_time);
+        $end_ts   = strtotime($end_time);
+        $now_ts   = time();
 
-    $item_id = $conn->insert_id; // ✅ newly created auction ID
+        if ($start_ts < $now_ts) {
+            $message = "<p style='color:red;font-weight:bold;'>❌ Start time cannot be in the past.</p>";
+        }
+        elseif ($end_ts <= $start_ts) {
+            $message = "<p style='color:red;font-weight:bold;'>❌ End time must be after start time.</p>";
+        }
+        else {
 
-    // 🔹 Handle image uploads
-    if (!empty($_FILES['images']['name'][0])) {
+            // ✅ INSERT AUCTION ITEM (ONLY ONCE)
+            $stmt = $conn->prepare("
+                INSERT INTO auction_items 
+                (seller_id, title, description, category, start_price, current_price, start_time, end_time, min_increment, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            ");
 
-        $upload_dir = "../uploads/auctions/";
+            $stmt->bind_param(
+                "isssddssd",
+                $user_id,
+                $title,
+                $description,
+                $category,
+                $start_price,
+                $start_price,
+                $start_time,
+                $end_time,
+                $min_increment
+            );
 
-        foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+            if ($stmt->execute()) {
 
-            $file_name = time() . "_" . basename($_FILES['images']['name'][$key]);
-            $target = $upload_dir . $file_name;
+                $item_id = $conn->insert_id;
 
-            $file_type = mime_content_type($tmp_name);
+                // ✅ IMAGE UPLOAD
+                if (!empty($_FILES['images']['name'][0])) {
 
-            // basic validation
-            if (strpos($file_type, "image") === false) {
-                continue;
+                    $upload_dir = "../uploads/auctions/";
+                    $db_dir     = "uploads/auctions/"; // 👈 stored in DB
+
+                    foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+
+                        $file_type = mime_content_type($tmp_name);
+                        if (strpos($file_type, "image") === false) continue;
+
+                        $file_name = time() . "_" . basename($_FILES['images']['name'][$key]);
+                        $target    = $upload_dir . $file_name;
+                        $db_path   = $db_dir . $file_name;
+
+                        if (move_uploaded_file($tmp_name, $target)) {
+
+                            $is_primary = ($key == 0) ? 1 : 0;
+
+                            $img_stmt = $conn->prepare("
+                                INSERT INTO auction_images (item_id, image_path, is_primary)
+                                VALUES (?, ?, ?)
+                            ");
+                            $img_stmt->bind_param("isi", $item_id, $db_path, $is_primary);
+                            $img_stmt->execute();
+                        }
+                    }
+                }
+
+                $message = "<p style='color:green;font-weight:bold;'>✅ Auction item with images added successfully!</p>";
             }
-
-            if (move_uploaded_file($tmp_name, $target)) {
-
-                $is_primary = ($key == 0) ? 1 : 0;
-
-                $img_stmt = $conn->prepare(
-                    "INSERT INTO auction_images (item_id, image_path, is_primary) VALUES (?, ?, ?)"
-                );
-                $img_stmt->bind_param("isi", $item_id, $target, $is_primary);
-                $img_stmt->execute();
+            else {
+                $message = "<p style='color:red;font-weight:bold;'>❌ Error: {$stmt->error}</p>";
             }
         }
     }
-
-                $message = "<p style='color:green;font-weight:bold;'>✅ Auction item with images added successfully!</p>";
-       }
- else {
-            $message = "<p style='color:red;font-weight:bold;'>Error: " . $stmt->error . "</p>";
-        }
-    } else {
+    else {
         $message = "<p style='color:red;font-weight:bold;'>⚠ Please fill all required fields.</p>";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -169,9 +200,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label>Start Price</label>
             <input type="number" step="0.1" name="start_price" required>
             <label>Start Time</label>
-            <input type="datetime-local" name="start_time" required>
+            <input type="datetime-local" name="start_time" id="start_time"required>
             <label>End Time</label>
-            <input type="datetime-local" name="end_time" required>
+            <input type="datetime-local" name="end_time" id="end_time" required>
             <label>Minimum Increment *</label>
             <input type="number" step="0.01" name="min_increment" placeholder="e.g. 50 or 500" required>
 
