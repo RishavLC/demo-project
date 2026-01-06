@@ -409,7 +409,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <button type="submit">Search</button>
   </form>
   <nav>
-    <a href="login.php">Login</a>
+    <a href="../auth/login.php">Login</a>
   </nav>
 </header>
 

@@ -52,3 +52,18 @@ window.onclick = function(e) {
     closeAuctionModal();
   }
 }
+
+// live bid
+setInterval(() => {
+    fetch("../api/get_all_latest_bids.php")
+        .then(res => res.json())
+        .then(data => {
+            document.querySelectorAll(".current-price").forEach(el => {
+                const id = el.dataset.itemId;
+                if (data[id]) {
+                    el.innerText = "Rs. " + data[id];
+                }
+            });
+        });
+}, 3000);
+
