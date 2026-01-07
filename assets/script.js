@@ -53,17 +53,25 @@ window.onclick = function(e) {
   }
 }
 
-// live bid
-setInterval(() => {
-    fetch("../api/get_all_latest_bids.php")
-        .then(res => res.json())
-        .then(data => {
-            document.querySelectorAll(".current-price").forEach(el => {
-                const id = el.dataset.itemId;
-                if (data[id]) {
-                    el.innerText = "Rs. " + data[id];
-                }
-            });
-        });
-}, 3000);
 
+// live bids
+function updatePrices(){
+fetch("../api/get_all_latest_bids.php")
+.then(res => res.json())
+.then(data => {
+
+document.querySelectorAll(".current-price").forEach(el => {
+
+const id = el.dataset.itemId;
+
+if (data[id]) {
+el.innerText = "Rs. " + data[id];
+}
+
+});
+
+})
+.catch(err => console.log("Polling error", err));
+}
+
+setInterval(updatePrices, 3000);

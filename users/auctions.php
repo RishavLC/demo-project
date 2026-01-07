@@ -114,7 +114,11 @@ if ($result && $result->num_rows > 0) {
         echo "<div class='auction-card'>
                 <h3>" . htmlspecialchars($row['title']) . "</h3>
                 <p><strong>Category:</strong> " . htmlspecialchars($row['category']) . "</p>
-                <p><strong>Current Price:</strong> Rs. " . number_format($row['current_price'], 2) . "</p>
+                    <strong>Current Price:</strong>
+                    <span class='current-price' data-item-id='" . $item_id . "'>
+                    Rs. " . number_format($row['current_price'], 2, '.', '') . "
+                    </span>
+                </p>
                 <p><strong>Highest Bid:</strong> Rs. {$highest_bid}</p>
                 <p><strong>Highest Bidder:</strong> {$highest_bidder}</p>
                 <p><strong>Total Bids:</strong> {$total_bids}</p>
@@ -129,5 +133,43 @@ if ($result && $result->num_rows > 0) {
 ?>
 </div>
 </div>
+<script>
+// =============== LIVE PRICE POLLING ===============
+function updatePrices() {
+    fetch("../api/get_all_latest_bids.php")
+    .then(res => res.json())
+    .then(data => {
+
+        document.querySelectorAll(".current-price").forEach(el => {
+            const id = el.dataset.itemId;
+            if (data[id]) {
+
+                const oldPrice = pf(el.innerText.replace(/[^0-9.]/g,''));
+                const newPrice = pf(data[id]);
+
+                if (newPrice > oldPrice) {
+                    el.innerText = "Rs. " + newPrice.toFixed(2);
+
+                    // update bid input min
+                    const card = el.closest(".auction-card");
+                    const input = card.querySelector('input[name="bid_amount"]');
+                    if (input) {
+                        input.min = (newPrice + pf(input.dataset.mininc)).toFixed(2);
+                        input.dataset.current = newPrice.toFixed(2);
+                    }
+                }
+            }
+        });
+
+    })
+    .catch(err => console.log("Polling error", err));
+}
+
+// Poll every 3 seconds
+setInterval(updatePrices, 1000);
+</script>
+
+<script src="../assets/script.js"></script>
+
 </body>
 </html>
