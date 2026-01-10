@@ -19,6 +19,10 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE AFTER username;
+ALTER TABLE users--for users status
+ADD status ENUM('active','suspended','banned') DEFAULT 'active',
+ADD strike_count INT DEFAULT 0,
+ADD suspended_until DATETIME NULL;
 
 -- Data table (records for CRUD)
 CREATE TABLE records (
@@ -80,9 +84,36 @@ CREATE TABLE auction_results (
     item_id INT NOT NULL,
     winner_id INT,
     winning_bid DECIMAL(10,2),
+    payment_status ENUM('pending','paid','failed') DEFAULT 'pending',
+    payment_deadline DATETIME,
     closed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (item_id) REFERENCES auction_items(id),
     FOREIGN KEY (winner_id) REFERENCES users(id)
+);
+
+
+--users penalty and for what reasons
+CREATE TABLE user_penalties (
+    penalty_id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT NOT NULL,
+    reason VARCHAR(255),
+    action_taken ENUM('warning','suspension','ban'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NULL,
+    admin_note TEXT,
+    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+--second highest bidder as a backup
+CREATE TABLE auction_backup_winners (
+    backup_winner_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT,
+    id INT,
+    bid_amount DECIMAL(10,2),
+    priority INT, -- 1 = second bidder, 2 = third
+    notified ENUM('yes','no') DEFAULT 'no',
+    FOREIGN KEY (item_id) REFERENCES auction_items(id),
+    FOREIGN KEY (id) REFERENCES users(id)
 );
 
 --notification table

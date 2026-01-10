@@ -9,6 +9,16 @@ include "../common/config.php";
 // Count Users
 $user_count = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
 
+// Suspended Users
+$suspended_users = $conn
+    ->query("SELECT COUNT(*) AS total FROM users WHERE status='suspended'")
+    ->fetch_assoc()['total'];
+
+// Banned Users
+$banned_users = $conn
+    ->query("SELECT COUNT(*) AS total FROM users WHERE status='banned'")
+    ->fetch_assoc()['total'];
+
 // Count Auctions
 $auction_count = $conn->query("SELECT COUNT(*) AS total FROM auction_items")->fetch_assoc()['total'];
 
@@ -114,6 +124,19 @@ $result = $conn->query($sql);
       <h3><?= $user_count ?></h3>
       <p>Total Users</p>
     </div>
+    <a href="manage_users.php?status=suspended" style="text-decoration:none;">
+      <div class="card" style="border-left:6px solid #f39c12;">
+        <h3><?= $suspended_users ?></h3>
+        <p>Suspended Users</p>
+      </div>
+    </a>
+    <a href="manage_users.php?status=banned" style="text-decoration:none;">
+      <div class="card" style="border-left:6px solid #e74c3c;">
+        <h3><?= $banned_users ?></h3>
+        <p>Banned Users</p>
+      </div>
+    </a>
+
     <div class="card">
       <h3><?= $auction_count ?></h3>
       <p>Total Auctions</p>
