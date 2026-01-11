@@ -20,11 +20,20 @@ $stmt->close();
 $sql = "
   SELECT ai.*, 
          (SELECT MAX(bid_amount) FROM bids WHERE bids.item_id = ai.id) AS highest_bid,
-         (SELECT COUNT(*) FROM bids WHERE bids.item_id = ai.id) AS total_bids
+         (SELECT COUNT(*) FROM bids WHERE bids.item_id = ai.id) AS total_bids,
+         (
+           SELECT u.username 
+           FROM bids b 
+           JOIN users u ON u.id = b.bidder_id
+           WHERE b.item_id = ai.id
+           ORDER BY b.bid_amount DESC
+           LIMIT 1
+         ) AS winner_name
   FROM auction_items ai
   WHERE ai.seller_id = ?
   ORDER BY ai.created_at DESC
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -138,13 +147,15 @@ $result = $stmt->get_result();
       <thead>
         <tr>
           <th>SN</th>
-          <th>Item Title</th>
+          <th>Image</th>
+          <th>Item </th>
           <th>Category</th>
           <th>Starting Price</th>
           <th>Highest Bid</th>
           <th>Total Bids</th>
+          <th>Winner</th>
           <th>Status</th>
-          <th>End Date</th>
+          <th>Bid History</th>
         </tr>
       </thead>
       <tbody>
@@ -153,15 +164,78 @@ $result = $stmt->get_result();
         while ($row = $result->fetch_assoc()): ?>
         <tr>
           <td><?= $sn++ ?></td>
+          <td>
+            <?php
+            /* ===== FETCH IMAGE FOR THIS ITEM ===== */
+$imgSql = "
+    SELECT image_path 
+    FROM auction_images 
+    WHERE item_id = ? 
+    ORDER BY is_primary DESC, id ASC 
+    LIMIT 1
+";
+$imgStmt = $conn->prepare($imgSql);
+$imgStmt->bind_param("i", $row['id']);
+$imgStmt->execute();
+$imgRes = $imgStmt->get_result();
+$imgRow = $imgRes->fetch_assoc();
+$imgStmt->close();
+
+/* assign image_path into row so your existing code works */
+$row['image_path'] = $imgRow['image_path'] ?? '';
+
+if (!empty($row['image_path'])) {
+    $clean_path = str_replace(['../', './'], '', $row['image_path']);
+    $img_url = "../" . $clean_path;
+} else {
+    $img_url = "../assets/no-image.png";
+}
+?>
+<img src="<?= $img_url ?>" 
+     width="70" height="60" 
+     style="object-fit:cover;border-radius:6px;">
+</td>
+          </td>
           <td><?= htmlspecialchars($row['title']) ?></td>
           <td><?= htmlspecialchars($row['category']) ?></td>
           <td>Rs. <?= number_format($row['start_price'], 2) ?></td>
           <td>Rs. <?= $row['highest_bid'] ? number_format($row['highest_bid'], 2) : '-' ?></td>
           <td><?= $row['total_bids'] ?></td>
-          <td class="<?= $row['status'] === 'active' ? 'status-active' : 'status-closed' ?>">
+                
+  <!-- Winner Column -->
+  <td>
+    <?php if ($row['winner_name']): ?>
+      <?php if ($row['status'] === 'active'): ?>
+        <span style="color:#f39c12;font-weight:bold;">
+          Leading: <?= htmlspecialchars($row['winner_name']) ?>
+        </span>
+      <?php else: ?>
+        <span style="color:#27ae60;font-weight:bold;">
+          <?= htmlspecialchars($row['winner_name']) ?>
+        </span>
+      <?php endif; ?>
+    <?php else: ?>
+      —
+    <?php endif; ?>
+  </td>
+<td class="<?= $row['status'] === 'active' ? 'status-active' : 'status-closed' ?>">
             <?= ucfirst($row['status']) ?>
           </td>
-          <td><?= htmlspecialchars($row['end_time']) ?></td>
+  <!-- Bid History Button -->
+  <td>
+    <a href="bid_history.php?item_id=<?= $row['id'] ?>"
+       style="
+         background:#3498db;
+         color:white;
+         padding:6px 10px;
+         border-radius:5px;
+         text-decoration:none;
+         font-size:14px;
+       ">
+       View
+    </a>
+  </td>
+          
         </tr>
         <?php endwhile; ?>
       </tbody>

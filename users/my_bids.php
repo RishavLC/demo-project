@@ -8,7 +8,7 @@ include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
 
-// ✅ Fetch username
+/* Fetch username */
 $user_sql = "SELECT username FROM users WHERE id = ?";
 $stmt = $conn->prepare($user_sql);
 $stmt->bind_param("i", $user_id);
@@ -17,9 +17,8 @@ $stmt->bind_result($username);
 $stmt->fetch();
 $stmt->close();
 
-// ✅ Fetch all auctions where this user placed a bid
+/* Fetch auctions where user has bid */
 $sql = "SELECT ai.*, u.username AS seller,
-        (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id) AS highest_bid,
         (SELECT bidder_id FROM bids WHERE item_id = ai.id ORDER BY bid_amount DESC LIMIT 1) AS winner_id,
         (SELECT bid_amount FROM bids WHERE item_id = ai.id ORDER BY bid_amount DESC LIMIT 1) AS winning_bid,
         (SELECT MAX(bid_amount) FROM bids WHERE item_id = ai.id AND bidder_id = ?) AS my_highest_bid
@@ -34,34 +33,42 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Bidding History</title>
-  <link rel="stylesheet" href="../assets/style.css">
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: #fff;
-      padding: 18px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .card h3 { margin: 0 0 8px; font-size: 18px; color: #2c3e50; }
-    .card p { margin: 5px 0; }
-    .winner { color: green; font-weight: bold; }
-    .loser { color: red; font-weight: bold; }
-    .ongoing { color: orange; font-weight: bold; }
-  </style>
+<title>My Bidding History</title>
+<link rel="stylesheet" href="../assets/style.css">
+
+<style>
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.winner { color: green; font-weight: bold; }
+.loser { color: red; font-weight: bold; }
+.ongoing { color: orange; font-weight: bold; }
+</style>
 </head>
+
 <body>
-<div class="sidebar">
+ <div class="sidebar">
   <div class="sidebar-header">
-    Welcome, <?= htmlspecialchars($username) ?>
+    User Panel
     <div class="toggle-btn">☰</div>
   </div>
   <ul>
@@ -72,49 +79,67 @@ $stmt->close();
     <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
     <li><a href="auctions.php" class="active">📊 Auction Details</a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
-    <li><a href="logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
+    <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
-
 <div class="main-content">
-  <h2>My Bidding History</h2>
-  <div class="grid">
-    <?php while($row = $result->fetch_assoc()) {
-        $status = "";
-        $winner_name = "No Winner";
+<h2>My Bidding History</h2>
 
-        // Find winner name if exists
-        if ($row['winner_id']) {
-            $wstmt = $conn->prepare("SELECT username FROM users WHERE id=?");
-            $wstmt->bind_param("i", $row['winner_id']);
-            $wstmt->execute();
-            $wstmt->bind_result($winner_name);
-            $wstmt->fetch();
-            $wstmt->close();
-        }
+<div class="grid">
 
-        // Decide status for logged-in user
-        if ($row['end_time'] > date("Y-m-d H:i:s")) {
-            $status = "<span class='ongoing'>Ongoing Auction</span>";
-        } else {
-            if ($row['winner_id'] == $user_id) {
-                $status = "<span class='winner'>You WON 🎉</span>";
-            } else {
-                $status = "<span class='loser'>You Lost ❌</span>";
-            }
-        }
-    ?>
-    <div class="card">
-      <h3><?= htmlspecialchars($row['title']) ?></h3>
-      <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
-      <p><strong>Your Highest Bid:</strong> <?= $row['my_highest_bid'] ? "Rs. ".$row['my_highest_bid'] : "N/A" ?></p>
-      <p><strong>Winning Bid:</strong> <?= $row['winning_bid'] ? "Rs. ".$row['winning_bid'] : "N/A" ?></p>
-      <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
-      <p><strong>Status:</strong> <?= $status ?></p>
-      <p><em>Auction Ended: <?= $row['end_time'] ?></em></p>
-    </div>
-    <?php } ?>
-  </div>
+<?php while ($row = $result->fetch_assoc()) {
+
+    /* Fetch image */
+    $imgSql = "SELECT image_path FROM auction_images 
+               WHERE item_id = ? 
+               ORDER BY is_primary DESC, id ASC LIMIT 1";
+    $imgStmt = $conn->prepare($imgSql);
+    $imgStmt->bind_param("i", $row['id']);
+    $imgStmt->execute();
+    $imgRes = $imgStmt->get_result();
+    $imgRow = $imgRes->fetch_assoc();
+    $imgStmt->close();
+
+    $imagePath = (!empty($imgRow['image_path']))
+        ? "../" . ltrim($imgRow['image_path'], './')
+        : "../assets/no-image.png";
+
+    /* Winner name */
+    $winner_name = "No Winner";
+    if ($row['winner_id']) {
+        $w = $conn->prepare("SELECT username FROM users WHERE id=?");
+        $w->bind_param("i", $row['winner_id']);
+        $w->execute();
+        $w->bind_result($winner_name);
+        $w->fetch();
+        $w->close();
+    }
+
+    /* Status */
+    if ($row['end_time'] > date("Y-m-d H:i:s")) {
+        $status = "<span class='ongoing'>Ongoing Auction</span>";
+    } elseif ($row['winner_id'] == $user_id) {
+        $status = "<span class='winner'>You WON 🎉</span>";
+    } else {
+        $status = "<span class='loser'>You Lost ❌</span>";
+    }
+?>
+
+<div class="card">
+  <img src="<?= htmlspecialchars($imagePath) ?>" alt="Auction Image">
+  <h3><?= htmlspecialchars($row['title']) ?></h3>
+  <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
+  <p><strong>Your Highest Bid:</strong> <?= $row['my_highest_bid'] ? "Rs. ".$row['my_highest_bid'] : "N/A" ?></p>
+  <p><strong>Winning Bid:</strong> <?= $row['winning_bid'] ? "Rs. ".$row['winning_bid'] : "N/A" ?></p>
+  <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
+  <p><strong>Status:</strong> <?= $status ?></p>
+  <p><em>Ends at: <?= $row['end_time'] ?></em></p>
 </div>
+
+<?php } ?>
+
+</div>
+</div>
+<script src="../assets/script.js"></script>
 </body>
 </html>
