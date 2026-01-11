@@ -29,6 +29,23 @@ if (!$item) {
     exit();
 }
 
+/* ===== FETCH IMAGE FOR THIS ITEM (PRIMARY IMAGE) ===== */
+$imgSql = "
+    SELECT image_path 
+    FROM auction_images 
+    WHERE item_id = ? 
+    ORDER BY is_primary DESC, id ASC 
+    LIMIT 1
+";
+$imgStmt = $conn->prepare($imgSql);
+$imgStmt->bind_param("i", $item_id);
+$imgStmt->execute();
+$imgRes = $imgStmt->get_result();
+$imgRow = $imgRes->fetch_assoc();
+$imgStmt->close();
+
+/* assign image_path into item so existing code works */
+$item['image'] = $imgRow['image_path'] ?? '';
 /* ================= FETCH BID STATS ================= */
 $stats_sql = "
     SELECT 
@@ -94,6 +111,33 @@ body {
 h2 {
     color: #8b0000;
 }
+
+.item-header {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.item-image-box {
+    width: 220px;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #eee;
+    border: 1px solid #ddd;
+}
+
+.item-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-details {
+    flex: 1;
+}
+
 .info-box {
     display: flex;
     justify-content: space-between;
@@ -140,23 +184,45 @@ th {
     <div class="toggle-btn">☰</div>
   </div>
   <ul>
-    <li><a href="dashboard_user.php" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
-    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
-    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
-    <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
-    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <li><a href="auctions.php" class="active">📊 Auction Details</a></li>
-    <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
-    <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
+     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
+    <li><a href="manage_users.php">👥 Manage Users</a></li>
+    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+    <li><a href="auction_history.php">📜 Auction Status</a></li>
+    <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
 <div class="main-content">
+<!-- <div class="container"> -->
 <h2>Bid History – <?= htmlspecialchars($item['title']) ?></h2>
 
-<p><strong>Description:</strong> <?= htmlspecialchars($item['description']) ?></p>
-<p><strong>Status:</strong> <?= ucfirst($item['status']) ?></p>
-<p><strong>Start Time:</strong> <?= $item['start_time'] ?></p>
-<p><strong>End Time:</strong> <?= $item['end_time'] ?></p>
+<div class="item-header">
+
+    <!-- IMAGE BOX -->
+    <div class="item-image-box">
+        <?php
+        $imagePath = "../assets/no-image.png"; 
+        if (!empty($item['image'])) {
+            $clean_path = str_replace(['../', './'], '', $item['image']);
+            $fullPath = "../" . $clean_path;
+            if (file_exists($fullPath)) $imagePath = $fullPath;
+        }
+        ?>
+        <img src="<?= $imagePath ?>" 
+             style="width:220px; height:140px; object-fit:cover; border-radius:8px;">
+</div>
+
+
+
+    <!-- DETAILS -->
+    <div class="item-details">
+        <p><strong>Description:</strong> <?= htmlspecialchars($item['description']) ?></p>
+        <p><strong>Status:</strong> <?= ucfirst($item['status']) ?></p>
+        <p><strong>Start Time:</strong> <?= $item['start_time'] ?></p>
+        <p><strong>End Time:</strong> <?= $item['end_time'] ?></p>
+    </div>
+
+</div>
+
 
 <div class="info-box">
     <div>Total Bids<br><?= $stats['total_bids'] ?></div>
@@ -166,7 +232,7 @@ th {
         Rs <?= $stats['highest_bid'] ? number_format($stats['highest_bid'], 2) : "—" ?>
     </div>
     <div>
-        Current Winner<br>
+        Winner<br>
         <?= $winner ? "<span class='winner'>{$winner['username']}</span>" : "No bids yet" ?>
     </div>
 </div>
@@ -196,6 +262,7 @@ th {
 </tr>
 <?php endif; ?>
 </table>
+
 </div>
 </body>
 </html>

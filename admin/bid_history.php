@@ -111,6 +111,7 @@ body {
 h2 {
     color: #8b0000;
 }
+
 .item-header {
     display: flex;
     gap: 20px;
@@ -198,10 +199,16 @@ th {
 
     <!-- IMAGE BOX -->
     <div class="item-image-box">
-    <?php
-    $imagePath = !empty($item['image']) ? "../uploads/auctions/" . $item['image'] : "../assets/no-image.png";
-    ?>
-    <img src="<?= $imagePath ?>" alt="Item Image">
+        <?php
+        $imagePath = "../assets/no-image.png"; 
+        if (!empty($item['image'])) {
+            $clean_path = str_replace(['../', './'], '', $item['image']);
+            $fullPath = "../" . $clean_path;
+            if (file_exists($fullPath)) $imagePath = $fullPath;
+        }
+        ?>
+        <img src="<?= $imagePath ?>" 
+             style="width:220px; height:140px; object-fit:cover; border-radius:8px;">
 </div>
 
 
@@ -225,7 +232,7 @@ th {
         Rs <?= $stats['highest_bid'] ? number_format($stats['highest_bid'], 2) : "—" ?>
     </div>
     <div>
-        Current Winner<br>
+        Winner<br>
         <?= $winner ? "<span class='winner'>{$winner['username']}</span>" : "No bids yet" ?>
     </div>
 </div>
