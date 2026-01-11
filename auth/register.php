@@ -1,62 +1,49 @@
 <?php
-include "../common/config.php";
+session_start();
+include "../common/config.php"; // Make sure your DB connection is here
 
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Collect form data
     $username = trim($_POST["username"]);
     $email = trim($_POST["email"]);
-    $password = md5($_POST["password"]);
+    $password = md5($_POST["password"]); // You can switch to password_hash() later
+    $phone = trim($_POST["phone"]);
+    $address = trim($_POST["address"]);
+    $citizenship_no = trim($_POST["citizenship_no"]);
+    $nic_no = trim($_POST["nic_no"]);
+    $terms = isset($_POST['terms']) ? $_POST['terms'] : '';
 
-    // ✅ Validate input
+    // Validation
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = "<div class='alert error'>Invalid email format.</div>";
+    } elseif ($terms != "on") {
+        $message = "<div class='alert error'>You must agree to the Terms and Conditions!</div>";
     } else {
-        // ✅ Check if username or email already exists
-        $check = $conn->prepare("SELECT * FROM users WHERE username=? OR email=?");
-        $check->bind_param("ss", $username, $email);
+        // Check duplicates
+        $check = $conn->prepare("SELECT * FROM users WHERE username=? OR email=? OR nic_no=? OR citizenship_no=?");
+        $check->bind_param("ssss", $username, $email, $nic_no, $citizenship_no);
         $check->execute();
         $result = $check->get_result();
 
         if ($result->num_rows > 0) {
-            $message = "<div class='alert error'>Username or Email already exists!</div>";
+            $message = "<div class='alert error'>Username, Email, NIC, or Citizenship number already exists!</div>";
         } else {
-            // ✅ Get role_id for 'user'
-            $roleResult = $conn->query("SELECT id FROM roles WHERE role_name = 'user' LIMIT 1");
+            // Get role_id for 'user'
+            $roleResult = $conn->query("SELECT id FROM roles WHERE role_name='user' LIMIT 1");
             $roleRow = $roleResult->fetch_assoc();
             $role_id = $roleRow['id'];
 
-            // ✅ Insert new user
-            $sql = $conn->prepare("INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)");
-            $sql->bind_param("sssi", $username, $email, $password, $role_id);
+            // Insert new user
+            $sql = $conn->prepare("INSERT INTO users (username, email, password, phone, address, citizenship_no, nic_no, role_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $sql->bind_param("sssssssi", $username, $email, $password, $phone, $address, $citizenship_no, $nic_no, $role_id);
 
             if ($sql->execute()) {
-                // ✅ Get created_at
-                $user_id = $conn->insert_id;
-                $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
-                $row = $result->fetch_assoc();
-                $created_at = $row['created_at'];
-
-                // ✅ Success message
-                echo "<div style='
-                        margin: 20px auto; 
-                        width: 420px; 
-                        padding: 15px; 
-                        text-align: center; 
-                        background: #e6ffed; 
-                        border: 1px solid #28a745; 
-                        border-radius: 8px; 
-                        font-family: Arial, sans-serif; 
-                        color: #155724;'>
-                        🎉 Registration successful on <b>$created_at</b>! <br><br>
-                        <a href='login.php' style='
-                            display: inline-block; 
-                            padding: 8px 15px; 
-                            margin-top: 10px; 
-                            background: #28a745; 
-                            color: #fff; 
-                            text-decoration: none; 
-                            border-radius: 5px;'>Login here</a>
+                $created_at = date("Y-m-d H:i:s"); // Current timestamp
+                echo "<div style='margin:20px auto;width:450px;padding:20px;text-align:center;background:#e6ffed;border:1px solid #28a745;border-radius:8px;font-family:Arial;color:#155724;'>
+                        🎉 Registration successful on <b>$created_at</b>!<br><br>
+                        <a href='login.php' style='display:inline-block;padding:10px 20px;margin-top:10px;background:#28a745;color:#fff;text-decoration:none;border-radius:5px;'>Login here</a>
                       </div>";
                 exit();
             } else {
@@ -66,10 +53,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register</title>
+    <meta charset="UTF-8">
+    <title>EasyBid Registration</title>
     <link rel="stylesheet" href="../assets/style.css">
     <style>
         body {
@@ -82,17 +71,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         form {
             background: #fff;
-            padding: 25px 35px;
+            padding: 30px 35px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 320px;
+            width: 360px;
             text-align: center;
         }
         form h2 {
             margin-bottom: 20px;
             color: #333;
         }
-        form input {
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="password"],
+        form input[type="tel"] {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -102,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         form button {
             background: #4CAF50;
             border: none;
-            padding: 10px;
+            padding: 12px;
             width: 100%;
             color: #fff;
             border-radius: 6px;
@@ -111,6 +103,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         form button:hover {
             background: #45a049;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin: 8px 0 5px 0;
+            font-weight: bold;
+            font-size: 14px;
         }
         .alert {
             margin-bottom: 15px;
@@ -128,18 +127,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .terms {
+            text-align: left;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+        .terms input {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
-<form method="POST">
-    <h2>Register</h2>
+<form method="POST" action="">
+    <h2>Register for EasyBid</h2>
     <?= $message ?>
     <input type="text" name="username" placeholder="Username" required>
     <input type="email" name="email" placeholder="Email" required>
     <input type="password" name="password" placeholder="Password" required>
+    <input type="tel" name="phone" placeholder="Phone Number" required>
+    <input type="text" name="address" placeholder="Address" required>
+    <input type="text" name="citizenship_no" placeholder="Citizenship Number" required>
+    <input type="text" name="nic_no" placeholder="NIC Number" required>
+
+    <div class="terms">
+        <label>
+            <input type="checkbox" name="terms" required> I agree to the <a href="terms.php" target="_blank">Terms and Conditions</a>
+        </label>
+    </div>
+
     <button type="submit">Register</button>
 </form>
 </body>
 </html>
-<!-- user registration can can e done easily by email , username and password but role will be defaultly be normal user 
- and only admin can change roles -->

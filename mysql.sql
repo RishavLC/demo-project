@@ -19,10 +19,14 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE AFTER username;
+ALTER TABLE users
+ADD COLUMN phone VARCHAR(20),
+ADD COLUMN address VARCHAR(255),
+ADD COLUMN citizenship_no VARCHAR(50),
+ADD COLUMN nic_no VARCHAR(50);
 ALTER TABLE users--for users status
 ADD status ENUM('active','suspended','banned') DEFAULT 'active',
-ADD strike_count INT DEFAULT 0,
-ADD suspended_until DATETIME NULL;
+ALTER TABLE users ADD COLUMN suspended_at DATETIME NULL;
 
 -- Data table (records for CRUD)
 CREATE TABLE records (
