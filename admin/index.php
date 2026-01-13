@@ -4,6 +4,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
   header("Location: ../auth/login.php");
     exit();
 }
+
 include "../common/config.php";
 
 // Count Users

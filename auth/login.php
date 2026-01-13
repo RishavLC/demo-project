@@ -1,71 +1,19 @@
 <?php
 session_start();
-include "../common/config.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST["username"];
-    $password = md5($_POST["password"]);
-
-    // Fetch user with role and status
-    $sql = "SELECT users.id, users.username, users.status, roles.role_name
-            FROM users
-            JOIN roles ON users.role_id = roles.id
-            WHERE users.username='$username' AND users.password='$password'";
-
-    $result = $conn->query($sql);
-
-    if ($result->num_rows == 1) {
-        $user = $result->fetch_assoc();
-
-        // Check status
-        if ($user['status'] == 'banned') {
-            echo "Your account is banned. Contact admin to regain access.";
-            exit();
-        }
-
-        if ($user['status'] == 'suspended') {
-            // Get the time the suspension started (use session if no column)
-            if (!isset($_SESSION['suspended_users'])) $_SESSION['suspended_users'] = [];
-
-            $user_id = $user['id'];
-            $now = time();
-
-            if (!isset($_SESSION['suspended_users'][$user_id])) {
-                // First login attempt after suspension, set suspend start
-                $_SESSION['suspended_users'][$user_id] = $now;
-                echo "Your account is suspended. You can login after 7 days.";
-                exit();
-            } else {
-                $suspend_start = $_SESSION['suspended_users'][$user_id];
-                $suspend_end = $suspend_start + (7 * 24 * 60 * 60); // 7 days in seconds
-
-                if ($now < $suspend_end) {
-                    $remaining = ceil(($suspend_end - $now) / 86400); // days left
-                    echo "Your account is suspended. You can login after $remaining day(s).";
-                    exit();
-                } else {
-                    // Automatically reactivate after 7 days
-                    $conn->query("UPDATE users SET status='active' WHERE id=$user_id");
-                    unset($_SESSION['suspended_users'][$user_id]);
-                    $user['status'] = 'active'; // allow login now
-                }
-            }
-        }
-
-        // Login success
-        $_SESSION["user_id"] = $user["id"];
-        $_SESSION["role"] = $user["role_name"];
-
-        if ($user["role_name"] == "admin") {
-            header("Location: ../admin/dashboard_admin.php");
-        } else {
-            header("Location: ../users/dashboard_user.php");
-        }
+/* Redirect if already logged in */
+if (isset($_SESSION["role"])) {
+    if ($_SESSION["role"] === "admin") {
+        header("Location: /demo-project/admin/");
         exit();
-    } else {
-        echo "Invalid username or password!";
+    }
+    if ($_SESSION["role"] === "user") {
+        header("Location: /demo-project/users/");
+        exit();
     }
 }
+$error = $_GET["error"] ?? null;
+$suspendedUntil = isset($_GET["suspended_until"]) ? (int)$_GET["suspended_until"] : null;
 ?>
 
 <!DOCTYPE html>
@@ -73,15 +21,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <title>Login</title>
     <link rel="stylesheet" href="../assets/style.css">
+    <style>
+        .error-box {
+            background: #ffe6e6;
+            color: #b30000;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
 </head>
-<body>    
-    <form method="POST" class="auth-form">
-        <h2>Login</h2>
-        <input type="text" name="username" placeholder="Username" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
-        <button type="submit">Login</button>
-        <p>If you don't have account? <a href="register.php">Register here</a></p>
-    </form>
+<body>
    
+<form method="POST" action="login_process.php" class="auth-form">
+     <?php if ($error === "banned"): ?>
+    <div class="error-box">
+        🚫 Your account is permanently banned.
+    </div>
+<?php endif; ?>
+
+<?php if ($suspendedUntil): ?>
+    <div class="error-box">
+        ⏳ Your account is suspended.
+        <br>
+        Time remaining: <strong id="countdown"></strong>
+    </div>
+<?php endif; ?>
+    <h2>Login</h2>
+    <input type="text" name="username" placeholder="Username" required><br><br>
+    <input type="password" name="password" placeholder="Password" required><br><br>
+    <button type="submit">Login</button>
+        <p>If you don't have account? <a href="register.php">Register here</a></p>
+</form>
+
+<?php if ($suspendedUntil): ?>
+<script>
+    const suspendEnd = <?= $suspendedUntil ?> * 1000;
+
+    function updateCountdown() {
+        const diff = suspendEnd - Date.now();
+
+        if (diff <= 0) {
+            document.getElementById("countdown").innerHTML =
+                "✅ Suspension expired. Please refresh.";
+            return;
+        }
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / (1000 * 60)) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+
+        document.getElementById("countdown").innerHTML =
+            `${d}d ${h}h ${m}m ${s}s`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+</script>
+<?php endif; ?>
+
 </body>
 </html>

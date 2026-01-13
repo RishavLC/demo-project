@@ -174,14 +174,48 @@ th {
 .winner {
     color: green;
 }
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: #2c3e50;
+  color: #fff;
+}
+
+/* Logo wrapper */
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Logo image */
+.logo-box img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Logo text */
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 </style>
 </head>
 
 <body>
-   <div class="sidebar">
-  <div class="sidebar-header">
-    User Panel
-    <div class="toggle-btn">☰</div>
+    <div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box">
+            <img src="../images/logo.jpeg" alt="EasyBid Logo">
+            <span class="logo-text">EasyBid</span>
+        </div>
+        <div class="toggle-btn">☰</div>  
   </div>
   <ul>
      <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>

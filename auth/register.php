@@ -156,6 +156,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <button type="submit">Register</button>
+    <button style="margin-top: 5px;"><a href="login.php" style="color: #fff; text-decoration: none;">Cancel</a></button>
 </form>
 </body>
 </html>

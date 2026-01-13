@@ -184,11 +184,14 @@ th {
     <div class="toggle-btn">☰</div>
   </div>
   <ul>
-     <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
-    <li><a href="manage_users.php">👥 Manage Users</a></li>
-    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
-    <li><a href="auction_history.php">📜 Auction Status</a></li>
-    <li><a href="../auth/logout.php">🚪 Logout</a></li>
+    <li><a href="dashboard_user.php" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
+    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
+    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
+    <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
+    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
+    <li><a href="auctions.php" class="active">📊 Auction Details</a></li>
+    <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
+    <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
 <div class="main-content">
