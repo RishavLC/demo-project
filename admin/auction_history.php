@@ -35,7 +35,7 @@ if ($sort == "high_price") $sortSQL = "ORDER BY ai.current_price DESC";
 if ($sort == "low_price") $sortSQL = "ORDER BY ai.current_price ASC";
 
 /* ---------------- PAGINATION ---------------- */
-$limit = 10;
+$limit = 5;
 $page = max(1, intval($_GET['page'] ?? 1));
 $offset = ($page - 1) * $limit;
 
@@ -72,6 +72,28 @@ $sql = "
 ";
 
 $result = $conn->query($sql);
+
+/* ---------------- SORT ---------------- */
+$allowedSorts = ['newest','oldest','high_price','low_price','seller'];
+$sort = in_array($sort, $allowedSorts) ? $sort : 'newest';
+
+switch($sort) {
+    case 'oldest':
+        $sortSQL = "ORDER BY ai.created_at ASC";
+        break;
+    case 'high_price':
+        $sortSQL = "ORDER BY ai.current_price DESC";
+        break;
+    case 'low_price':
+        $sortSQL = "ORDER BY ai.current_price ASC";
+        break;
+    case 'seller':
+        $sortSQL = "ORDER BY u.username ASC";
+        break;
+    default:
+        $sortSQL = "ORDER BY ai.created_at DESC";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -94,6 +116,7 @@ tr:nth-child(even) { background:#f2f6fc; }
 .status { padding:6px 10px; border-radius:6px; font-weight:bold; }
 .status-active { background:#d4edda; color:#155724; }
 .status-closed { background:#f8d7da; color:#721c24; }
+.status-rejected { background:#f8d7da; color:#721c24; }
 
 .btn {
     padding:6px 10px;
@@ -132,6 +155,36 @@ tr:nth-child(even) { background:#f2f6fc; }
 <div class="main-content">
 
 <h2>Auction History </h2>
+<form method="get" style="margin-bottom:15px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+    <!-- Status Filter -->
+    <select name="filter" style="padding:5px 10px; border-radius:6px; border:1px solid #ccc;">
+        <option value="">All Status</option>
+        <option value="active" <?= $filter=='active'?'selected':'' ?>>Active</option>
+        <option value="closed" <?= $filter=='closed'?'selected':'' ?>>Closed</option>
+        <option value="rejected" <?= $filter=='rejected'?'selected':'' ?>>Rejected</option>
+        <option value="upcoming" <?= $filter=='upcoming'?'selected':'' ?>>Upcoming</option>
+        <option value="pending" <?= $filter=='pending'?'selected':'' ?>>Pending</option>
+    </select>
+
+    <!-- Sort By -->
+    <select name="sort" style="padding:5px 10px; border-radius:6px; border:1px solid #ccc;">
+        <option value="newest" <?= $sort=='newest'?'selected':'' ?>>Newest</option>
+        <option value="oldest" <?= $sort=='oldest'?'selected':'' ?>>Oldest</option>
+        <option value="high_price" <?= $sort=='high_price'?'selected':'' ?>>High Price</option>
+        <option value="low_price" <?= $sort=='low_price'?'selected':'' ?>>Low Price</option>
+        <option value="seller" <?= $sort=='seller'?'selected':'' ?>>Seller</option>
+    </select>
+
+    <!-- Search -->
+    <input type="text" name="search" placeholder="Search..." value="<?= htmlspecialchars($search) ?>" 
+           style="padding:5px 10px; border-radius:6px; border:1px solid #ccc; flex:1;">
+    <button type="submit" style="padding:6px 12px; border-radius:6px; background:#3498db; color:white; border:none;">
+        Search
+    </button>
+</div>
+
+</form>
 
 <table>
 <tr>

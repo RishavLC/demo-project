@@ -27,6 +27,9 @@ ADD COLUMN nic_no VARCHAR(50);
 ALTER TABLE users--for users status
 ADD status ENUM('active','suspended','banned') DEFAULT 'active',
 ALTER TABLE users ADD COLUMN suspended_at DATETIME NULL;
+ALTER TABLE users
+ADD photo VARCHAR(255) DEFAULT NULL;
+
 
 -- Data table (records for CRUD)
 CREATE TABLE records (

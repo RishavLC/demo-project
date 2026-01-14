@@ -54,6 +54,15 @@ if (isset($_GET['reject'])) {
     header("Location: manage_auctions.php");
     exit();
 }
+/* ---------------- PAGINATION ---------------- */
+$limit = 3;
+$page = max(1, intval($_GET['page'] ?? 1));
+$offset = ($page - 1) * $limit;
+
+$countResult = $conn->query("SELECT COUNT(*) AS total FROM auction_items");
+$totalRows = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalRows / $limit);
+
 
 /* =======================
    FETCH AUCTIONS + IMAGE
@@ -68,6 +77,7 @@ SELECT ai.*, u.username,
 FROM auction_items ai
 JOIN users u ON ai.seller_id = u.id
 ORDER BY ai.created_at DESC
+LIMIT $limit OFFSET $offset
 ";
 $result = $conn->query($sql);
 ?>
@@ -124,6 +134,16 @@ button { background:#27ae60; color:#fff; }
   padding:10px;
   border-radius:6px;
   margin-bottom:15px;
+}
+
+.pagination { text-align:center; margin-top:15px; }
+.pagination a {
+    padding:6px 10px; margin:2px;
+    border:1px solid #ccc; border-radius:6px;
+    text-decoration:none; color:#333;
+}
+.active-page {
+    background:#4a90e2; color:white !important;
 }
 </style>
 </head>
@@ -192,6 +212,15 @@ if (!empty($row['image_path'])) {
 <?php endwhile; ?>
 
 </div>
+<div class="pagination">
+<div class="pagination">
+<?php for ($i = 1; $i <= $totalPages; $i++): ?>
+    <a href="?page=<?= $i ?>" class="<?= ($i == $page) ? 'active-page' : '' ?>">
+        <?= $i ?>
+    </a>
+<?php endfor; ?>
+</div>
+
 </div>
 
 </body>

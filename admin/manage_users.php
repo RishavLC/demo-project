@@ -48,12 +48,27 @@ if (!empty($status_filter) && in_array($status_filter, ['active','suspended','ba
     $params[0] .= "s";
     $params[] = $status_filter;
 }
+/* ---------------- PAGINATION ---------------- */
+$limit = 8;
+$page = max(1, intval($_GET['page'] ?? 1));
+$offset = ($page - 1) * $limit;
+
+$countResult = $conn->query("SELECT COUNT(*) AS total FROM auction_items");
+$totalRows = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalRows / $limit);
+
+$allowed_sort = ['id','username','role_name','status','created_at','updated_at'];
+$allowed_order = ['ASC','DESC'];
+
+$sort = in_array($_GET['sort'] ?? '', $allowed_sort) ? $_GET['sort'] : 'id';
+$order = in_array(strtoupper($_GET['order'] ?? ''), $allowed_order) ? strtoupper($_GET['order']) : 'ASC';
+
 
 $sql = "SELECT users.id, users.username, roles.role_name, users.status, users.created_at, users.updated_at 
         FROM users 
         LEFT JOIN roles ON users.role_id = roles.id
         WHERE $conditions 
-        ORDER BY $sort $order";
+        ORDER BY $sort $order LIMIT $limit OFFSET $offset";
 
 if (empty($error_message)) {
     $stmt = $conn->prepare($sql);
@@ -72,6 +87,20 @@ if (empty($error_message)) {
 <head>
   <title>Manage Users - <?= $role ?></title>
   <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pagination a {
+    padding: 6px 10px;
+    margin: 2px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+}
+.active-page {
+    background: #4a90e2;
+    color: white !important;
+}
+</style>
 </head>
 <body>
 <div class="sidebar">
@@ -137,8 +166,9 @@ if (empty($error_message)) {
             <td><?= $row['created_at'] ?></td>
             <td><?= $row['updated_at'] ? $row['updated_at'] : '-' ?></td>
             <td>
-              <a href="edit_user.php?id=<?= $row['id'] ?>" class="btn btn-edit">✏ Edit</a>
-              <a href="delete_user.php?id=<?= $row['id'] ?>" class="btn btn-delete" onclick="return confirm('Delete this user?');">🗑 Delete</a>
+                  <a href="view_user.php?id=<?= $row['id'] ?>" class="btn btn-view">
+                        👁 View
+                  </a>
             </td>
         </tr>
     <?php endwhile; ?>
@@ -146,6 +176,11 @@ if (empty($error_message)) {
     <tr><td colspan="7">No users found.</td></tr>
 <?php endif; ?>
 </table>
+<div class="pagination">
+<?php for ($i = 1; $i <= $totalPages; $i++): ?>
+    <a href="?page=<?= $i ?>" class="<?= ($i == $page) ? 'active-page' : '' ?>"><?= $i ?></a>
+<?php endfor; ?>
+</div>
 </div>
 <script src="../assets/script.js"></script>
 </body>
