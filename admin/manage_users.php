@@ -100,6 +100,9 @@ if (empty($error_message)) {
     background: #4a90e2;
     color: white !important;
 }
+th a{
+    text-decoration: none; color: white;
+}
 </style>
 </head>
 <body>

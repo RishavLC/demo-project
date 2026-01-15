@@ -33,6 +33,45 @@ if ($result->num_rows !== 1) {
 }
 $user = $result->fetch_assoc();
 
+/* ===== Auction Created ===== */
+$q_created = $conn->prepare("
+    SELECT COUNT(*) AS total_created
+    FROM auction_items
+    WHERE seller_id = ?
+");
+$q_created->bind_param("i", $user_id);
+$q_created->execute();
+$created = $q_created->get_result()->fetch_assoc()['total_created'];
+
+/* ===== Auctions Participated ===== */
+$q_participated = $conn->prepare("
+    SELECT COUNT(DISTINCT item_id) AS total_participated
+    FROM bids
+    WHERE bidder_id = ?
+");
+
+if (!$q_participated) {
+    die("Participated query error: " . $conn->error);
+}
+
+$q_participated->bind_param("i", $user_id);
+$q_participated->execute();
+
+$participated = $q_participated
+    ->get_result()
+    ->fetch_assoc()['total_participated'];
+
+/* ===== Auctions Won ===== */
+$q_won = $conn->prepare("
+    SELECT COUNT(*) AS total_won
+    FROM auction_items
+    WHERE winner_id = ?
+");
+
+$q_won->bind_param("i", $user_id);
+$q_won->execute();
+$won = $q_won->get_result()->fetch_assoc()['total_won'];
+
 /* ================= HANDLE ACTIONS ================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $action = $_POST['action'];
@@ -145,12 +184,37 @@ body { background:#f4f6f9; font-family:Arial; }
   font-weight: 600;
   white-space: nowrap;
 }
+.stat-card {
+  flex: 1;
+  padding: 25px;
+  border-radius: 12px;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
 
-/* Toggle button */
-/* .toggle-btn {
-  cursor: pointer;
-  font-size: 20px;
-} */
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,.25);
+}
+
+.green { background:#2ecc71; }
+.orange { background:#f39c12; }
+.red { background:#e74c3c; }
+
+.stat-card h2 {
+  font-size: 36px;
+  margin: 0;
+}
+
+.stat-card p {
+  margin-top: 8px;
+  font-size: 15px;
+  opacity: .95;
+}
+
 
 /* ================= COLLAPSED SIDEBAR ================= */
 
@@ -229,6 +293,16 @@ td {
 .warn { background:#f39c12;color:#fff; }
 .danger { background:#e74c3c;color:#fff; }
 
+.user-card {
+    position: relative;
+}
+
+.status-corner {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
 </style>
 </head>
 
@@ -266,10 +340,34 @@ td {
     <div>
         <h3><?= htmlspecialchars($user['username']) ?></h3>
         <p><b>Role:</b> <?= ucfirst($user['role_name']) ?></p>
-        <p><?= statusBadge($user) ?></p>
+        <div class="status-corner">
+            <?= statusBadge($user) ?>
+        </div>
+
 
     </div>
 </div>
+<h3>📊 Auction Activity Summary</h3>
+
+<div style="display:flex; gap:20px; margin:20px 0;">
+
+  <a href="user_auctions_created.php?user_id=<?= $user_id ?>" class="stat-card green">
+    <h2><?= $created ?></h2>
+    <p>Auctions Created</p>
+  </a>
+
+  <a href="user_auctions_participated.php?user_id=<?= $user_id ?>" class="stat-card orange">
+    <h2><?= $participated ?></h2>
+    <p>Participated</p>
+  </a>
+
+  <a href="user_auctions_won.php?user_id=<?= $user_id ?>" class="stat-card red">
+    <h2><?= $won ?></h2>
+    <p>Auctions Won</p>
+  </a>
+
+</div>
+
 
 <table>
 <tr><td><b>User Name</b></td><td><?= $user['username'] ?? '-' ?></td></tr>
