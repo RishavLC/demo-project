@@ -409,7 +409,7 @@ td {
 </form>
 
 <br>
-<a href="manage_users.php">⬅ Back</a>
+<a class="btn" href="manage_users.php">⬅ Back</a>
 </div>
 </div>
 <script src="../assets/script.js"></script>

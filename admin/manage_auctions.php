@@ -213,15 +213,11 @@ if (!empty($row['image_path'])) {
 
 </div>
 <div class="pagination">
-<div class="pagination">
 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
     <a href="?page=<?= $i ?>" class="<?= ($i == $page) ? 'active-page' : '' ?>">
         <?= $i ?>
     </a>
 <?php endfor; ?>
 </div>
-
-</div>
-
 </body>
 </html>

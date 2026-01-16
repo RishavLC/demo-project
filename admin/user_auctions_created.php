@@ -27,6 +27,11 @@ if (!$user) {
     exit();
 }
 
+/* ===== PAGINATION SETUP ===== */
+$itemsPerPage = 3;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $itemsPerPage;
+
 /* ===== FETCH AUCTIONS CREATED ===== */
 $sql = "
 SELECT 
@@ -38,12 +43,25 @@ FROM auction_items ai
 LEFT JOIN users u ON ai.winner_id = u.id
 WHERE ai.seller_id = ?
 ORDER BY ai.created_at DESC
+LIMIT ?, ?
 ";
-
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("iii", $user_id, $offset, $itemsPerPage);
 $stmt->execute();
 $auctions = $stmt->get_result();
+
+/* ===== TOTAL COUNT ===== */
+$countStmt = $conn->prepare("
+    SELECT COUNT(*) AS total
+    FROM auction_items
+    WHERE seller_id = ?
+");
+$countStmt->bind_param("i", $user_id);
+$countStmt->execute();
+$totalItems = $countStmt->get_result()->fetch_assoc()['total'];
+$totalPages = ceil($totalItems / $itemsPerPage);
+$countStmt->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -200,6 +218,8 @@ $auctions = $stmt->get_result();
 }
 
 h2 { margin-bottom:10px; }
+.btn { display:inline-block; padding:6px 12px; background:#3498db; color:#fff; border-radius:6px; text-decoration:none; margin-top:10px; }
+
 </style>
 </head>
 
@@ -281,9 +301,10 @@ if ($imgRes && $imgRes->num_rows > 0) {
 
 
     <div class="auction-info">
-        <h3><?= htmlspecialchars($a['title']) ?><span class="badge <?= $a['status'] ?>">
+        <a style="text-decoration: none; color: black;" href="bid_history.php?item_id=<?= $a['id'] ?>"><h3><?= htmlspecialchars($a['title']) ?></h3></a>
+              <span class="badge <?= $a['status'] ?>">
             <?= strtoupper($a['status']) ?>
-        </span></h3>
+        </span>
 
         <p><?= htmlspecialchars($a['description']) ?></p>
 
@@ -314,9 +335,25 @@ if ($imgRes && $imgRes->num_rows > 0) {
 </div>
 
 <?php endwhile; ?>
+<?php if ($totalPages > 1): ?>
+<div style="text-align:center; margin-top:20px;">
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+        <?php if ($p == $page): ?>
+            <strong style="padding:6px 12px; background:#3498db; color:#fff; border-radius:6px;">
+                <?= $p ?>
+            </strong>
+        <?php else: ?>
+            <a href="?user_id=<?= $user_id ?>&page=<?= $p ?>"
+               style="padding:6px 12px; border:1px solid #ccc; border-radius:6px; text-decoration:none; color:#333;">
+               <?= $p ?>
+            </a>
+        <?php endif; ?>
+    <?php endfor; ?>
+</div>
+<?php endif; ?>
 
 <br>
-<a href="view_user.php?id=<?= $user_id ?>">⬅ Back to Profile</a>
+<a class="btn" href="view_user.php?id=<?= $user_id ?>">⬅ Back</a>
 
 </div>
 </div>

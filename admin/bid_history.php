@@ -44,8 +44,8 @@ $imgRes = $imgStmt->get_result();
 $imgRow = $imgRes->fetch_assoc();
 $imgStmt->close();
 
-/* assign image_path into item so existing code works */
 $item['image'] = $imgRow['image_path'] ?? '';
+
 /* ================= FETCH BID STATS ================= */
 $stats_sql = "
     SELECT 
@@ -75,18 +75,86 @@ $stmt->execute();
 $winner = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-/* ================= FETCH ALL BIDS ================= */
+/* ================= PAGINATION SETUP ================= */
+$bidsPerPage = 5;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $bidsPerPage;
+
+/* ================= FETCH BIDS WITH LIMIT ================= */
 $bids_sql = "
     SELECT b.bid_amount, b.bid_time, u.username
     FROM bids b
     JOIN users u ON u.id = b.bidder_id
     WHERE b.item_id = ?
     ORDER BY b.bid_amount DESC, b.bid_time DESC
+    LIMIT ?, ?
 ";
 $stmt = $conn->prepare($bids_sql);
-$stmt->bind_param("i", $item_id);
+$stmt->bind_param("iii", $item_id, $offset, $bidsPerPage);
 $stmt->execute();
 $bids = $stmt->get_result();
+$stmt->close();
+
+/* ================= GET TOTAL BIDS FOR PAGINATION ================= */
+$totalBids = $stats['total_bids'];
+$totalPages = ceil($totalBids / $bidsPerPage);
+
+
+/* ================= USER FILTER ================= */
+$searchUser = isset($_GET['search_user']) ? trim($_GET['search_user']) : '';
+
+/* ================= FETCH BIDS WITH FILTER AND PAGINATION ================= */
+$bids_sql = "
+    SELECT b.bid_amount, b.bid_time, u.username
+    FROM bids b
+    JOIN users u ON u.id = b.bidder_id
+    WHERE b.item_id = ?
+";
+
+$params = [$item_id];
+$types = "i";
+
+if (!empty($searchUser)) {
+    $bids_sql .= " AND u.username LIKE ?";
+    $params[] = "%$searchUser%";
+    $types .= "s";
+}
+
+$bids_sql .= " ORDER BY b.bid_amount DESC, b.bid_time DESC LIMIT ?, ?";
+$params[] = $offset;
+$params[] = $bidsPerPage;
+$types .= "ii";
+
+$stmt = $conn->prepare($bids_sql);
+$stmt->bind_param($types, ...$params);
+$stmt->execute();
+$bids = $stmt->get_result();
+
+/* ================= GET TOTAL BIDS FOR PAGINATION (WITH FILTER) ================= */
+$count_sql = "
+    SELECT COUNT(*) AS total_bids
+    FROM bids b
+    JOIN users u ON u.id = b.bidder_id
+    WHERE b.item_id = ?
+";
+
+$count_params = [$item_id];
+$count_types = "i";
+
+if (!empty($searchUser)) {
+    $count_sql .= " AND u.username LIKE ?";
+    $count_params[] = "%$searchUser%";
+    $count_types .= "s";
+}
+
+$count_stmt = $conn->prepare($count_sql);
+$count_stmt->bind_param($count_types, ...$count_params);
+$count_stmt->execute();
+$totalBids = $count_stmt->get_result()->fetch_assoc()['total_bids'];
+$count_stmt->close();
+
+$totalPages = ceil($totalBids / $bidsPerPage);
+
 ?>
 
 <!DOCTYPE html>
@@ -204,7 +272,15 @@ th {
   font-weight: 600;
   white-space: nowrap;
 }
-
+.pagination { text-align:center; margin-top:15px; }
+.pagination a {
+    padding:6px 10px; margin:2px;
+    border:1px solid #ccc; border-radius:6px;
+    text-decoration:none; color:#333;
+}
+.active-page {
+    background:#4a90e2; color:white !important;
+}
 </style>
 </head>
 
@@ -260,18 +336,86 @@ th {
 
 <div class="info-box">
     <div>Total Bids<br><?= $stats['total_bids'] ?></div>
-    <div>Starting Price<br>Rs <?= number_format($item['start_price'], 2) ?></div>
-    <div>
-        Highest Bid<br>
-        Rs <?= $stats['highest_bid'] ? number_format($stats['highest_bid'], 2) : "—" ?>
-    </div>
-    <div>
-        Winner<br>
-        <?= $winner ? "<span class='winner'>{$winner['username']}</span>" : "No bids yet" ?>
-    </div>
+    <div>Starting Bid<br>Rs <?= number_format($item['start_price'], 2) ?></div>
+   <?php
+if ($item['status'] === 'active') {
+    $bid_label = "Current Highest Bid";
+} elseif ($item['status'] === 'closed') {
+    $bid_label = "Winning Bid";
+} else {
+    $bid_label = "Highest Bid";
+}
+
+$display_bid = $stats['highest_bid'] 
+    ? $stats['highest_bid'] 
+    : $item['start_price'];
+?>
+
+<div>
+    <b><?= $bid_label ?>:</b><br>
+    Rs <?= number_format($display_bid, 2) ?>
 </div>
 
+    <div>
+        <?php
+$winner_name = '-';
+
+if ($item['status'] === 'closed') {
+    // FINAL WINNER
+    $q = $conn->prepare("
+        SELECT u.username
+        FROM auction_items ai
+        LEFT JOIN users u ON ai.winner_id = u.id
+        WHERE ai.id = ?
+    ");
+    $q->bind_param("i", $item_id);
+    $q->execute();
+    $winner_name = $q->get_result()->fetch_assoc()['username'] ?? '-';
+
+} elseif ($item['status'] === 'active') {
+    // CURRENT LEADING BIDDER
+    $q = $conn->prepare("
+        SELECT u.username
+        FROM bids b
+        JOIN users u ON b.bidder_id = u.id
+        WHERE b.item_id = ?
+        ORDER BY b.bid_amount DESC, b.bid_time ASC
+        LIMIT 1
+    ");
+    $q->bind_param("i", $item_id);
+    $q->execute();
+    $winner_name = $q->get_result()->fetch_assoc()['username'] ?? '-';
+}
+?>
+
+<div>
+    <b>
+        <?= $item['status'] === 'active' ? 'Leading Bidder' : 'Winner' ?>:
+    </b>
+    <?= htmlspecialchars($winner_name) ?>
+</div>
+
+    </div>
+    </div>
+
 <h3>All Bids</h3>
+<!-- User Filter Form -->
+<div style="margin-bottom:15px; display:flex; justify-content:flex-end; gap:10px; align-items:center;">
+    <form method="get" style="display:flex; gap:5px; align-items:center;">
+        <input type="hidden" name="item_id" value="<?= $item_id ?>">
+        <input 
+            type="text" 
+            name="search_user" 
+            placeholder="Filter by username" 
+            value="<?= htmlspecialchars($searchUser) ?>" 
+            style="padding:5px 10px; border-radius:5px; border:1px solid #ccc; min-width:180px;"
+        >
+        <button type="submit" style="padding:5px 12px; border:none; background:#2c3e50; color:#fff; border-radius:5px; cursor:pointer;">Filter</button>
+        <?php if($searchUser): ?>
+            <a href="?item_id=<?= $item_id ?>" style="padding:5px 12px; background:#888; color:#fff; border-radius:5px; text-decoration:none;">Reset</a>
+        <?php endif; ?>
+    </form>
+</div>
 
 <table>
 <tr>
@@ -296,6 +440,19 @@ th {
 </tr>
 <?php endif; ?>
 </table>
+<!-- Pagination Links -->
+<?php if ($totalPages > 1): ?>
+<div class="pagination" style="text-align:center; margin-top:20px;">
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+        <?php if ($p == $page): ?>
+            <strong><?= $p ?></strong>
+        <?php else: ?>
+            <a class="active-page" href="?item_id=<?= $item_id ?>&page=<?= $p ?><?php if($searchUser) echo '&search_user='.urlencode($searchUser); ?>"><?= $p ?></a>
+        <?php endif; ?>
+        &nbsp;
+    <?php endfor; ?>
+</div>
+<?php endif; ?>
 
 </div>
 </body>
