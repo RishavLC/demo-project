@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Kathmandu');
 session_start();
 
 /* Redirect if already logged in */

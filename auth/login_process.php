@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Kathmandu');
+
 session_start();
 include "../common/config.php";
 
@@ -49,16 +51,21 @@ if ($user["status"] === "banned") {
 /* ⏳ SUSPENDED */
 if ($user["status"] === "suspended") {
 
-    $suspendedAt = strtotime($user["suspended_at"]);
-    $suspendEnd  = $suspendedAt + (7 * 24 * 60 * 60);
+    $suspendEnd = strtotime($user["suspended_at"]); // already end time
 
     if (time() < $suspendEnd) {
         header("Location: login.php?suspended_until=" . $suspendEnd);
         exit();
     }
-     // auto-reactivate
-    $conn->query("UPDATE users SET status='active', suspended_at=NULL WHERE id=".$user["id"]);
+
+    // auto-reactivate
+    $conn->query("
+        UPDATE users 
+        SET status='active', suspended_at=NULL 
+        WHERE id=" . (int)$user["id"]
+    );
 }
+
 /* ✅ LOGIN SUCCESS */
 $_SESSION["user_id"] = $user["id"];
 $_SESSION["role"] = $user["role_name"]; // admin | user
