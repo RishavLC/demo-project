@@ -54,16 +54,6 @@ if (isset($_GET['reject'])) {
     header("Location: manage_auctions.php");
     exit();
 }
-/* ---------------- PAGINATION ---------------- */
-$limit = 3;
-$page = max(1, intval($_GET['page'] ?? 1));
-$offset = ($page - 1) * $limit;
-
-$countResult = $conn->query("SELECT COUNT(*) AS total FROM auction_items");
-$totalRows = $countResult->fetch_assoc()['total'];
-$totalPages = ceil($totalRows / $limit);
-
-
 /* =======================
    FETCH AUCTIONS + IMAGE
 ======================= */
@@ -76,9 +66,10 @@ SELECT ai.*, u.username,
         LIMIT 1) AS image_path
 FROM auction_items ai
 JOIN users u ON ai.seller_id = u.id
+WHERE ai.status = 'pending'
 ORDER BY ai.created_at DESC
-LIMIT $limit OFFSET $offset
 ";
+
 $result = $conn->query($sql);
 ?>
 
@@ -136,15 +127,130 @@ button { background:#27ae60; color:#fff; }
   margin-bottom:15px;
 }
 
-.pagination { text-align:center; margin-top:15px; }
-.pagination a {
-    padding:6px 10px; margin:2px;
-    border:1px solid #ccc; border-radius:6px;
-    text-decoration:none; color:#333;
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: #2c3e50;
+  color: #fff;
 }
-.active-page {
-    background:#4a90e2; color:white !important;
+
+/* Logo wrapper */
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+/* Logo image */
+.logo-box img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Logo text */
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Toggle button */
+/* .toggle-btn {
+  cursor: pointer;
+  font-size: 20px;
+} */
+
+/* ================= COLLAPSED SIDEBAR ================= */
+
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+.sidebar.collapsed .logo-box {
+  justify-content: center;
+  width: 100%;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+}
+
+.sidebar.collapsed .toggle-btn {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  position: relative;
+}
+
+.sidebar ul li a {
+  display: block;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #fff;
+}
+
+/* Dropdown Caret */
+.sidebar ul li > a.caret::after {
+  content: "▾";
+  float: right;
+}
+
+/* Dropdown Menu */
+/* Ensure parent li is positioned relative */
+.sidebar ul li {
+  position: relative;  /* keeps dropdown aligned under the parent */
+}
+
+/* Position dropdown absolutely */
+.dropdown-menu {
+  display: none;
+  position: absolute;  /* important */
+  top: 100%;           /* right below parent li */
+  left: 25;
+  width: 220px;        /* same as sidebar width */
+  background: #3a5064;
+  margin: 0;
+  padding: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 1000;       /* make sure it’s on top */
+}
+
+.dropdown-menu li a {
+  padding: 10px 20px;
+  padding-left: 35px;
+  font-size: 14px;
+  color: #0a4554;
+  white-space: nowrap;
+  margin-left: 0px;
+}
+
+
+.dropdown-menu li a:hover {
+  background: #223345;
+  margin-left: -10px;
+}
+
+/* Show dropdown when active */
+.dropdown-menu.show {
+  display: block;
+}
+
 </style>
 </head>
 
@@ -152,15 +258,35 @@ button { background:#27ae60; color:#fff; }
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sidebar-header">Admin Panel</div>
+  <div class="sidebar-header">
+    <div class="logo-box">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo">
+      <span class="logo-text">EasyBid</span>
+    </div>
+    <div class="toggle-btn">☰</div>
+  </div>
+
   <ul>
-    <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
+    <li><a href="index.php">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
-    <li><a href="manage_auctions.php" class="active">📦 Manage Auctions</a></li>
-    <li><a href="auction_history.php">📜 Auction History</a></li>
+    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+
+    <!-- DROPDOWN -->
+    <li>
+      <a class="caret" onclick="toggleDropdown('auctionDropdown')">
+        📜 Auctions 
+      </a>
+      <ul class="dropdown-menu" id="auctionDropdown">
+        <li><a href="auctions_active.php">🟢 Active</a></li>
+        <li><a href="auctions_upcoming.php">🟡 Upcoming</a></li>
+        <li><a href="auction_overview.php">📜 History</a></li>
+      </ul>
+    </li>
+
     <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
+
 
 <div class="main-content">
 <h2>Manage Auction Items</h2>
@@ -172,7 +298,6 @@ button { background:#27ae60; color:#fff; }
 <div class="grid">
 
 <?php while($row = $result->fetch_assoc()): ?>
-
 <?php
 // IMAGE FIX (IMPORTANT)
 if (!empty($row['image_path'])) {
@@ -191,12 +316,20 @@ if (!empty($row['image_path'])) {
   <div class="card-content">
     <h3><?= htmlspecialchars($row['title']) ?></h3>
     <p><strong>Seller:</strong> <?= htmlspecialchars($row['username']) ?></p>
-    <p><strong>Start Price:</strong> Rs. <?= number_format($row['start_price'],2) ?></p>
-    <p><strong>Status:</strong>
-      <span class="status-<?= strtolower($row['status']) ?>">
-        <?= ucfirst($row['status']) ?>
-      </span>
-    </p>
+
+<p><strong>Start Price:</strong> Rs. <?= number_format($row['start_price'],2) ?></p>
+
+<p><strong>Start Date:</strong> 
+<?= date("d M Y, h:i A", strtotime($row['start_time'])) ?>
+</p>
+
+<p><strong>End Date:</strong> 
+<?= date("d M Y, h:i A", strtotime($row['end_time'])) ?>
+</p>
+
+<p><strong>Status:</strong>
+<span class="status-pending">Pending</span>
+</p>
 
     <?php if ($row['status'] == 'pending'): ?>
       <form method="POST">
@@ -212,12 +345,13 @@ if (!empty($row['image_path'])) {
 <?php endwhile; ?>
 
 </div>
-<div class="pagination">
-<?php for ($i = 1; $i <= $totalPages; $i++): ?>
-    <a href="?page=<?= $i ?>" class="<?= ($i == $page) ? 'active-page' : '' ?>">
-        <?= $i ?>
-    </a>
-<?php endfor; ?>
 </div>
+<script src="../assets/script.js"></script>
+<script>
+  function toggleDropdown(id) {
+  const menu = document.getElementById(id);
+          menu.classList.toggle("show");
+}
+</script>
 </body>
 </html>
