@@ -1,180 +1,125 @@
 <?php
 session_start();
-if (!isset($_SESSION["role"]) || $_SESSION["role"] != "admin") {
-  header("Location: ../auth/login.php");
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
+    header("Location: ../auth/login.php");
     exit();
 }
 
 include "../common/config.php";
 
-// Count Users
-$user_count = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
+/* ================= COUNTS ================= */
 
-// Suspended Users
-$suspended_users = $conn
-    ->query("SELECT COUNT(*) AS total FROM users WHERE status='suspended'")
-    ->fetch_assoc()['total'];
+// Users
+$user_count = $conn->query("SELECT COUNT(*) total FROM users")->fetch_assoc()['total'];
+$active_users = $conn->query("SELECT COUNT(*) total FROM users WHERE status='active'")->fetch_assoc()['total'];
+$suspended_users = $conn->query("SELECT COUNT(*) total FROM users WHERE status='suspended'")->fetch_assoc()['total'];
+$banned_users = $conn->query("SELECT COUNT(*) total FROM users WHERE status='banned'")->fetch_assoc()['total'];
 
-// Banned Users
-$banned_users = $conn
-    ->query("SELECT COUNT(*) AS total FROM users WHERE status='banned'")
-    ->fetch_assoc()['total'];
+// Auctions
+$auction_count = $conn->query("SELECT COUNT(*) total FROM auction_items")->fetch_assoc()['total'];
+$active_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status='active'")->fetch_assoc()['total'];
+$upcoming_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status='upcoming'")->fetch_assoc()['total'];
+$closed_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status IN ('closed','sold')")->fetch_assoc()['total'];
 
-// Count Auctions
-$auction_count = $conn->query("SELECT COUNT(*) AS total FROM auction_items")->fetch_assoc()['total'];
-
-// Active Auctions
-$active_auctions = $conn->query("SELECT COUNT(*) AS total FROM auction_items WHERE status='active'")->fetch_assoc()['total'];
-
-// Closed Auctions
-$closed_auctions = $conn->query("SELECT COUNT(*) AS total FROM auction_items WHERE status='closed' OR status='sold'")->fetch_assoc()['total'];
-
-// Total Bids
-$total_bids = $conn->query("SELECT COUNT(*) AS total FROM bids")->fetch_assoc()['total'];
-
-// Fetch all records (admin sees all)
-$sql = "SELECT r.id, r.title, r.description, u.username 
+/* ================= RECENT RECORDS ================= */
+$sql = "SELECT r.id, r.title, r.description, u.username
         FROM records r
         JOIN users u ON r.user_id = u.id
-        ORDER BY r.id DESC";
+        ORDER BY r.id DESC
+        LIMIT 10";
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="../assets/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .card h3 {
-      margin: 0;
-      font-size: 24px;
-      color: #2c3e50;
-    }
-    .card p {
-      margin: 5px 0 0;
-      color: #7f8c8d;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 25px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background: #3498db;
-      color: white;
-    }
-    .btn-edit, .btn-delete {
-      padding: 5px 10px;
-      border-radius: 6px;
-      text-decoration: none;
-      color: white;
-    }
-    .btn-edit { background: #27ae60; }
-    .btn-delete { background: #e74c3c; }
-    canvas {
-      margin-top: 40px;
-    }
-    #auctionChart {
-    max-width: 350px;   /* Reduce width */
-    max-height: 350px;  /* Reduce height */
-    margin: 10 auto;
-    display: block;
-    }
-/* Sidebar Header */
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px;
-  background: #2c3e50;
-  color: #fff;
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="../assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { background:#f4f6f8; font-family:Arial,sans-serif; }
+
+/* ===== DASHBOARD ===== */
+.main-content { margin-left:240px; padding:30px; }
+
+/* ===== STATS ===== */
+.stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px;
 }
 
-/* Logo wrapper */
-.logo-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.card-link { text-decoration:none; }
+
+.card {
+  background:#fff;
+  padding:22px;
+  border-radius:14px;
+  text-align:center;
+  box-shadow:0 4px 8px rgba(0,0,0,.1);
+  transition:.3s;
+  cursor:pointer;
 }
 
-/* Logo image */
-.logo-box img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 6px;
+.card:hover {
+  transform:translateY(-6px);
+  box-shadow:0 12px 22px rgba(0,0,0,.18);
 }
 
-/* Logo text */
-.logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  white-space: nowrap;
+.card h3 { font-size:28px; margin:0; color:#2c3e50; }
+.card p { margin-top:6px; color:#7f8c8d; }
+
+/* Colors */
+.success { border-left:6px solid #27ae60; }
+.warning { border-left:6px solid #f39c12; }
+.danger  { border-left:6px solid #e74c3c; }
+.info    { border-left:6px solid #3498db; }
+.dark    { border-left:6px solid #2c3e50; }
+
+/* ===== TABLE ===== */
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:35px;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
 }
 
-/* Toggle button */
-/* .toggle-btn {
-  cursor: pointer;
-  font-size: 20px;
-} */
-
-/* ================= COLLAPSED SIDEBAR ================= */
-
-.sidebar.collapsed .logo-text {
-  display: none;
+th,td {
+  padding:14px;
+  border-bottom:1px solid #eee;
 }
 
-.sidebar.collapsed .logo-box {
-  justify-content: center;
-  width: 100%;
+th {
+  background:#3498db;
+  color:#fff;
+  text-align:left;
 }
 
-.sidebar.collapsed .sidebar-header {
-  justify-content: center;
+.btn-edit {
+  background:#27ae60;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+  text-decoration:none;
 }
 
-.sidebar.collapsed .toggle-btn {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
+.btn-delete {
+  background:#e74c3c;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+  text-decoration:none;
 }
 
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Chart */
+#auctionChart {
+  max-width:380px;
+  margin:40px auto;
 }
 
-.sidebar ul li {
-  position: relative;
-}
-
-.sidebar ul li a {
-  display: block;
-  padding: 12px 20px;
-  text-decoration: none;
-  color: #fff;
-}
 
 /* Dropdown Caret */
 .sidebar ul li > a.caret::after {
@@ -222,17 +167,18 @@ $result = $conn->query($sql);
 .dropdown-menu.show {
   display: block;
 }
-
 </style>
 </head>
+
 <body>
+
+<!-- ===== SIDEBAR (UNCHANGED STRUCTURE) ===== -->
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="logo-box">
-      <img src="../images/logo.jpeg" alt="EasyBid Logo">
+      <img src="../images/logo.jpeg">
       <span class="logo-text">EasyBid</span>
     </div>
-    <div class="toggle-btn">☰</div>
   </div>
 
   <ul>
@@ -240,15 +186,12 @@ $result = $conn->query($sql);
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
 
-    <!-- DROPDOWN -->
     <li>
-      <a class="caret" onclick="toggleDropdown('auctionDropdown')">
-        📜 Auctions 
-      </a>
-      <ul class="dropdown-menu" id="auctionDropdown">
+      <a class="caret" onclick="toggleDropdown('auctionDrop')">📜 Auctions</a>
+      <ul class="dropdown-menu" id="auctionDrop">
         <li><a href="auctions_active.php">🟢 Active</a></li>
         <li><a href="auctions_upcoming.php">🟡 Upcoming</a></li>
-        <li><a href="auction_overview.php">📜 History</a></li>
+        <li><a href="auction_overview.php">📕 History</a></li>
       </ul>
     </li>
 
@@ -256,93 +199,97 @@ $result = $conn->query($sql);
   </ul>
 </div>
 
-
+<!-- ===== MAIN ===== -->
 <div class="main-content">
-  <h2>Admin Dashboard</h2>
-  
-  <div class="stats">
-    <div class="card">
-      <h3><?= $user_count ?></h3>
-      <p>Total Users</p>
-    </div>
-    <a href="manage_users.php?status=suspended" style="text-decoration:none;">
-      <div class="card" style="border-left:6px solid #f39c12;">
-        <h3><?= $suspended_users ?></h3>
-        <p>Suspended Users</p>
-      </div>
-    </a>
-    <a href="manage_users.php?status=banned" style="text-decoration:none;">
-      <div class="card" style="border-left:6px solid #e74c3c;">
-        <h3><?= $banned_users ?></h3>
-        <p>Banned Users</p>
-      </div>
-    </a>
 
-    <div class="card">
-      <h3><?= $auction_count ?></h3>
-      <p>Total Auctions</p>
-    </div>
-    <div class="card">
-      <h3><?= $active_auctions ?></h3>
-      <p>Active Auctions</p>
-    </div>
-    <div class="card">
-      <h3><?= $closed_auctions ?></h3>
-      <p>Closed Auctions</p>
-    </div>
-    <div class="card">
-      <h3><?= $total_bids ?></h3>
-      <p>Total Bids</p>
-    </div>
-  </div>
+<h2>Admin Dashboard</h2>
 
-  <canvas id="auctionChart" width="100" height="100"></canvas>
+<div class="stats">
 
-  <h2 style="margin-top:40px;">All Records</h2>
-  <table>
-    <tr>
-      <th>ID</th><th>Title</th><th>Description</th><th>User</th><th>Action</th>
-    </tr>
-    <?php while($row = $result->fetch_assoc()) { ?>
-    <tr>
-      <td><?= $row['id'] ?></td>
-      <td><?= htmlspecialchars($row['title']) ?></td>
-      <td><?= htmlspecialchars($row['description']) ?></td>
-      <td><?= htmlspecialchars($row['username']) ?></td>
-      <td>
-        <a href="edit_record.php?id=<?= $row['id'] ?>" class="btn-edit">✏ Edit</a>
-        <a href="delete_record.php?id=<?= $row['id'] ?>" class="btn-delete">🗑 Delete</a>
-      </td>
-    </tr>
-    <?php } ?>
-  </table>
+<a href="manage_users.php" class="card-link">
+<div class="card">
+<h3><?= $user_count ?></h3><p>Total Users</p>
+</div></a>
+
+<a href="manage_users.php?status=active" class="card-link">
+<div class="card success">
+<h3><?= $active_users ?></h3><p>Active Users</p>
+</div></a>
+
+<a href="manage_users.php?status=suspended" class="card-link">
+<div class="card warning">
+<h3><?= $suspended_users ?></h3><p>Suspended Users</p>
+</div></a>
+
+<a href="manage_users.php?status=banned" class="card-link">
+<div class="card danger">
+<h3><?= $banned_users ?></h3><p>Banned Users</p>
+</div></a>
+
+<a href="manage_auctions.php" class="card-link">
+<div class="card info">
+<h3><?= $auction_count ?></h3><p>Total Auctions</p>
+</div></a>
+
+<a href="auctions_active.php" class="card-link">
+<div class="card success">
+<h3><?= $active_auctions ?></h3><p>Active Auctions</p>
+</div></a>
+
+<a href="auctions_upcoming.php" class="card-link">
+<div class="card warning">
+<h3><?= $upcoming_auctions ?></h3><p>Upcoming Auctions</p>
+</div></a>
+
+<a href="auction_overview.php" class="card-link">
+<div class="card dark">
+<h3><?= $closed_auctions ?></h3><p>Closed / Sold</p>
+</div></a>
+
 </div>
 
-<script src="../assets/script.js"></script>
+<canvas id="auctionChart"></canvas>
+
+<h2>Recent Records</h2>
+
+<table>
+<tr>
+<th>ID</th><th>Title</th><th>Description</th><th>User</th><th>Action</th>
+</tr>
+
+<?php while($row=$result->fetch_assoc()){ ?>
+<tr>
+<td><?= $row['id'] ?></td>
+<td><?= htmlspecialchars($row['title']) ?></td>
+<td><?= htmlspecialchars($row['description']) ?></td>
+<td><?= htmlspecialchars($row['username']) ?></td>
+<td>
+<a href="edit_record.php?id=<?= $row['id'] ?>" class="btn-edit">Edit</a>
+<a href="delete_record.php?id=<?= $row['id'] ?>" class="btn-delete">Delete</a>
+</td>
+</tr>
+<?php } ?>
+</table>
+
+</div>
+
 <script>
-const ctx = document.getElementById('auctionChart').getContext('2d');
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Active Auctions', 'Closed Auctions'],
-        datasets: [{
-            data: [<?= $active_auctions ?>, <?= $closed_auctions ?>],
-            backgroundColor: ['#27ae60', '#e74c3c']
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'bottom' }
-        }
-    }
+new Chart(document.getElementById('auctionChart'), {
+  type:'doughnut',
+  data:{
+    labels:['Active','Upcoming','Closed'],
+    datasets:[{
+      data:[<?= $active_auctions ?>,<?= $upcoming_auctions ?>,<?= $closed_auctions ?>],
+      backgroundColor:['#27ae60','#f39c12','#e74c3c']
+    }]
+  },
+  options:{ plugins:{ legend:{ position:'bottom' } } }
 });
 
-function toggleDropdown(id) {
-  const menu = document.getElementById(id);
-          menu.classList.toggle("show");
+function toggleDropdown(id){
+  document.getElementById(id).classList.toggle("show");
 }
-
 </script>
+
 </body>
 </html>

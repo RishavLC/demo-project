@@ -10,10 +10,6 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "user") {
     header("Location: ../auth/login.php");
     exit();
 }
-// if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
-//    header("Location: ../auth/login.php");
-//     exit();
-// }
 include "../common/config.php";
 
 $user_id = $_SESSION["user_id"];
@@ -156,23 +152,44 @@ if (!empty($search)) {
     $stmt->bind_param("i", $user_id);
 }
 
-/* 🔹 3. Fetch Closed Auctions (with winners) */
-$closed_sql = "SELECT ai.*, u.username AS seller,
-               (SELECT b.bidder_id FROM bids b 
-                WHERE b.item_id = ai.id 
-                ORDER BY b.bid_amount DESC LIMIT 1) AS winner_id,
-               (SELECT b.bid_amount FROM bids b 
-                WHERE b.item_id = ai.id 
-                ORDER BY b.bid_amount DESC LIMIT 1) AS winning_bid
-               FROM auction_items ai
-               JOIN users u ON ai.seller_id = u.id
-               WHERE ai.status='closed'
-               ORDER BY ai.end_time DESC";
-$closed_result = $conn->query($closed_sql);
+/* 🔹 3. Fetch Auctions User Participated In */
+$participated_sql = "
+SELECT 
+    ai.id,
+    ai.title,
+    ai.start_price,
+    ai.status,
+    ai.end_time,
+    u.username AS seller,
+    img.image_path,
+    MAX(b1.bid_amount) AS highest_bid,
+    MAX(CASE WHEN b1.bidder_id = ? THEN b1.bid_amount ELSE 0 END) AS my_bid,
+    b2.bidder_id AS winner_id
+FROM auction_items ai
+JOIN bids b1 ON ai.id = b1.item_id
+JOIN users u ON ai.seller_id = u.id
+LEFT JOIN auction_images img 
+       ON ai.id = img.item_id AND img.is_primary = 1
+LEFT JOIN (
+    SELECT item_id, bidder_id
+    FROM bids b
+    WHERE (item_id, bid_amount) IN (
+        SELECT item_id, MAX(bid_amount)
+        FROM bids
+        GROUP BY item_id
+    )
+) b2 ON ai.id = b2.item_id
+WHERE b1.bidder_id = ?
+GROUP BY ai.id
+ORDER BY ai.end_time DESC
+";
 
-if(!$closed_result){
-    die("SQL Error: " . $conn->error);
-}
+$stmt = $conn->prepare($participated_sql);
+$stmt->bind_param("ii", $user_id, $user_id);
+$stmt->execute();
+$participated_result = $stmt->get_result();
+$stmt->close();
+
 // unread notification count
 $sql = "SELECT COUNT(*) AS unread FROM notifications WHERE user_id=? AND is_read=0";
 $stmt = $conn->prepare($sql);
@@ -226,6 +243,26 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $total_investment = $stmt->get_result()->fetch_assoc()['total_investment'] ?? 0;
 $stmt->close();
+
+/* 🔹 4. Fetch Upcoming Auctions (start_time > NOW()) */
+$upcoming_sql = "
+  SELECT ai.*, u.username AS seller,
+         img.image_path
+  FROM auction_items ai
+  JOIN users u ON ai.seller_id = u.id
+  LEFT JOIN auction_images img 
+         ON ai.id = img.item_id AND img.is_primary = 1
+  WHERE ai.status='upcoming'
+    AND ai.start_time > NOW()
+  ORDER BY ai.start_time ASC
+";
+
+$upcoming_result = $conn->query($upcoming_sql);
+
+if (!$upcoming_result) {
+    die('Upcoming SQL Error: ' . $conn->error);
+}
+
 
 ?>
 <!DOCTYPE html>
@@ -402,44 +439,143 @@ if (!empty($row['image_path'])) {
     <a href="?page=<?= $current_page + 1 ?>&sort_by=<?= $sort_by ?>">Next &raquo;</a>
   <?php endif; ?>
 </div>
+<!-- UPCOMING -->
+<h2 style="margin-top:40px;">Upcoming Auctions</h2>
 
-<!-- Auction Details Modal -->
-<div id="auctionModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeAuctionModal()">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <p><strong>Description:</strong> <span id="modalDescription"></span></p>
-    <p><strong>Seller:</strong> <span id="modalSeller"></span></p>
-    <p><strong>Starting Price:</strong> Rs.Rs. <span id="modalPrice"></span></p>
-    <p><strong>Highest Bid:</strong> Rs. <span id="modalHighest"></span></p>
-    <p><strong>Ends At:</strong> <span id="modalEnd"></span></p>
-    <a id="bidLink" href="#" class="btn">Place Bid</a>
-  </div>
-</div>
+<table class="auction-table">
+  <tr>
+    <th>SN</th>
+    <th>Image</th>
+    <th>Auction Item</th>
+    <th>Starting Price</th>
+    <th>Category</th>
+    <th>Starts At</th>
+  </tr>
 
+<?php 
+$sn = 1;
+if ($upcoming_result->num_rows > 0) {
+  while ($row = $upcoming_result->fetch_assoc()) { 
+?>
+<tr>
+  <td><?= $sn++ ?></td>
 
-  <h2 style="margin-top:40px;">Closed Auctions</h2>
-  <div class="grid">
-    <?php while($row = $closed_result->fetch_assoc()) { 
-        $winner_name = "No bids";
-        if ($row['winner_id']) {
-            $wstmt = $conn->prepare("SELECT username FROM users WHERE id=?");
-            $wstmt->bind_param("i", $row['winner_id']);
-            $wstmt->execute();
-            $wstmt->bind_result($winner_name);
-            $wstmt->fetch();
-            $wstmt->close();
-        }
+  <td>
+    <?php
+    if (!empty($row['image_path'])) {
+        $clean_path = str_replace(['../', './'], '', $row['image_path']);
+        $img_url = "../" . $clean_path;
+    } else {
+        $img_url = "../assets/no-image.png";
+    }
     ?>
-    <div class="card">
-      <h3><?= htmlspecialchars($row['title']) ?></h3>
-      <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
-      <p><strong>Final Price:</strong> <?= $row['winning_bid'] ? "Rs. ".$row['winning_bid'] : "N/A" ?></p>
-      <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
-      <p><em>Closed on <?= $row['end_time'] ?></em></p>
-    </div>
-    <?php } ?>
-  </div>
+    <img src="<?= $img_url ?>" width="70" height="60"
+         style="object-fit:cover;border-radius:6px;">
+  </td>
+
+  <td><?= htmlspecialchars($row['title']) ?></td>
+  <td>Rs. <?= $row['start_price'] ?></td>
+  <td><?= htmlspecialchars($row['category']) ?></td>
+  <td><?= $row['start_time'] ?></td>
+</tr>
+<?php } 
+} else { ?>
+<tr>
+  <td colspan="7" style="text-align:center;">No upcoming auctions</td>
+</tr>
+<?php } ?>
+</table>
+
+  <h2 style="margin-top:40px;">My Participated Auctions</h2>
+
+<table class="auction-table">
+  <tr>
+    <th>SN</th>
+    <th>Image</th>
+    <th>Item</th>
+    <th>Seller</th>
+    <th>My Bid</th>
+    <th>Highest Bid</th>
+    <th>Status</th>
+    <th>Result</th>
+  </tr>
+
+<?php 
+$sn = 1;
+if ($participated_result->num_rows > 0) {
+  while ($row = $participated_result->fetch_assoc()) {
+
+/* ================= RESULT LOGIC ================= */
+$now = time();
+$end_time = strtotime($row['end_time']);
+$user_id_int = (int)$_SESSION['user_id'];
+
+if ($end_time <= $now) {
+    // Auction ended
+    if ((int)$row['winner_id'] === $user_id_int) {
+        $result = "<span style='display:inline-block;
+                                background-color:#2ecc71;
+                                color:#fff;
+                                padding:4px 10px;
+                                border-radius:12px;
+                                font-size:12px;
+                                font-weight:bold;
+                                text-align:center;'>Won</span>";
+    } else {
+        $result = "<span style='display:inline-block;
+                                background-color:#e74c3c;
+                                color:#fff;
+                                padding:4px 10px;
+                                border-radius:12px;
+                                font-size:12px;
+                                font-weight:bold;
+                                text-align:center;'>Lost</span>";
+    }
+} else {
+    $result = "<span style='display:inline-block;
+                            background-color:#f75c08;
+                            color:#fff;
+                            padding:4px 10px;
+                            border-radius:12px;
+                            font-size:12px;
+                            font-weight:bold;
+                            text-align:center;'>Ongoing</span>";
+}
+
+
+    /* Image */
+    if (!empty($row['image_path'])) {
+        $img_url = "../" . str_replace(['../','./'],'',$row['image_path']);
+    } else {
+        $img_url = "../assets/no-image.png";
+    }
+?>
+<tr>
+  <td><?= $sn++ ?></td>
+
+  <td>
+    <img src="<?= $img_url ?>" width="70" height="60"
+         style="object-fit:cover;border-radius:6px;">
+  </td>
+
+  <td><?= htmlspecialchars($row['title']) ?></td>
+  <td><?= htmlspecialchars($row['seller']) ?></td>
+  <td>Rs. <?= $row['my_bid'] ?? 0 ?></td>
+  <td>Rs. <?= $row['highest_bid'] ?? 0 ?></td>
+  <td><?= ucfirst($row['status']) ?></td>
+<td><?= $result ?></td>
+
+</tr>
+<?php } 
+} else { ?>
+<tr>
+  <td colspan="8" style="text-align:center;">
+    You have not participated in any auctions yet.
+  </td>
+</tr>
+<?php } ?>
+</table>
+
 </div>
 
 <script src="../assets/script.js"></script>
