@@ -70,97 +70,6 @@ $countStmt->close();
 <title>Auctions Created</title>
 <link rel="stylesheet" href="../assets/style.css">
 <style>
-    /* Sidebar Header */
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px;
-  background: #2c3e50;
-  color: #fff;
-}
-
-/* Logo wrapper */
-.logo-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Logo image */
-.logo-box img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-/* Logo text */
-.logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Toggle button */
-/* .toggle-btn {
-  cursor: pointer;
-  font-size: 20px;
-} */
-
-/* ================= COLLAPSED SIDEBAR ================= */
-
-.sidebar.collapsed .logo-text {
-  display: none;
-}
-
-.sidebar.collapsed .logo-box {
-  justify-content: center;
-  width: 100%;
-}
-
-.sidebar.collapsed .sidebar-header {
-  justify-content: center;
-}
-
-.sidebar.collapsed .toggle-btn {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar ul li {
-  position: relative;
-}
-
-.sidebar ul li a {
-  display: block;
-  padding: 12px 20px;
-  text-decoration: none;
-  color: #fff;
-}
-
-.dropdown-menu {
-  display: none;
-  background: #2f3640;
-}
-
-.dropdown-menu li a {
-  padding-left: 40px;
-  font-size: 14px;
-}
-
-/* Show dropdown when active */
-.dropdown-menu.show {
-  display: block;
-}
 .page-box {
     max-width:1200px;
     margin:30px auto;
@@ -224,29 +133,25 @@ h2 { margin-bottom:10px; }
 </head>
 
 <body>
-    <div class="sidebar">
+   <div class="sidebar">
   <div class="sidebar-header">
     <div class="logo-box">
-      <img src="../images/logo.jpeg" alt="EasyBid Logo">
+      <img src="../images/logo.jpeg">
       <span class="logo-text">EasyBid</span>
     </div>
-    <div class="toggle-btn">☰</div>
   </div>
 
   <ul>
-    <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
+    <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
 
-    <!-- DROPDOWN -->
-    <li class="dropdown">
-      <a href="javascript:void(0)" onclick="toggleDropdown()">
-        📜 Auctions ▾
-      </a>
-      <ul class="dropdown-menu" id="auctionDropdown">
+    <li>
+      <a class="caret" onclick="toggleDropdown('auctionDrop')">📜 Auctions</a>
+      <ul class="dropdown-menu" id="auctionDrop">
         <li><a href="auctions_active.php">🟢 Active</a></li>
         <li><a href="auctions_upcoming.php">🟡 Upcoming</a></li>
-        <li><a href="auction_history.php">📜 History</a></li>
+        <li><a href="auction_overview.php">📕 History</a></li>
       </ul>
     </li>
 
@@ -358,5 +263,11 @@ if ($imgRes && $imgRes->num_rows > 0) {
 </div>
 </div>
 <script src="../assets/script.js"></script>
+<script>
+    function toggleDropdown(id) {
+        const menu = document.getElementById(id);
+          menu.classList.toggle("show");
+}
+</script>
 </body>
 </html>

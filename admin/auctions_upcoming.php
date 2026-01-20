@@ -121,18 +121,35 @@ tr:nth-child(even) { background:#f2f6fc; }
 </head>
 
 <body>
-
 <div class="sidebar">
-  <div class="sidebar-header">Admin Panel</div>
+  <div class="sidebar-header">
+    <div class="logo-box">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo">
+      <span class="logo-text">EasyBid</span>
+    </div>
+    <div class="toggle-btn">☰</div>
+  </div>
+
   <ul>
-    <li><a href="dashboard_admin.php">🏠 Dashboard</a></li>
-    <li><a href="active_auctions.php">🟢 Active Auctions</a></li>
-    <li><a href="upcoming_auctions.php">⏳ Upcoming Auctions</a></li>
-    <li><a href="auction_history.php">📜 Auction History</a></li>
+    <li><a href="../admin/">🏠 Dashboard</a></li>
+    <li><a href="manage_users.php">👥 Manage Users</a></li>
+    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+
+    <!-- DROPDOWN -->
+    <li>
+      <a class="caret" onclick="toggleDropdown('auctionDropdown')">
+        📜 Auctions 
+      </a>
+      <ul class="dropdown-menu" id="auctionDropdown">
+        <li><a href="auctions_active.php">🟢 Active</a></li>
+        <li><a href="auctions_upcoming.php">🟡 Upcoming</a></li>
+        <li><a href="auction_overview.php">📜 History</a></li>
+      </ul>
+    </li>
+
     <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
-
 <div class="main-content">
 
 <h2>⏳ Upcoming Auctions</h2>
@@ -209,5 +226,12 @@ for ($i = 1; $i <= $totalPages; $i++) {
 </div>
 
 </div>
+<script src="../assets/script.js"></script>
+<script>
+     function toggleDropdown(id) {
+  const menu = document.getElementById(id);
+          menu.classList.toggle("show");
+}
+</script>
 </body>
 </html>

@@ -335,131 +335,6 @@ td:last-child {
 .pagination a{padding:5px 9px;border:1px solid #ccc;margin:2px;border-radius:5px;text-decoration:none}
 .pagination .active{background:#3498db;color:#fff}
 
-
-/* Sidebar Header */
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px;
-  background: #2c3e50;
-  color: #fff;
-}
-
-/* Logo wrapper */
-.logo-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Logo image */
-.logo-box img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-/* Logo text */
-.logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Toggle button */
-/* .toggle-btn {
-  cursor: pointer;
-  font-size: 20px;
-} */
-
-/* ================= COLLAPSED SIDEBAR ================= */
-
-.sidebar.collapsed .logo-text {
-  display: none;
-}
-
-.sidebar.collapsed .logo-box {
-  justify-content: center;
-  width: 100%;
-}
-
-.sidebar.collapsed .sidebar-header {
-  justify-content: center;
-}
-
-.sidebar.collapsed .toggle-btn {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar ul li {
-  position: relative;
-}
-
-.sidebar ul li a {
-  display: block;
-  padding: 12px 20px;
-  text-decoration: none;
-  color: #fff;
-}
-
-/* Dropdown Caret */
-.sidebar ul li > a.caret::after {
-  content: "▾";
-  float: right;
-}
-
-/* Dropdown Menu */
-/* Ensure parent li is positioned relative */
-.sidebar ul li {
-  position: relative;  /* keeps dropdown aligned under the parent */
-}
-
-/* Position dropdown absolutely */
-.dropdown-menu {
-  display: none;
-  position: absolute;  /* important */
-  top: 100%;           /* right below parent li */
-  left: 25;
-  width: 220px;        /* same as sidebar width */
-  background: #3a5064;
-  margin: 0;
-  padding: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  z-index: 1000;       /* make sure it’s on top */
-}
-
-.dropdown-menu li a {
-  padding: 10px 20px;
-  padding-left: 35px;
-  font-size: 14px;
-  color: #0a4554;
-  white-space: nowrap;
-  margin-left: 0px;
-}
-
-
-.dropdown-menu li a:hover {
-  background: #223345;
-  margin-left: -10px;
-}
-
-/* Show dropdown when active */
-.dropdown-menu.show {
-  display: block;
-}
-
 </style>
 </head>
 
@@ -474,7 +349,7 @@ td:last-child {
   </div>
 
   <ul>
-    <li><a href="index.php">🏠 Dashboard</a></li>
+    <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
 
@@ -532,7 +407,7 @@ td:last-child {
 <script src="../assets/script.js"></script>
 <script>
     function toggleDropdown(id) {
-  const menu = document.getElementById(id);
+      const menu = document.getElementById(id);
           menu.classList.toggle("show");
 }
 </script>

@@ -75,6 +75,11 @@ $stmt->execute();
 $winner = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+/* ================= PAGINATION SETUP ================= */
+$bidsPerPage = 5;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $bidsPerPage;
+
 /* ================= FETCH ALL BIDS ================= */
 $bids_sql = "
     SELECT b.bid_amount, b.bid_time, u.username
@@ -82,11 +87,26 @@ $bids_sql = "
     JOIN users u ON u.id = b.bidder_id
     WHERE b.item_id = ?
     ORDER BY b.bid_amount DESC, b.bid_time DESC
+    LIMIT ?, ?
 ";
 $stmt = $conn->prepare($bids_sql);
-$stmt->bind_param("i", $item_id);
+$stmt->bind_param("iii", $item_id, $offset, $bidsPerPage);
 $stmt->execute();
 $bids = $stmt->get_result();
+$stmt->close();
+
+/* ================= TOTAL BIDS COUNT ================= */
+$countStmt = $conn->prepare("
+    SELECT COUNT(*) AS total
+    FROM bids
+    WHERE item_id = ?
+");
+$countStmt->bind_param("i", $item_id);
+$countStmt->execute();
+$totalBids = $countStmt->get_result()->fetch_assoc()['total'];
+$totalPages = ceil($totalBids / $bidsPerPage);
+$countStmt->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -189,7 +209,7 @@ th {
     <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
     <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <li><a href="auctions.php" class="active">📊 Auction Details</a></li>
+    <li><a href="auctions.php" class="active">📊 <span>Auction Details</span></a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
     <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
@@ -265,7 +285,24 @@ th {
 </tr>
 <?php endif; ?>
 </table>
+<?php if ($totalPages > 1): ?>
+<div style="text-align:center; margin-top:20px;">
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+        <?php if ($p == $page): ?>
+            <strong style="padding:6px 12px; background:#2c3e50; color:#fff; border-radius:6px;">
+                <?= $p ?>
+            </strong>
+        <?php else: ?>
+            <a href="?item_id=<?= $item_id ?>&page=<?= $p ?>"
+               style="padding:6px 12px; margin:2px; border:1px solid #ccc; border-radius:6px; text-decoration:none; color:#333;">
+                <?= $p ?>
+            </a>
+        <?php endif; ?>
+    <?php endfor; ?>
+</div>
+<?php endif; ?>
 
 </div>
+<script src="../assets/script.js"></script>
 </body>
 </html>

@@ -190,7 +190,7 @@ button { background:#27ae60; color:#fff; }
   </div>
 
   <ul>
-    <li><a href="index.php">🏠 Dashboard</a></li>
+    <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
 

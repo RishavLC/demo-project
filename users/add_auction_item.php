@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 }
 
-                $message = "<p style='color:green;font-weight:bold;'>✅ Auction item with images added successfully!</p>";
+                $message = "<p style='color:green;font-weight:bold;'>✅ Auction item added successfully!</p>";
             }
             else {
                 $message = "<p style='color:red;font-weight:bold;'>❌ Error: {$stmt->error}</p>";
