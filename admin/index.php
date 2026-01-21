@@ -119,54 +119,6 @@ th {
   max-width:380px;
   margin:40px auto;
 }
-
-
-/* Dropdown Caret */
-.sidebar ul li > a.caret::after {
-  content: "▾";
-  float: right;
-}
-
-/* Dropdown Menu */
-/* Ensure parent li is positioned relative */
-.sidebar ul li {
-  position: relative;  /* keeps dropdown aligned under the parent */
-}
-
-/* Position dropdown absolutely */
-.dropdown-menu {
-  display: none;
-  position: absolute;  /* important */
-  top: 100%;           /* right below parent li */
-  left: 25;
-  width: 220px;        /* same as sidebar width */
-  background: #3a5064;
-  margin: 0;
-  padding: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  z-index: 1000;       /* make sure it’s on top */
-}
-
-.dropdown-menu li a {
-  padding: 10px 20px;
-  padding-left: 35px;
-  font-size: 14px;
-  color: #0a4554;
-  white-space: nowrap;
-  margin-left: 0px;
-}
-
-
-.dropdown-menu li a:hover {
-  background: #223345;
-  margin-left: -10px;
-}
-
-/* Show dropdown when active */
-.dropdown-menu.show {
-  display: block;
-}
 </style>
 </head>
 
@@ -195,7 +147,9 @@ th {
       </ul>
     </li>
 
-    <li><a href="../auth/logout.php">🚪 Logout</a></li>
+    <div class="logout">
+<li><a href="../auth/logout.php">🚪 Logout</a></li>
+</div>
   </ul>
 </div>
 

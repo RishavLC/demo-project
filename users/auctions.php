@@ -5,7 +5,14 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
     exit();
 }
 include "../common/config.php";
-
+//username
+$user_sql = "SELECT username FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($username);
+$stmt->fetch();
+$stmt->close();
 // Fetch all ongoing auctions
 $sql = "
     SELECT ai.*, 
@@ -59,16 +66,17 @@ $result = $conn->query($sql);
 
 <div class="sidebar">
   <div class="sidebar-header">
-    EasyBid
+      Welcome, <?= htmlspecialchars($username) ?>
+
     <div class="toggle-btn">☰</div>
   </div>
   <ul>
-    <li><a href="dashboard_user.php" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
+    <li><a href="../users/" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
     <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
     <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
     <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <li><a href="auctions.php" class="active" data-label="Auction Details">📊 Auction Details</a></li>
+    <!-- <li><a href="auctions.php" class="active" data-label="Auction Details">📊 Auction Details</a></li> -->
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
     <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
