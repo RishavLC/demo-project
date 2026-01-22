@@ -140,3 +140,27 @@ CREATE TABLE auction_images (
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (item_id) REFERENCES auction_items(id) ON DELETE CASCADE
 );
+--feedback_table
+CREATE TABLE auction_feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('open','reviewed') DEFAULT 'open',
+
+    FOREIGN KEY (item_id) REFERENCES auction_items(id),
+    FOREIGN KEY (sender_id) REFERENCES users(id)
+);
+
+CREATE TABLE auction_feedback_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    feedback_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    sender_role ENUM('user','admin') NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (feedback_id) REFERENCES auction_feedback(id),
+    FOREIGN KEY (sender_id) REFERENCES users(id)
+);

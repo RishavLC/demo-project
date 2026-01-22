@@ -290,43 +290,45 @@ if (!$upcoming_result) {
 </div>
 
 <div class="main-content">
-<!-- Header -->
-<div class="header">
-  <h2>Welcome, <?= htmlspecialchars($username) ?></h2>
+<!-- FULL WIDTH HEADER -->
+  <div class="header-wrapper">
+    <div class="header">
+      <h2>Welcome, <?= htmlspecialchars($username) ?></h2>
 
-  <!-- Notification Bell -->
-  <div class="notification-wrapper">
-    <div class="notification-bell" onclick="toggleDropdown()">
-      🔔
-      <?php if ($unread_count > 0) { ?>
-        <span class="badge"><?= $unread_count ?></span>
-      <?php } ?>
+      <!-- Notification Bell -->
+      <div class="notification-wrapper">
+        <div class="notification-bell" onclick="toggleDropdown()">
+          🔔
+          <?php if ($unread_count > 0) { ?>
+            <span class="badge"><?= $unread_count ?></span>
+          <?php } ?>
+        </div>
+
+        <div id="notificationDropdown" class="notification-dropdown">
+          <?php
+          $noti_sql = "SELECT * FROM notifications 
+                       WHERE user_id=? 
+                       ORDER BY created_at DESC 
+                       LIMIT 5";
+          $stmt = $conn->prepare($noti_sql);
+          $stmt->bind_param("i", $user_id);
+          $stmt->execute();
+          $noti_result = $stmt->get_result();
+
+          if ($noti_result->num_rows > 0) {
+            while ($n = $noti_result->fetch_assoc()) {
+              echo "<p>".htmlspecialchars($n['message'])."</p>";
+            }
+          } else {
+            echo "<p>No notifications</p>";
+          }
+          ?>
+          <a href="../admin/notifications.php" class="view-all">View All</a>
+          <a href="../admin/mark_notifications.php" class="mark-read">Mark All as Read</a>
+        </div>
+      </div>
     </div>
-
-<div id="notificationDropdown" class="notification-dropdown">
-  <?php
-  $noti_sql = "SELECT * FROM notifications 
-               WHERE user_id=? 
-               ORDER BY created_at DESC 
-               LIMIT 5";
-  $stmt = $conn->prepare($noti_sql);
-  $stmt->bind_param("i", $user_id);
-  $stmt->execute();
-  $noti_result = $stmt->get_result();
-
-  if ($noti_result->num_rows > 0) {
-    while ($n = $noti_result->fetch_assoc()) {
-      echo "<p>".htmlspecialchars($n['message'])."</p>";
-    }
-  } else {
-    echo "<p>No notifications</p>";
-  }
-  ?>
-  <a href="../admin/notifications.php" class="view-all">View All</a>
-  <a href="../admin/mark_notifications.php" class="mark-read">Mark All as Read</a>
-</div>
-</div>
-</div>
+  </div>
 
 <!-- Summary cards -->
 <div class="summary-cards">

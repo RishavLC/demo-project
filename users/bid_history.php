@@ -7,6 +7,8 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "user") {
 }
 
 include "../common/config.php";
+$user_id = $_SESSION['user_id'];
+
 //username
 $user_sql = "SELECT username FROM users WHERE id = ?";
 $stmt = $conn->prepare($user_sql);
@@ -267,6 +269,32 @@ th {
         <?= $winner ? "<span class='winner'>{$winner['username']}</span>" : "No bids yet" ?>
     </div>
 </div>
+<?php
+$showFeedbackBtn = false;
+
+if (
+    $item['status'] === 'closed' &&
+    $winner &&
+    $item['seller_id'] == $user_id
+) {
+    $showFeedbackBtn = true;
+}
+?>
+<?php if ($showFeedbackBtn): ?>
+<div style="text-align:right; margin:20px 0;">
+    <a href="feedback.php?item_id=<?= $item_id ?>"
+       style="
+        background:#8b0000;
+        color:white;
+        padding:10px 18px;
+        border-radius:6px;
+        text-decoration:none;
+        font-weight:bold;
+       ">
+        ✍️ Give Feedback / Contact Admin
+    </a>
+</div>
+<?php endif; ?>
 
 <h3>All Bids</h3>
 

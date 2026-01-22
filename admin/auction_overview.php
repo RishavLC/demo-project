@@ -374,7 +374,7 @@ td:last-child {
 <div class="section"><h3>Pending</h3><?php renderTable($pending,'pending',$p_pending,$pendingPages); ?></div>
 <div class="section"><h3>Active</h3><?php renderTable($active,'active',$p_active,$activePages); ?></div>
 <div class="section"><h3>Upcoming</h3><?php renderTable($upcoming,'upcoming',$p_upcoming,$upcomingPages); ?></div>
-<div class="section"><h3>History</h3> <form method="get" style="margin-bottom:15px;">
+<div class="section" id="history"><h3>History</h3> <form method="get" action="#history" style="margin-bottom:15px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
     <!-- Status Filter -->
     <select name="filter" style="padding:5px 10px; border-radius:6px; border:1px solid #ccc;">
@@ -398,6 +398,10 @@ td:last-child {
     <button type="submit" style="padding:6px 12px; border-radius:6px; background:#3498db; color:white; border:none;">
         Search
     </button>
+    <a href="auction_overview.php#history"
+   style="padding:6px 12px; border-radius:6px; background:#95a5a6; color:white; text-decoration:none;">
+   Reset
+    </a>
 </div>
 
 </form>
