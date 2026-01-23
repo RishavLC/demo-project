@@ -62,6 +62,19 @@ $stmt->close();
 .winner { color: green; font-weight: bold; }
 .loser { color: red; font-weight: bold; }
 .ongoing { color: orange; font-weight: bold; }
+.pay-btn {
+  background: #60bb46;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.pay-btn:hover {
+  background: #4aa637;
+}
+
 </style>
 </head>
 
@@ -124,6 +137,22 @@ $stmt->close();
     } else {
         $status = "<span class='loser'>You Lost ❌</span>";
     }
+    $isEnded = ($row['end_time'] < date("Y-m-d H:i:s"));
+    $isWinner = ($row['winner_id'] == $user_id);
+// check if already paid or not
+    $paid = false;
+if ($isWinner && $isEnded) {
+    $payCheck = $conn->prepare(
+        "SELECT status FROM payments WHERE user_id=? AND item_id=? AND status='success'"
+    );
+    $payCheck->bind_param("ii", $user_id, $row['id']);
+    $payCheck->execute();
+    $payCheck->store_result();
+    $paid = $payCheck->num_rows > 0;
+    $payCheck->close();
+}
+
+
 ?>
 
 <div class="card">
@@ -135,6 +164,17 @@ $stmt->close();
   <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
   <p><strong>Status:</strong> <?= $status ?></p>
   <p><em>Ends at: <?= $row['end_time'] ?></em></p>
+  <?php if ($isEnded && $isWinner): ?>
+    <?php if (!$paid): ?>
+        <form action="../users/payment/payment_form.php" method="POST">
+          <input type="hidden" name="item_id" value="<?= $row['id'] ?>">
+          <button class="pay-btn">Pay Now</button>
+        </form>
+    <?php else: ?>
+        <p class="winner">Payment Completed ✅</p>
+    <?php endif; ?>
+<?php endif; ?>
+
 </div>
 
 <?php } ?>

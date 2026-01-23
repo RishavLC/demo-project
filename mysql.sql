@@ -164,3 +164,17 @@ CREATE TABLE auction_feedback_messages (
     FOREIGN KEY (feedback_id) REFERENCES auction_feedback(id),
     FOREIGN KEY (sender_id) REFERENCES users(id)
 );
+
+--payment table 
+CREATE TABLE payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    item_id INT,
+    amount DECIMAL(10,2),
+    status ENUM('pending','success','failed') DEFAULT 'pending',
+    ref_id VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    payer_name VARCHAR(100),
+    remarks TEXT,
+    voucher_no VARCHAR(50);
+);

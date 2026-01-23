@@ -394,42 +394,114 @@ td {
 </table>
 
 <hr>
-
-<form method="POST">
+<form method="POST" id="adminActionForm">
 <h3>🛠 Admin Controls</h3>
+
 <div class="actions">
 
 <?php if ($user['status'] === 'active'): ?>
-    <!-- Active user -->
-    <button class="warn" name="action" value="suspend_7">Suspend 7 Days</button>
-    <button class="warn" name="action" value="suspend_15">Suspend 15 Days</button>
-    <button class="danger" name="action" value="ban">Ban User</button>
+    <button type="button" class="warn"
+        onclick="confirmAction('suspend_7','Do you want to Suspend user for 7 days?')">
+        Suspend 7 Days
+    </button>
+
+    <button type="button" class="warn"
+        onclick="confirmAction('suspend_15','Are you sure want to Suspend user for 15 days?')">
+        Suspend 15 Days
+    </button>
+
+    <button type="button" class="danger"
+        onclick="confirmAction('ban','Are you sure you want to BAN this user permanently?')">
+        Ban User
+    </button>
 
 <?php elseif ($user['status'] === 'suspended'): ?>
-    <!-- Suspended user -->
-    <button class="safe" name="action" value="unsuspend">Unsuspend User</button>
-    <button class="danger" name="action" value="ban">Ban Permanently</button>
+    <button type="button" class="safe"
+        onclick="confirmAction('unsuspend',' Do you want to Unsuspend this user?')">
+        Unsuspend User
+    </button>
+
+    <button type="button" class="danger"
+        onclick="confirmAction('ban','Are you sure want to Ban this user permanently?')">
+        Ban Permanently
+    </button>
 
 <?php elseif ($user['status'] === 'banned'): ?>
-    <!-- Banned user -->
-    <button class="safe" name="action" value="unban">Unban User</button>
-
+    <button type="button" class="safe"
+        onclick="confirmAction('unban','Do you want to Unban this user?')">
+        Unban User
+    </button>
 <?php endif; ?>
 
 </div>
 
+<!-- Hidden input MUST be inside the form -->
+<input type="hidden" name="action" id="actionInput">
+
 </form>
+
 
 <br>
 <a class="btn" href="manage_users.php">⬅ Back</a>
 </div>
 </div>
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" style="
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,.6);
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+">
+  <div style="
+      background:#fff;
+      padding:25px;
+      border-radius:12px;
+      width:380px;
+      text-align:center;
+      box-shadow:0 15px 40px rgba(0,0,0,.3);
+  ">
+    <!-- <h3>confirm</h3> -->
+    <p id="confirmText" style="margin:15px 0;color:#555;"></p>
+
+    <div style="display:flex;gap:15px;justify-content:center;">
+      <button class="safe" onclick="submitConfirmed()">Confirm</button>
+      <button class="danger" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/script.js"></script>
 <script>
     function toggleDropdown(id) {
         const menu = document.getElementById(id);
           menu.classList.toggle("show");
 }
+
+let selectedAction = null;
+
+function confirmAction(action, message) {
+    selectedAction = action;
+    document.getElementById("confirmText").innerText = message;
+    document.getElementById("confirmModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("confirmModal").style.display = "none";
+    selectedAction = null;
+}
+
+function submitConfirmed() {
+    if (!selectedAction) return;
+
+    document.getElementById("actionInput").value = selectedAction;
+    document.getElementById("adminActionForm").submit();
+}
+
 </script>
+
 </body>
 </html>

@@ -77,6 +77,52 @@ $stmt->close();
     margin-top:10px;
     width:100%;
 }
+/* warning modalfor back to back bid  */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #fff;
+    padding: 22px;
+    width: 360px;
+    max-width: 90%;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    animation: pop 0.25s ease;
+}
+
+.modal-box h3 {
+    margin-bottom: 10px;
+    color: #c0392b;
+}
+
+.modal-box p {
+    font-size: 15px;
+    margin-bottom: 18px;
+}
+
+.modal-box button {
+    padding: 8px 20px;
+    border: none;
+    background: #3498db;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+@keyframes pop {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
 </style>
 </head>
 
@@ -191,6 +237,14 @@ Rs. <?= number_format($current_price,2) ?>
 
 </div>
 </div>
+<!-- Warning Modal -->
+<div id="warningModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>⚠️ Bid Not Allowed</h3>
+    <p id="modalMessage"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
 
 <script>
 function pf(v){ return parseFloat(v)||0; }
@@ -216,12 +270,21 @@ function placeBid(form){
     fetch("../api/place_bid.php",{method:"POST",body:fd})
     .then(r=>r.json())
     .then(d=>{
-        if(d.error){ alert(d.error); return; }
+        if(d.error){ showModal(d.error); return; }
         form.closest(".auction-card")
             .querySelector(".current-price")
             .innerText = "Rs. "+pf(d.new_price).toFixed(2);
     });
     return false;
+}
+
+function showModal(message) {
+    document.getElementById("modalMessage").innerText = message;
+    document.getElementById("warningModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("warningModal").style.display = "none";
 }
 </script>
 
