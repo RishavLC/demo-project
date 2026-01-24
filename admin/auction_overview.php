@@ -236,7 +236,7 @@ echo "<table>
         $actionBtn = '';
 
 if ($key === 'pending') {
-    $actionBtn = "<a class='btn' href='manage_auctions.php?id={$row['id']}'>Review</a>";
+    $actionBtn = "<a class='btn' href='manage_auction_item.php?id={$row['id']}'>Review</a>";
 } else {
     $actionBtn = "<a class='btn' href='bid_history.php?item_id={$row['id']}'>View</a>";
 }

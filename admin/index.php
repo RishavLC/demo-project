@@ -128,9 +128,10 @@ th {
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="logo-box">
-      <img src="../images/logo.jpeg">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo">
       <span class="logo-text">EasyBid</span>
     </div>
+    <div class="toggle-btn">☰</div>
   </div>
 
   <ul>
@@ -138,18 +139,19 @@ th {
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
 
+    <!-- DROPDOWN -->
     <li>
-      <a class="caret" onclick="toggleDropdown('auctionDrop')">📜 Auctions</a>
-      <ul class="dropdown-menu" id="auctionDrop">
+      <a class="caret" onclick="toggleDropdown('auctionDropdown')">
+        📜 Auctions 
+      </a>
+      <ul class="dropdown-menu" id="auctionDropdown">
         <li><a href="auctions_active.php">🟢 Active</a></li>
         <li><a href="auctions_upcoming.php">🟡 Upcoming</a></li>
-        <li><a href="auction_overview.php">📕 History</a></li>
+        <li><a href="auction_overview.php">📜 History</a></li>
       </ul>
     </li>
 
-    <div class="logout">
-<li><a href="../auth/logout.php">🚪 Logout</a></li>
-</div>
+    <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
 
@@ -226,7 +228,7 @@ th {
 </table>
 
 </div>
-
+<script src="../assets/script.js"></script>
 <script>
 new Chart(document.getElementById('auctionChart'), {
   type:'doughnut',

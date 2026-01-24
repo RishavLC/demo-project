@@ -450,20 +450,7 @@ if ($item['status'] === 'closed') {
 <div class="bid-history">
     <h3>📜 Live Bid History</h3>
     <div id="bidHistory">Loading...</div>
-</div>
-<!-- Pagination Links -->
-<?php if ($totalPages > 1): ?>
-<div class="pagination" style="text-align:center; margin-top:20px;">
-    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-        <?php if ($p == $page): ?>
-            <strong><?= $p ?></strong>
-        <?php else: ?>
-            <a class="active-page" href="?item_id=<?= $item_id ?>&page=<?= $p ?><?php if($searchUser) echo '&search_user='.urlencode($searchUser); ?>"><?= $p ?></a>
-        <?php endif; ?>
-        &nbsp;
-    <?php endfor; ?>
-</div>
-<?php endif; ?>
+</div>  
 
 </div>
 <script src="../assets/script.js"></script>

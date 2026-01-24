@@ -225,7 +225,7 @@ if ($result->num_rows) {
             </td>
             <td><span class='status'>Active</span></td>
             <td>
-              <a class='btn' href='live_bids.php?item_id={$row['id']}'>View</a>
+              <a class='btn' href='bid_history.php?item_id={$row['id']}'>View</a>
             </td>
         </tr>";
         $sn++;
