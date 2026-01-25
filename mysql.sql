@@ -74,6 +74,9 @@ ALTER TABLE auction_items ADD COLUMN min_increment DECIMAL(10,2) DEFAULT 50;
 ALTER TABLE auction_items ADD COLUMN buy_now_price DECIMAL(10,2) DEFAULT NULL;
 ALTER TABLE auction_items 
 ADD rejection_reason TEXT NULL;
+ALTER TABLE auction_items 
+MODIFY COLUMN status ENUM('pending','pending_reapply','upcoming','active','closed','sold','rejected') DEFAULT 'pending';
+
 
 
 -- bids
