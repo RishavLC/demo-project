@@ -222,19 +222,19 @@ if (!empty($row['image_path'])) {
             <?= ucfirst($row['status']) ?>
           </td>
   <!-- Bid History Button -->
-  <td>
-    <a href="bid_history.php?item_id=<?= $row['id'] ?>"
-       style="
-         background:#3498db;
-         color:white;
-         padding:6px 10px;
-         border-radius:5px;
-         text-decoration:none;
-         font-size:14px;
-       ">
-       View
+<td>
+<?php if ($row['status'] == 'pending'): ?>
+    <a href="edit_item.php?id=<?= $row['id'] ?>" class="btn btn-warning btn-sm">
+        Edit
     </a>
-  </td>
+<?php else: ?>
+    <a href="bid_history.php?item_id=<?= $row['id'] ?>" class="btn btn-info btn-sm">
+    View
+</a>
+
+<?php endif; ?>
+</td>
+
           
         </tr>
         <?php endwhile; ?>

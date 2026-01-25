@@ -115,44 +115,107 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Add Auction Item</title>
     <link rel="stylesheet" href="../assets/style.css">
     <style>
-        .form-container {
-            width: 500px;
-            margin: 30px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
-        }
-        .form-container h2 {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .form-container label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        .form-container input, 
-        .form-container textarea, 
-        .form-container select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        .form-container button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 10px;
-            border: none;
-            background: #4a90e2;
-            color: white;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .form-container button:hover {
-            background: #357ab7;
-        }
+      /* ================= FORM CONTAINER ================= */
+.form-container {
+    width: 850px;
+    margin: 5px auto;
+    padding: 22px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+/* ================= TITLE ================= */
+.form-container h2 {
+    text-align: center;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* ================= GRID ================= */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* ================= FORM GROUP ================= */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ================= LABEL ================= */
+.form-group label {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+/* ================= INPUTS ================= */
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* ================= TEXTAREA ================= */
+.form-group textarea {
+    resize: vertical;
+    min-height: 50px;
+}
+
+/* ================= FOCUS ================= */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #60a5fa;
+}
+
+/* ================= FULL WIDTH ROW ================= */
+.form-group.full {
+    grid-column: span 2;
+}
+
+/* ================= BUTTON ================= */
+.form-container button {
+    grid-column: span 2;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.form-container button:hover {
+    background: #2563eb;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .form-container {
+        width: 95%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: span 1;
+    }
+}
     </style>
 </head>
 <body>
@@ -178,14 +241,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="form-container">    
         <h2>Add Auction Item</h2>
         <?= $message ?>
+<form method="POST" enctype="multipart/form-data">
+    <div class="form-grid">
 
-        <form method="POST" enctype="multipart/form-data">
+        <!-- LEFT COLUMN -->
+        <div class="form-group">
             <label>Item Title</label>
             <input type="text" name="title" required>
+        </div>
 
-            <label>Description</label>
-            <textarea name="description"></textarea>
-
+        <div class="form-group">
             <label>Category</label>
             <select name="category" required>
                 <option value="">Select Category</option>
@@ -201,21 +266,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="Real Estate">Real Estate</option>
                 <option value="Others">Others</option>
             </select>
+        </div>
 
-            <label>Item Images</label>
-            <input type="file" name="images[]" multiple accept="image/*" required>
-
+        <div class="form-group">
             <label>Start Price</label>
             <input type="number" step="0.1" name="start_price" required>
-            <label>Start Time</label>
-            <input type="datetime-local" name="start_time" id="start_time"required>
-            <label>End Time</label>
-            <input type="datetime-local" name="end_time" id="end_time" required>
-            <label>Minimum Increment *</label>
-            <input type="number" step="0.01" name="min_increment" placeholder="e.g. 50 or 500" required>
+        </div>
 
-            <button type="submit">Add Item</button>
-        </form>
+        <div class="form-group">
+            <label>Minimum Increment *</label>
+            <input type="number" step="0.01" name="min_increment" required>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="form-group">
+            <label>Start Time</label>
+            <input type="datetime-local" name="start_time" required>
+        </div>
+
+        <div class="form-group">
+            <label>End Time</label>
+            <input type="datetime-local" name="end_time" required>
+        </div>
+
+        <div class="form-group full">
+            <label>Description</label>
+            <textarea name="description" rows="3"></textarea>
+        </div>
+
+        <div class="form-group full">
+            <label>Item Images</label>
+            <input type="file" name="images[]" multiple accept="image/*" required>
+        </div>
+
+        <button type="submit">Add Item</button>
+    </div>
+</form>
+
     </div>
 </div>
 

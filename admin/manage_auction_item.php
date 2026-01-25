@@ -24,6 +24,7 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $item = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
 if (!$item) {
     header("Location: manage_auctions.php");
@@ -40,29 +41,39 @@ while ($img = $res->fetch_assoc()) {
 /* APPROVE */
 if (isset($_POST['approve'])) {
     $status = ($item['start_time'] > date("Y-m-d H:i:s")) ? 'upcoming' : 'active';
+
     $stmt = $conn->prepare("
-        UPDATE auction_items SET status=?, reviewed_at=NOW(), rejection_reason=NULL WHERE id=?
+        UPDATE auction_items 
+        SET `status`=?, rejection_reason=NULL 
+        WHERE id=?
     ");
     $stmt->bind_param("si", $status, $id);
     $stmt->execute();
+    $stmt->close();
+
     $_SESSION['msg'] = "Auction approved.";
-    header("Location: manage_auctions.php");
+    header("Location: auction_active.php");
     exit();
 }
 
 /* REJECT */
 if (isset($_POST['reject'])) {
     $reason = trim($_POST['reason']);
+
     if ($reason === "") {
         $error = "Rejection reason required.";
     } else {
         $stmt = $conn->prepare("
-            UPDATE auction_items SET status='rejected', rejection_reason=?, reviewed_at=NOW() WHERE id=?
+            UPDATE auction_items 
+            SET `status`='rejected', rejection_reason=? 
+            WHERE id=?
         ");
         $stmt->bind_param("si", $reason, $id);
         $stmt->execute();
+        $stmt->close();
+
         $_SESSION['msg'] = "Auction rejected.";
-        header("Location: manage_auctions.php");
+        header("Location: auction_overview.php");
         exit();
     }
 }
@@ -73,6 +84,7 @@ if (isset($_POST['reject'])) {
 <head>
 <title>Manage Auction</title>
 <link rel="stylesheet" href="../assets/style.css">
+
 <style>
 body { background:#f4f6f9; font-family:Arial,sans-serif; }
 
@@ -88,42 +100,48 @@ body { background:#f4f6f9; font-family:Arial,sans-serif; }
   box-shadow:0 6px 16px rgba(0,0,0,.08);
 }
 
-/* MAIN ROW */
+/* TOP */
 .top {
   display:flex;
   gap:16px;
+  align-items:flex-start;
 }
 
 /* IMAGES */
-.images {
-  flex:1;
-}
+.images { flex:1; }
 .images img {
   width:100%;
-  height:230px;
+  height:220px;
   object-fit:cover;
   border-radius:8px;
   margin-bottom:6px;
 }
 
 /* DETAILS */
-.details {
-  flex:1.3;
-}
+.details { flex:1.4; }
 
 .details h3 {
-  margin:0 0 6px 0;
+  margin:0 0 6px;
 }
-.pending { background:#fff3cd; color:#856404; }
-.active { background:#d4edda; color:#155724; }
-.rejected { background:#f8d7da; color:#721c24; }
 
-/* INFO ROWS */
 .info p {
-  margin:3px 0;
+  margin:4px 0;
   font-size:14px;
 }
-/* TEXTAREA */
+
+/* DESCRIPTION */
+.description {
+  margin-top:12px;
+  font-size:14px;
+}
+
+/* ACTIONS */
+.actions {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
 textarea {
   width:100%;
   min-height:60px;
@@ -132,22 +150,13 @@ textarea {
   border:1px solid #ccc;
 }
 
-/* ACTIONS */
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  flex-wrap: wrap; /* ensures responsive stacking if small screen */
-}
-
 .btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
+  padding:8px 18px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
 }
-
 
 .approve { background:#27ae60; color:#fff; }
 .reject { background:#e74c3c; color:#fff; }
@@ -160,7 +169,9 @@ textarea {
 </style>
 </head>
 
-<body><div class="sidebar">
+<body>
+
+<div class="sidebar">
   <div class="sidebar-header">
     <div class="logo-box">
       <img src="../images/logo.jpeg" alt="EasyBid Logo">
@@ -189,10 +200,14 @@ textarea {
     <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
+
+
 <div class="main-content">
 <div class="wrapper">
 <div class="card">
-    <h3 style="margin-top: -5px;">Manage Auction Item</h3>
+
+<h3>Manage Auction Item</h3>
+
 <div class="top">
 
 <!-- IMAGES -->
@@ -208,26 +223,25 @@ textarea {
 <div class="details">
   <h3><?= htmlspecialchars($item['title']) ?></h3>
 
-  
-
   <div class="info">
     <p><strong>Seller:</strong> <?= htmlspecialchars($item['username']) ?></p>
-    <p><strong>Email:</strong> <?= $item['email'] ?></p>
-    <p><strong>Price:</strong> Rs. <?= number_format($item['start_price'],2) ?></p>
+    <p><strong>Email:</strong> <?= htmlspecialchars($item['email']) ?></p>
+    <p><strong>Category:</strong> <?= htmlspecialchars($item['category']) ?></p>
+    <p><strong>Start Price:</strong> Rs. <?= number_format($item['start_price'],2) ?></p>
     <p><strong>Start:</strong> <?= date("d M Y h:i A", strtotime($item['start_time'])) ?></p>
     <p><strong>End:</strong> <?= date("d M Y h:i A", strtotime($item['end_time'])) ?></p>
-    <p><strong>Status:</strong>
-        <?= ucfirst($item['status']) ?>
-        
-<h4 style="margin-bottom:-5px;">Description</h4>
-<p><?= nl2br(htmlspecialchars($item['description'])) ?></p>
+    <p><strong>Status:</strong> <?= ucfirst($item['status']) ?></p>
+  </div>
+
+  <div class="description">
+    <strong>Description:</strong><br>
+    <?= nl2br(htmlspecialchars($item['description'])) ?>
   </div>
 </div>
+
 </div>
 
-
 <!-- ACTIONS -->
-<div class="section">
 <?php if ($item['status'] === 'pending'): ?>
 
 <?php if(isset($error)): ?>
@@ -239,8 +253,9 @@ textarea {
     <button name="approve" class="btn approve">Approve</button>
     <button name="reject" class="btn reject">Reject</button>
   </div>
-  <label style="margin-top:8px;"><strong>Reject reason</strong></label>
-  <textarea name="reason" required></textarea>
+
+  <label><strong>Reject reason</strong></label>
+  <textarea name="reason"></textarea>
 </form>
 
 <?php else: ?>
@@ -249,16 +264,11 @@ textarea {
 <p><strong>Reason:</strong> <?= htmlspecialchars($item['rejection_reason']) ?></p>
 <?php endif; ?>
 <?php endif; ?>
-</div>
 
 </div>
 </div>
 </div>
+
 <script src="../assets/script.js"></script>
-<script>
-    function toggleDropdown(id){
-    document.getElementById(id).classList.toggle("show");
-}   
-</script>
 </body>
 </html>

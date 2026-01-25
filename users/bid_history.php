@@ -203,6 +203,25 @@ th {
 .winner {
     color: green;
 }
+
+.rejection-box {
+    background: #fdecea;
+    border-left: 5px solid #e74c3c;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+.rejection-box h3 {
+    margin: 0 0 6px 0;
+    color: #c0392b;
+}
+
+.rejection-box p {
+    margin: 0;
+    font-size: 15px;
+}
+
 </style>
 </head>
 
@@ -216,7 +235,7 @@ th {
   <ul>
     <li><a href="../users/" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
     <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
-    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
+    <li><a href="add_record.php" data-label="FeedBack">➕ <span>Add Feedback</span></a></li>
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
     <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
     <!-- <li><a href="auctions.php" class="active">📊 <span>Auction Details</span></a></li> -->
@@ -295,32 +314,48 @@ if (
     </a>
 </div>
 <?php endif; ?>
+<?php if ($item['status'] === 'rejected' && $item['seller_id'] == $user_id): ?>
 
-<h3>All Bids</h3>
+    <!-- ADMIN REJECTION MESSAGE -->
+    <div class="rejection-box">
+        <h3>❌ Auction Rejected by Admin</h3>
+        <p>
+            <strong>Reason:</strong>
+            <?= htmlspecialchars($item['rejection_reason'] ?? 'No reason provided') ?>
+        </p>
+    </div>
 
-<table>
-<tr>
-    <th>S.N</th>
-    <th>Bidder</th>
-    <th>Bid Amount (Rs)</th>
-    <th>Bid Time</th>
-</tr>
-
-<?php if ($bids->num_rows > 0): ?>
-<?php $i = 1; while ($row = $bids->fetch_assoc()): ?>
-<tr>
-    <td><?= $i++ ?></td>
-    <td><?= htmlspecialchars($row['username']) ?></td>
-    <td>Rs <?= number_format($row['bid_amount'], 2) ?></td>
-    <td><?= $row['bid_time'] ?></td>
-</tr>
-<?php endwhile; ?>
 <?php else: ?>
-<tr>
-    <td colspan="4" class="no-data">No bids placed for this item</td>
-</tr>
+
+    <!-- NORMAL BID TABLE -->
+    <h3>All Bids</h3>
+
+    <table>
+    <tr>
+        <th>S.N</th>
+        <th>Bidder</th>
+        <th>Bid Amount (Rs)</th>
+        <th>Bid Time</th>
+    </tr>
+
+    <?php if ($bids->num_rows > 0): ?>
+    <?php $i = 1; while ($row = $bids->fetch_assoc()): ?>
+    <tr>
+        <td><?= $i++ ?></td>
+        <td><?= htmlspecialchars($row['username']) ?></td>
+        <td>Rs <?= number_format($row['bid_amount'], 2) ?></td>
+        <td><?= $row['bid_time'] ?></td>
+    </tr>
+    <?php endwhile; ?>
+    <?php else: ?>
+    <tr>
+        <td colspan="4" class="no-data">No bids placed for this item</td>
+    </tr>
+    <?php endif; ?>
+    </table>
+
 <?php endif; ?>
-</table>
+
 <?php if ($totalPages > 1): ?>
 <div style="text-align:center; margin-top:20px;">
     <?php for ($p = 1; $p <= $totalPages; $p++): ?>
