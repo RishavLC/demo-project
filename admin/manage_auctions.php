@@ -54,6 +54,7 @@ if (isset($_GET['reject'])) {
     header("Location: manage_auctions.php");
     exit();
 }
+
 /* =======================
    FETCH AUCTIONS + IMAGE
 ======================= */
@@ -66,7 +67,7 @@ SELECT ai.*, u.username,
         LIMIT 1) AS image_path
 FROM auction_items ai
 JOIN users u ON ai.seller_id = u.id
-WHERE ai.status = 'pending'
+WHERE ai.status IN ('pending', 'pending_reapply')
 ORDER BY ai.created_at DESC
 ";
 
@@ -78,7 +79,6 @@ $result = $conn->query($sql);
 <head>
 <title>Manage Auctions</title>
 <link rel="stylesheet" href="../assets/style.css">
-
 <style>
 body { background:#f5f6fa; }
 .grid {
@@ -98,11 +98,6 @@ body { background:#f5f6fa; }
   object-fit:cover;
 }
 .card-content { padding:15px; }
-.status-active { color:#27ae60; font-weight:bold; }
-.status-upcoming { color:#2980b9; font-weight:bold; }
-.status-pending { color:#f39c12; font-weight:bold; }
-.status-rejected { color:#e74c3c; font-weight:bold; }
-.status-closed { color:#95a5a6; font-weight:bold; }
 
 button, .btn-delete {
   width:100%;
@@ -127,59 +122,26 @@ button { background:#27ae60; color:#fff; }
   margin-bottom:15px;
 }
 
-/* Dropdown Caret */
-.sidebar ul li > a.caret::after {
-  content: "▾";
-  float: right;
+/* Status badge */
+.status-badge {
+  padding:3px 8px;
+  color:white;
+  border-radius:6px;
+  font-weight:bold;
 }
 
-/* Dropdown Menu */
-/* Ensure parent li is positioned relative */
-.sidebar ul li {
-  position: relative;  /* keeps dropdown aligned under the parent */
-}
-
-/* Position dropdown absolutely */
-.dropdown-menu {
-  display: none;
-  position: absolute;  /* important */
-  top: 100%;           /* right below parent li */
-  left: 25;
-  width: 220px;        /* same as sidebar width */
-  background: #3a5064;
-  margin: 0;
-  padding: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  z-index: 1000;       /* make sure it’s on top */
-}
-
-.dropdown-menu li a {
-  padding: 10px 20px;
-  padding-left: 35px;
-  font-size: 14px;
-  color: #0a4554;
-  white-space: nowrap;
-  margin-left: 0px;
-}
-
-
-.dropdown-menu li a:hover {
-  background: #223345;
-  margin-left: -10px;
-}
-
-/* Show dropdown when active */
-.dropdown-menu.show {
-  display: block;
-}
-
+/* Dropdown */
+.sidebar ul li > a.caret::after { content: "▾"; float: right; }
+.sidebar ul li { position: relative; }
+.dropdown-menu { display:none; position:absolute; top:100%; left:25px; width:220px; background:#3a5064; margin:0; padding:0; border-radius:6px; z-index:1000; }
+.dropdown-menu li a { padding:10px 20px; padding-left:35px; font-size:14px; color:#0a4554; white-space:nowrap; }
+.dropdown-menu li a:hover { background:#223345; margin-left:-10px; }
+.dropdown-menu.show { display:block; }
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="logo-box">
@@ -193,23 +155,17 @@ button { background:#27ae60; color:#fff; }
     <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
     <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
-
-    <!-- DROPDOWN -->
     <li>
-      <a class="caret" onclick="toggleDropdown('auctionDropdown')">
-        📜 Auctions 
-      </a>
+      <a class="caret" onclick="toggleDropdown('auctionDropdown')">📜 Auctions</a>
       <ul class="dropdown-menu" id="auctionDropdown">
         <li><a href="auctions_active.php">🟢 Active</a></li>
         <li><a href="auctions_upcoming.php">🟡 Upcoming</a></li>
         <li><a href="auction_overview.php">📜 History</a></li>
       </ul>
     </li>
-
     <li><a href="../auth/logout.php">🚪 Logout</a></li>
   </ul>
 </div>
-
 
 <div class="main-content">
 <h2>Manage Auction Items</h2>
@@ -219,42 +175,36 @@ button { background:#27ae60; color:#fff; }
 <?php endif; ?>
 
 <div class="grid">
-
 <?php while($row = $result->fetch_assoc()): ?>
 <?php
-// IMAGE FIX (IMPORTANT)
-if (!empty($row['image_path'])) {
-    $clean = str_replace(['../','./'], '', $row['image_path']);
-    $img = "../" . $clean;
-} else {
-    $img = "../assets/no-image.png";
-}
+$img = !empty($row['image_path']) ? "../" . str_replace(['../','./'],'',$row['image_path']) : "../assets/no-image.png";
+
+// Status badge colors
+$badge_color = match($row['status']) {
+    'pending' => '#ffc107',
+    'pending_reapply' => '#ff6f00', // dark orange
+    'active' => '#28a745',
+    'rejected' => '#dc3545',
+    'closed' => '#95a5a6',
+    default => '#6c757d',
+};
 ?>
 
 <div class="card">
-
-  <!-- IMAGE -->
   <img src="<?= $img ?>" alt="Auction Image">
-
   <div class="card-content">
     <h3><?= htmlspecialchars($row['title']) ?></h3>
     <p><strong>Seller:</strong> <?= htmlspecialchars($row['username']) ?></p>
+    <p><strong>Start Price:</strong> Rs. <?= number_format($row['start_price'],2) ?></p>
+    <p><strong>Start Date:</strong> <?= date("d M Y, h:i A", strtotime($row['start_time'])) ?></p>
+    <p><strong>End Date:</strong> <?= date("d M Y, h:i A", strtotime($row['end_time'])) ?></p>
+    <p><strong>Status:</strong> 
+       <span class="status-badge" style="background:<?= $badge_color ?>;">
+           <?= ucfirst($row['status']) ?>
+       </span>
+    </p>
 
-<p><strong>Start Price:</strong> Rs. <?= number_format($row['start_price'],2) ?></p>
-
-<p><strong>Start Date:</strong> 
-<?= date("d M Y, h:i A", strtotime($row['start_time'])) ?>
-</p>
-
-<p><strong>End Date:</strong> 
-<?= date("d M Y, h:i A", strtotime($row['end_time'])) ?>
-</p>
-
-<p><strong>Status:</strong>
-<span class="status-pending">Pending</span>
-</p>
-
-    <?php if ($row['status'] == 'pending'): ?>
+    <?php if(in_array($row['status'], ['pending','pending_reapply'])): ?>
       <form method="POST">
         <input type="hidden" name="id" value="<?= $row['id'] ?>">
         <button name="approve">✅ Approve</button>
@@ -262,18 +212,15 @@ if (!empty($row['image_path'])) {
       <a href="?reject=<?= $row['id'] ?>" class="btn-delete">❌ Reject</a>
     <?php endif; ?>
   </div>
-
 </div>
-
 <?php endwhile; ?>
+</div>
+</div>
 
-</div>
-</div>
 <script src="../assets/script.js"></script>
 <script>
-  function toggleDropdown(id) {
-  const menu = document.getElementById(id);
-          menu.classList.toggle("show");
+function toggleDropdown(id) {
+  document.getElementById(id).classList.toggle("show");
 }
 </script>
 </body>

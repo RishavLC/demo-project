@@ -69,6 +69,7 @@ function fetchSection($conn, $where, $page, $limit) {
 
 /* ================= FETCH DATA ================= */
 [$pending,  $pendingPages]  = fetchSection($conn, "ai.status='pending'",               $p_pending,  $limit);
+[$reapplied, $reappliedPages] = fetchSection($conn, "ai.status='pending_reapply'", $p_reapplied ?? 1, $limit);
 [$active,   $activePages]   = fetchSection($conn, "ai.status='active'",                $p_active,   $limit);
 [$upcoming, $upcomingPages] = fetchSection($conn, "ai.status='upcoming'",              $p_upcoming, $limit);
 $offset = ($p_history - 1) * $limit;
@@ -235,7 +236,7 @@ echo "<table>
 
         $actionBtn = '';
 
-if ($key === 'pending') {
+if ($key === 'pending' || $key === 'reapplied' ) {
     $actionBtn = "<a class='btn' href='manage_auction_item.php?id={$row['id']}'>Review</a>";
 } else {
     $actionBtn = "<a class='btn' href='bid_history.php?item_id={$row['id']}'>View</a>";
@@ -261,7 +262,7 @@ if ($key === 'pending') {
     echo "</table><div class='pagination'>";
     for ($i=1; $i<=$pages; $i++) {
         $active = ($i==$page) ? "active" : "";
-        echo "<a class='$active' href='?p_$key=$i'>$i</a>";
+        echo "<a class='$active' href='?p_$key=$i#$key'>$i</a>";
     }
     echo "</div>";
 }
@@ -326,6 +327,7 @@ td:last-child {
 
 /* STATUS COLORS */
 .status-pending{background:#ffeeba;color:#856404}
+.status-reapplied{background:#ffeeba;color:#789880}
 .status-active{background:#d4edda;color:#155724}
 .status-upcoming{background:#fff3cd;color:#856404}
 .status-closed,.status-rejected{background:#f8d7da;color:#721c24}
@@ -351,7 +353,8 @@ td:last-child {
   <ul>
     <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
-    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+    <!-- <li><a href="manage_auctions.php">📦 Manage Auctions</a></li> -->
+    <li><a href="feedback_list.php">💬 Feedback</a></li>
 
     <!-- DROPDOWN -->
     <li>
@@ -372,6 +375,9 @@ td:last-child {
 <h2>📦 Auction Overview</h2>
 
 <div class="section"><h3>Pending</h3><?php renderTable($pending,'pending',$p_pending,$pendingPages); ?></div>
+<div class="section"><h3>Pending-Reapplied Items</h3>
+<?php renderTable($reapplied,'reapplied',$p_reapplied ?? 1,$reappliedPages); ?>
+</div>
 <div class="section"><h3>Active</h3><?php renderTable($active,'active',$p_active,$activePages); ?></div>
 <div class="section"><h3>Upcoming</h3><?php renderTable($upcoming,'upcoming',$p_upcoming,$upcomingPages); ?></div>
 <div class="section" id="history"><h3>History</h3> <form method="get" action="#history" style="margin-bottom:15px;">

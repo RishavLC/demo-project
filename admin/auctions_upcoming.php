@@ -133,7 +133,8 @@ tr:nth-child(even) { background:#f2f6fc; }
   <ul>
     <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
-    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+    <!-- <li><a href="manage_auctions.php">📦 Manage Auctions</a></li> -->
+    <li><a href="feedback_list.php">💬 Feedback</a></li>
 
     <!-- DROPDOWN -->
     <li>

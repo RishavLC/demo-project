@@ -103,31 +103,6 @@ CREATE TABLE auction_results (
     FOREIGN KEY (winner_id) REFERENCES users(id)
 );
 
-
---users penalty and for what reasons
-CREATE TABLE user_penalties (
-    penalty_id INT AUTO_INCREMENT PRIMARY KEY,
-    id INT NOT NULL,
-    reason VARCHAR(255),
-    action_taken ENUM('warning','suspension','ban'),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NULL,
-    admin_note TEXT,
-    FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
-);
-
---second highest bidder as a backup
-CREATE TABLE auction_backup_winners (
-    backup_winner_id INT AUTO_INCREMENT PRIMARY KEY,
-    item_id INT,
-    id INT,
-    bid_amount DECIMAL(10,2),
-    priority INT, -- 1 = second bidder, 2 = third
-    notified ENUM('yes','no') DEFAULT 'no',
-    FOREIGN KEY (item_id) REFERENCES auction_items(id),
-    FOREIGN KEY (id) REFERENCES users(id)
-);
-
 --notification table
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -182,4 +157,36 @@ CREATE TABLE payments (
     payer_name VARCHAR(100),
     remarks TEXT,
     voucher_no VARCHAR(50);
+);
+--user to user conversation and message
+CREATE TABLE conversations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    buyer_id INT NOT NULL,
+    seller_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (item_id) REFERENCES auction_items(id),
+    FOREIGN KEY (buyer_id) REFERENCES users(id),
+    FOREIGN KEY (seller_id) REFERENCES users(id)
+);
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id),
+    FOREIGN KEY (sender_id) REFERENCES users(id)
+);
+
+CREATE TABLE item_chats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    buyer_id INT NOT NULL,
+    seller_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

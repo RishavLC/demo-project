@@ -274,17 +274,22 @@ if (!$upcoming_result) {
 <body>
 <div class="sidebar">
   <div class="sidebar-header">
-    Welcome, <?= htmlspecialchars($username) ?>
+    <!-- Logo instead of Welcome -->
+    <div class="logo-box">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
+      <span class="logo-text">EasyBid</span>
+    </div>
     <div class="toggle-btn">☰</div>
   </div>
+
   <ul>
     <li><a href="../users/" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
-    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
-    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
+    <!-- <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li> -->
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
-    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <!-- <li><a href="auctions.php" class="active">📊 Auction Details</a></li> -->
+    <li><a href="auction_bid.php" data-label="Place Bids">🪙 <span>Place Bids</span></a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
+    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
+    <li><a href="feedback_list.php" data-label="Feedback list">💬 <span>My Feedback</span></a></li>
     <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>

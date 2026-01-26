@@ -40,11 +40,14 @@ while ($img = $res->fetch_assoc()) {
 
 /* APPROVE */
 if (isset($_POST['approve'])) {
-    $status = ($item['start_time'] > date("Y-m-d H:i:s")) ? 'upcoming' : 'active';
+    // Determine status
+    $now = date("Y-m-d H:i:s");
+    $status = ($item['start_time'] > $now) ? 'upcoming' : 'active';
 
+    // Update status and keep start/end times
     $stmt = $conn->prepare("
         UPDATE auction_items 
-        SET `status`=?, rejection_reason=NULL 
+        SET `status`=?, rejection_reason=NULL
         WHERE id=?
     ");
     $stmt->bind_param("si", $status, $id);
@@ -52,7 +55,7 @@ if (isset($_POST['approve'])) {
     $stmt->close();
 
     $_SESSION['msg'] = "Auction approved.";
-    header("Location: auction_active.php");
+    header("Location: auctions_active.php");
     exit();
 }
 
@@ -242,12 +245,14 @@ textarea {
 </div>
 
 <!-- ACTIONS -->
-<?php if ($item['status'] === 'pending'): ?>
+<?php if (in_array($item['status'], ['pending', 'pending_reapply'])): ?>
 
 <?php if(isset($error)): ?>
 <div class="error"><?= $error ?></div>
 <?php endif; ?>
-
+<?php if($item['status'] === 'pending_reapply'): ?>
+<p style="color:#ff6f00;"><strong>⚠ Reapplied item pending review</strong></p>
+<?php endif; ?>
 <form method="POST">
   <div class="actions">
     <button name="approve" class="btn approve">Approve</button>

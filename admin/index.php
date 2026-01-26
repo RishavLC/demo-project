@@ -137,8 +137,8 @@ th {
   <ul>
     <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
-    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
-
+    <!-- <li><a href="manage_auctions.php">📦 Manage Auctions</a></li> -->
+    <li><a href="feedback_list.php">💬 Feedback</a></li>
     <!-- DROPDOWN -->
     <li>
       <a class="caret" onclick="toggleDropdown('auctionDropdown')">
@@ -205,7 +205,7 @@ th {
 </div>
 
 <canvas id="auctionChart"></canvas>
-
+<!-- 
 <h2>Recent Records</h2>
 
 <table>
@@ -225,7 +225,7 @@ th {
 </td>
 </tr>
 <?php } ?>
-</table>
+</table> -->
 
 </div>
 <script src="../assets/script.js"></script>

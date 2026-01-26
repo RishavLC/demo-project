@@ -125,17 +125,22 @@ $result = $stmt->get_result();
 <body>
     <div class="sidebar">
   <div class="sidebar-header">
-    Welcome, <?= htmlspecialchars($username) ?>
+    <!-- Logo instead of Welcome -->
+    <div class="logo-box">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
+      <span class="logo-text">EasyBid</span>
+    </div>
     <div class="toggle-btn">☰</div>
   </div>
+
   <ul>
-    <li><a href="../users" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
-    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
-    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
+    <li><a href="../users/" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
+    <!-- <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li> -->
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
-    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <!-- <li><a href="auctions.php" class="active">📊 Auction Details</a></li> -->
+    <li><a href="auction_bid.php" data-label="Place Bids">🪙 <span>Place Bids</span></a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
+    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
+    <li><a href="feedback_list.php" data-label="Feedback list">💬 <span>My Feedback</span></a></li>
     <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
@@ -156,6 +161,7 @@ $result = $stmt->get_result();
           <th>Winner</th>
           <th>Status</th>
           <th>Bid History</th>
+          <th>Messages</th>
         </tr>
       </thead>
       <tbody>
@@ -229,12 +235,47 @@ if (!empty($row['image_path'])) {
     </a>
 <?php else: ?>
     <a href="bid_history.php?item_id=<?= $row['id'] ?>" class="btn btn-info btn-sm">
-    View
-</a>
+      View
+    </a>
 
 <?php endif; ?>
 </td>
+<!-- Messages Column -->
+<td>
 
+<!-- Messages Block -->
+<div class="messages-block">
+    <div class="messages-list">
+    <?php
+    // Fetch all conversations for this item
+    $convStmt = $conn->prepare("
+        SELECT c.id, u.username AS buyer_name, 
+               (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.is_read = 0 AND m.sender_id = c.buyer_id) AS unread
+        FROM conversations c
+        JOIN users u ON c.buyer_id = u.id
+        WHERE c.item_id = ?
+        ORDER BY c.created_at DESC
+    ");
+    $convStmt->bind_param("i", $row['id']);
+    $convStmt->execute();
+    $convs = $convStmt->get_result();
+    $convStmt->close();
+
+    if ($convs->num_rows > 0):
+        while ($c = $convs->fetch_assoc()):
+            $unreadBadge = $c['unread'] > 0 ? "<span class='unread'>({$c['unread']})</span>" : "";
+            echo '<a href="chat_view.php?id='.$c['id'].'" class="chat-btn">
+                    '.htmlspecialchars($c['buyer_name']).$unreadBadge.'
+                  </a>';
+        endwhile;
+    else:
+        echo '<span class="no-messages">No messages yet</span>';
+    endif;
+    ?>
+    </div>
+</div>
+
+</td>
           
         </tr>
         <?php endwhile; ?>

@@ -228,18 +228,22 @@ th {
 <body>
    <div class="sidebar">
   <div class="sidebar-header">
-       Welcome, <?= htmlspecialchars($username) ?>
-
+    <!-- Logo instead of Welcome -->
+    <div class="logo-box">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
+      <span class="logo-text">EasyBid</span>
+    </div>
     <div class="toggle-btn">☰</div>
   </div>
+
   <ul>
     <li><a href="../users/" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
-    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
-    <li><a href="add_record.php" data-label="FeedBack">➕ <span>Add Feedback</span></a></li>
+    <!-- <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li> -->
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
-    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <!-- <li><a href="auctions.php" class="active">📊 <span>Auction Details</span></a></li> -->
+    <li><a href="auction_bid.php" data-label="Place Bids">🪙 <span>Place Bids</span></a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
+    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
+    <li><a href="feedback_list.php" data-label="Feedback list">💬 <span>My Feedback</span></a></li>
     <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
@@ -287,64 +291,93 @@ th {
         Winner<br>
         <?= $winner ? "<span class='winner'>{$winner['username']}</span>" : "No bids yet" ?>
     </div>
-</div>
-<?php
-$showFeedbackBtn = false;
-
+</div><?php
 if (
     $item['status'] === 'closed' &&
     $winner &&
     $item['seller_id'] == $user_id
 ) {
-    $showFeedbackBtn = true;
-}
-?>
-<?php if ($showFeedbackBtn): ?>
-<div style="text-align:right; margin:20px 0;">
-    <a href="feedback.php?item_id=<?= $item_id ?>"
-       style="
-        background:#8b0000;
-        color:white;
-        padding:10px 18px;
-        border-radius:6px;
-        text-decoration:none;
-        font-weight:bold;
-       ">
-        ✍️ Give Feedback / Contact Admin
-    </a>
-</div>
-<?php endif; ?>
-<?php if ($item['status'] === 'rejected' && $item['seller_id'] == $user_id): ?>
 
-    <!-- ADMIN REJECTION MESSAGE -->
+    // 🔍 check if feedback already exists
+    $stmt = $conn->prepare("
+        SELECT id 
+        FROM auction_feedback 
+        WHERE item_id = ? AND sender_id = ?
+        LIMIT 1
+    ");
+    $stmt->bind_param("ii", $item_id, $user_id);
+    $stmt->execute();
+    $existingFeedback = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    ?>
+
+    <div style="text-align:right; margin:20px 0;">
+
+        <?php if ($existingFeedback): ?>
+            <!-- VIEW FEEDBACK -->
+            <a href="feedback_view.php?id=<?= $existingFeedback['id'] ?>"
+               style="
+                background:#28a745;
+                color:white;
+                padding:10px 18px;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+               ">
+                💬 View Feedback / Admin Reply
+            </a>
+
+        <?php else: ?>
+            <!-- GIVE FEEDBACK -->
+            <a href="feedback.php?item_id=<?= $item_id ?>"
+               style="
+                background:#8b0000;
+                color:white;
+                padding:10px 18px;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+               ">
+                ✍️ Give Feedback / Contact Admin
+            </a>
+
+        <?php endif; ?>
+
+    </div>
+
+<?php } ?>
+
+<?php if ($item['status'] === 'rejected' && $item['seller_id'] == $user_id): ?>
     <div class="rejection-box">
         <h3>❌ Auction Rejected by Admin</h3>
         <p>
-            <strong>Reason:</strong>
-            <?= htmlspecialchars($item['rejection_reason'] ?? 'No reason provided') ?>
+            <strong>Reason:</strong> <?= htmlspecialchars($item['rejection_reason'] ?? 'No reason provided') ?>
         </p>
+        <div style="margin-top:15px;">
+            <a href="reapply_item.php?item_id=<?= $item_id ?>" 
+               style="padding:10px 18px; background:#e67e22; color:#fff; border-radius:6px; text-decoration:none; font-weight:bold;">
+                🔄 Reapply / Edit Item
+            </a>
+        </div>
     </div>
-
-<?php else: ?>
+<?php endif; ?>
 
     <!-- NORMAL BID TABLE -->
     <h3>All Bids</h3>
 
     <table>
     <tr>
-        <th>S.N</th>
+        <th>Bid Time</th>
         <th>Bidder</th>
         <th>Bid Amount (Rs)</th>
-        <th>Bid Time</th>
     </tr>
 
     <?php if ($bids->num_rows > 0): ?>
     <?php $i = 1; while ($row = $bids->fetch_assoc()): ?>
     <tr>
-        <td><?= $i++ ?></td>
+        <td><?= $row['bid_time'] ?></td>
         <td><?= htmlspecialchars($row['username']) ?></td>
         <td>Rs <?= number_format($row['bid_amount'], 2) ?></td>
-        <td><?= $row['bid_time'] ?></td>
     </tr>
     <?php endwhile; ?>
     <?php else: ?>
@@ -353,8 +386,6 @@ if (
     </tr>
     <?php endif; ?>
     </table>
-
-<?php endif; ?>
 
 <?php if ($totalPages > 1): ?>
 <div style="text-align:center; margin-top:20px;">

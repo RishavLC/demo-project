@@ -32,7 +32,34 @@ $stmt->bind_param("ii", $user_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();
+
+/* Check if a chat already exists between user and seller for this item */
+$chatStmt = $conn->prepare("
+    SELECT id 
+    FROM item_chats
+    WHERE item_id = ?
+      AND (
+        (buyer_id = ? AND seller_id = ?)
+        OR
+        (buyer_id = ? AND seller_id = ?)
+      )
+    LIMIT 1
+");
+
+$chatStmt->bind_param(
+    "iiiii",
+    $row['id'],         // current item ID
+    $_SESSION['user_id'], // current user
+    $row['seller_id'],    // seller of current item
+    $row['seller_id'],    // swap
+    $_SESSION['user_id']
+);
+
+$chatStmt->execute();
+$chat = $chatStmt->get_result()->fetch_assoc();
+$chatStmt->close();
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -81,18 +108,22 @@ $stmt->close();
 <body>
  <div class="sidebar">
   <div class="sidebar-header">
-        Welcome, <?= htmlspecialchars($username) ?>
-
+    <!-- Logo instead of Welcome -->
+    <div class="logo-box">
+      <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
+      <span class="logo-text">EasyBid</span>
+    </div>
     <div class="toggle-btn">☰</div>
   </div>
+
   <ul>
     <li><a href="../users/" data-label="Dashboard">🏠 <span>Dashboard</span></a></li>
-    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
-    <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li>
+    <!-- <li><a href="add_record.php" data-label="Add Record">➕ <span>Add Record</span></a></li> -->
     <li><a href="add_auction_item.php" data-label="Add Auction Items">📦 <span>Add Auction Items</span></a></li>
-    <li><a href="auction_bid.php" data-label="Place Bids">💰 <span>Place Bids</span></a></li>
-    <!-- <li><a href="auctions.php" class="active">📊 Auction Details</a></li> -->
+    <li><a href="auction_bid.php" data-label="Place Bids">🪙 <span>Place Bids</span></a></li>
     <li><a href="my_added_items.php" data-label="My Added Items">📦 <span>My Added Items</span></a></li>
+    <li><a href="my_bids.php" data-label="My Bidding History">📜 <span>My Bidding History</span></a></li>
+    <li><a href="feedback_list.php" data-label="Feedback list">💬 <span>My Feedback</span></a></li>
     <li><a href="../auth/logout.php" data-label="Logout">🚪 <span>Logout</span></a></li>
   </ul>
 </div>
@@ -164,6 +195,25 @@ if ($isWinner && $isEnded) {
   <p><strong>Winner:</strong> <?= htmlspecialchars($winner_name) ?></p>
   <p><strong>Status:</strong> <?= $status ?></p>
   <p><em>Ends at: <?= $row['end_time'] ?></em></p>
+ <?php if ($_SESSION['user_id'] != $row['seller_id']): ?>
+    <div style="margin-top:10px;">
+        <a href="<?= $chat 
+            ? 'chat_view.php?chat_id='.$chat['id']
+            : 'start_chat.php?item_id='.$row['id'] ?>"
+           style="
+            display:inline-block;
+            background:#34495e;
+            color:white;
+            padding:7px 14px;
+            border-radius:5px;
+            text-decoration:none;
+            font-size:13px;
+           ">
+           <?= $chat ? '💬 View Chat' : '💬 Message Seller' ?>
+        </a>
+    </div>
+<?php endif; ?>
+
   <?php if ($isEnded && $isWinner): ?>
     <?php if (!$paid): ?>
         <form action="../users/payment/payment_form.php" method="POST">
