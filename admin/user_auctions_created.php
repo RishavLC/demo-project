@@ -144,7 +144,8 @@ h2 { margin-bottom:10px; }
   <ul>
     <li><a href="../admin/">🏠 Dashboard</a></li>
     <li><a href="manage_users.php">👥 Manage Users</a></li>
-    <li><a href="manage_auctions.php">📦 Manage Auctions</a></li>
+    <!-- <li><a href="manage_auctions.php">📦 Manage Auctions</a></li> -->
+    <li><a href="feedback_list.php">💬 Feedback</a></li>
 
     <li>
       <a class="caret" onclick="toggleDropdown('auctionDrop')">📜 Auctions</a>

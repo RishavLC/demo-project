@@ -432,7 +432,7 @@ table tr:hover {
 }
 /* ===== Button ===== */
 .auth-form button {
-  background: #4caf50;
+  background: #1455be;
   border: none;
   padding: 10px;
   width: 100%;
@@ -441,7 +441,7 @@ table tr:hover {
   cursor: pointer;
 }
 .auth-form button:hover {
-  background: #45a049;
+  background: #1d4bbd;
 }
 
 /* Search==Bar */
@@ -472,7 +472,7 @@ table tr:hover {
 }
 
 .search-form button {
-  background-color: #007bff;
+  background-color: #2570c1;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -553,7 +553,7 @@ table tr:hover {
   text-align: center;
 }
 .auction-table th {
-  background: #3498db;
+  background: #1c6393;
   color: white;
 }
 .auction-table tr:nth-child(even) {
@@ -629,7 +629,7 @@ table tr:hover {
 }
 
 .search-btn {
-  background-color: #007bff;
+  background-color: #1a5697;
   color: white;
   border: none;
   padding: 7px 14px;

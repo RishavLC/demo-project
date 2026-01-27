@@ -14,14 +14,38 @@
     }
 
     /* Header */
-    header {
-      background: #007bff;
-      padding: 20px;
-      text-align: center;
+        header {
+      background-color: #003366;
       color: #fff;
-      font-size: 1.8rem;
-      font-weight: bold;
+      padding: 15px 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: sticky;/* relative for header to while scrolling */
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
       letter-spacing: 1px;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 12px;
+      transition: 0.3s;
+    }
+    nav a:hover {
+      background: #0056b3;
+      border-radius: 6px;
     }
 
     /* Contact Section */
@@ -137,7 +161,7 @@
 
     /* Footer */
     footer {
-      background: #007bff;
+      background: #143253;
       color: white;
       text-align: center;
       padding: 20px;
@@ -150,11 +174,54 @@
         flex-direction: column;
       }
     }
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;              /* space between logo and text */
+}
+
+.logo-img {
+  width: 40px;           /* 🔹 small & clean */
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;    /* soft rounded look */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;           /* header text color */
+  letter-spacing: 0.5px;
+}
+.logo-box:hover .logo-img {
+  transform: scale(1.05);
+}
+
+.logo-img {
+  transition: 0.3s ease;
+}
   </style>
 </head>
 <body>
 
-  <header>Contact EasyBid</header>
+ <header><div class="logo-box">
+    <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
+    <span class="logo-text">EasyBid</span>
+</div>
+
+  <nav>
+    <a href="index.php">Home</a>
+    <a href="aboutus.html">About Us</a>
+    <a href="index.php#auctions">Auctions</a>
+    <a href="contactus.html">Contact Us</a>
+  </nav>
+
+  <nav>
+    <a href="../auth/login.php">Login</a>
+  </nav>
+</header>
+
 
   <section class="contact-section">
     <div class="contact-info">
@@ -165,16 +232,7 @@
       <p>We’re here to help you with bidding issues, account queries, or partnership opportunities. Reach out anytime!</p>
     </div>
 
-    <div class="contact-form">
-      <h2>Send a Message</h2>
-      <form action="send_message.php" method="POST">
-        <input type="text" name="name" placeholder="Your Name" required>
-        <input type="email" name="email" placeholder="Your Email" required>
-        <input type="text" name="subject" placeholder="Subject" required>
-        <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
-        <button type="submit">Send Message</button>
-      </form>
-    </div>
+    
   </section>
   
   <iframe 

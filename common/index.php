@@ -3,80 +3,27 @@ include "config.php";
 $category = isset($_GET['category']) ? $_GET['category'] : '';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-$sql = "SELECT * FROM auction_items WHERE status='active'";
+$sql = "
+SELECT ai.*, img.image_path
+FROM auction_items ai
+LEFT JOIN auction_images img 
+    ON ai.id = img.item_id AND img.is_primary = 1
+WHERE ai.status = 'active'
+";
+
 if ($category != '') {
-    $sql .= " AND category LIKE '%" . $conn->real_escape_string($category) . "%'";
+    $safeCategory = $conn->real_escape_string($category);
+    $sql .= " AND ai.category LIKE '%$safeCategory%'";
 }
+
 if ($search != '') {
-    $sql .= " AND name LIKE '%" . $conn->real_escape_string($search) . "%'";
+    $safeSearch = $conn->real_escape_string($search);
+    $sql .= " AND ai.title LIKE '%$safeSearch%'";
 }
+
 $result = $conn->query($sql);
 
-//for register form
-$message = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST["username"]);
-    $email = trim($_POST["email"]);
-    $password = md5($_POST["password"]);
-
-    // ✅ Validate input
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = "<div class='alert error'>Invalid email format.</div>";
-    } else {
-        // ✅ Check if username or email already exists
-        $check = $conn->prepare("SELECT * FROM users WHERE username=? OR email=?");
-        $check->bind_param("ss", $username, $email);
-        $check->execute();
-        $result = $check->get_result();
-
-        if ($result->num_rows > 0) {
-            $message = "<div class='alert error'>Username or Email already exists!</div>";
-        } else {
-            // ✅ Get role_id for 'user'
-            $roleResult = $conn->query("SELECT id FROM roles WHERE role_name = 'user' LIMIT 1");
-            $roleRow = $roleResult->fetch_assoc();
-            $role_id = $roleRow['id'];
-
-            // ✅ Insert new user
-            $sql = $conn->prepare("INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)");
-            $sql->bind_param("sssi", $username, $email, $password, $role_id);
-
-            if ($sql->execute()) {
-                // ✅ Get created_at
-                $user_id = $conn->insert_id;
-                $result = $conn->query("SELECT created_at FROM users WHERE id = $user_id");
-                $row = $result->fetch_assoc();
-                $created_at = $row['created_at'];
-
-                // ✅ Success message
-                echo "<div style='
-                        margin: 20px auto; 
-                        width: 420px; 
-                        padding: 15px; 
-                        text-align: center; 
-                        background: #e6ffed; 
-                        border: 1px solid #28a745; 
-                        border-radius: 8px; 
-                        font-family: Arial, sans-serif; 
-                        color: #155724;'>
-                        🎉 Registration successful on <b>$created_at</b>! <br><br>
-                        <a href='index.php' style='
-                            display: inline-block; 
-                            padding: 8px 15px; 
-                            margin-top: 10px; 
-                            background: #28a745; 
-                            color: #fff; 
-                            text-decoration: none; 
-                            border-radius: 5px;'>Login here</a>
-                      </div>";
-                exit();
-            } else {
-                $message = "<div class='alert error'>Error: " . $conn->error . "</div>";
-            }
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,32 +70,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       background: #0056b3;
       border-radius: 6px;
     }
-    .search-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #fff;
-      border-radius: 8px;
-      padding: 5px 10px;
-    }
-    .search-bar input, .search-bar select {
-      border: none;
-      outline: none;
-      padding: 6px;
-      font-size: 14px;
-    }
-    .search-bar button {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .search-bar button:hover {
-      background: #0056b3;
-    }
-
     /* Hero Section */
 .hero {
   position: relative;
@@ -385,29 +306,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   font-size: 13px;
   color: #bbb;
 }
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;              /* space between logo and text */
+}
+
+.logo-img {
+  width: 40px;           /* 🔹 small & clean */
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;    /* soft rounded look */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;           /* header text color */
+  letter-spacing: 0.5px;
+}
+.logo-box:hover .logo-img {
+  transform: scale(1.05);
+}
+
+.logo-img {
+  transition: 0.3s ease;
+}
+
 
   </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">EasyBid</div>
+  <div class="logo-box">
+    <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
+    <span class="logo-text">EasyBid</span>
+</div>
+
   <nav>
     <a href="#">Home</a>
     <a href="aboutus.html">About Us</a>
     <a href="#auctions">Auctions</a>
     <a href="contactus.html">Contact Us</a>
   </nav>
-  <form class="search-bar" method="GET">
-    <select name="category">
-      <option value="">All Categories</option>
-      <option value="Electronics">Electronics</option>
-      <option value="Furnitures">Furniture</option>
-      <option value="Vehicles">Vehicles</option>
-    </select>
-    <input type="text" name="search" placeholder="Search items..." value="<?php echo htmlspecialchars($search); ?>">
-    <button type="submit">Search</button>
-  </form>
   <nav>
     <a href="../auth/login.php">Login</a>
   </nav>
@@ -428,7 +371,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php if ($result->num_rows > 0) { 
       while($row = $result->fetch_assoc()) { ?>
       <div class="auction-card">
-        <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Item Image">
+    <?php
+$imgPath = "../" . $row['image_path'];
+
+if (!empty($row['image_path']) && file_exists($imgPath)) {
+    $image = $imgPath;
+} else {
+    $image = "../images/no-image.png";
+}
+?>
+
+<img src="<?= $image ?>" alt="<?= htmlspecialchars($row['title']) ?>">
+
         <h3><?php echo htmlspecialchars($row['title']); ?></h3>
         <p>Starting Price: Rs. <?php echo number_format($row['start_price'], 2); ?></p>
         <a href="login.php">Bid Now</a>
@@ -478,19 +432,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="#"><i class="fab fa-linkedin"></i></a>
       </div>
     </div>
-
-    <!-- Newsletter -->
-    <div class="footer-col">
-      <form method="POST">
-          <h2>Register</h2>
-          <?= $message ?>
-          <input type="text" name="username" placeholder="Username" required>
-          <input type="email" name="email" placeholder="Email" required>
-          <input type="password" name="password" placeholder="Password" required><br>
-          <button type="submit">Register</button>
-      </form>
-    </div>
-
   </div>
 
   <div class="footer-bottom">

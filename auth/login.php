@@ -36,6 +36,12 @@ $suspendedUntil = isset($_GET["suspended_until"]) ? (int)$_GET["suspended_until"
 <body>
    
 <form method="POST" action="login_process.php" class="auth-form">
+    <?php if ($error === "invalid"): ?>
+    <div class="error-box">
+        ❌ Invalid username or password.
+    </div>
+<?php endif; ?>
+
      <?php if ($error === "banned"): ?>
     <div class="error-box">
         🚫 Your account is permanently banned.

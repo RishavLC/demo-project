@@ -1,22 +1,15 @@
 <?php
 date_default_timezone_set('Asia/Kathmandu');
-
 session_start();
 include "../common/config.php";
 
-/* 🚫 Block role switching */
+/* Block role switching */
 if (isset($_SESSION["role"])) {
-    if ($_SESSION["role"] === "admin") {
-        header("Location: /demo-project/admin/");
-        exit();
-    }
-    if ($_SESSION["role"] === "user") {
-        header("Location: /demo-project/users/");
-        exit();
-    }
+    header("Location: /demo-project/");
+    exit();
 }
 
-/* 🔐 Validate request */
+/* Validate request */
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: login.php");
     exit();
@@ -34,14 +27,16 @@ $sql = "SELECT users.id, users.status, users.suspended_at, roles.role_name
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ss", $username, $password);
 $stmt->execute();
-$result = $stmt->get_result();
 
-if ($result->num_rows !== 1) {
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+/* ❌ INVALID LOGIN */
+if (!$user) {
     header("Location: login.php?error=invalid");
     exit();
 }
 
-$user = $result->fetch_assoc();
 /* 🚫 BANNED */
 if ($user["status"] === "banned") {
     header("Location: login.php?error=banned");
@@ -51,24 +46,24 @@ if ($user["status"] === "banned") {
 /* ⏳ SUSPENDED */
 if ($user["status"] === "suspended") {
 
-    $suspendEnd = strtotime($user["suspended_at"]); // already end time
+    $suspendEnd = strtotime($user["suspended_at"]);
 
     if (time() < $suspendEnd) {
         header("Location: login.php?suspended_until=" . $suspendEnd);
         exit();
     }
 
-    // auto-reactivate
+    /* Auto-reactivate */
     $conn->query("
-        UPDATE users 
-        SET status='active', suspended_at=NULL 
+        UPDATE users
+        SET status='active', suspended_at=NULL
         WHERE id=" . (int)$user["id"]
     );
 }
 
 /* ✅ LOGIN SUCCESS */
 $_SESSION["user_id"] = $user["id"];
-$_SESSION["role"] = $user["role_name"]; // admin | user
+$_SESSION["role"] = $user["role_name"];
 
 if ($user["role_name"] === "admin") {
     header("Location: /demo-project/admin/");
