@@ -6,6 +6,10 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] != "user") {
 }
 
 include "../common/config.php";
+
+$user_id = $_SESSION["user_id"];
+$message = "";
+
 // username
 $user_sql = "SELECT username FROM users WHERE id = ?";
 $stmt = $conn->prepare($user_sql);
@@ -14,9 +18,6 @@ $stmt->execute();
 $stmt->bind_result($username);
 $stmt->fetch();
 $stmt->close();
-$user_id = $_SESSION["user_id"];
-$message = "";
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $title         = trim($_POST["title"]);
@@ -225,7 +226,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Logo instead of Welcome -->
     <div class="logo-box">
       <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
-      <span class="logo-text">EasyBid</span>
+      <!-- <span class="logo-text">EasyBid</span> -->
+       <?= htmlspecialchars($username) ?>
+
     </div>
     <div class="toggle-btn">☰</div>
   </div>

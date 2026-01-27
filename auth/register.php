@@ -92,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border: 1px solid #ccc;
         }
         form button {
-            background: #4CAF50;
+            background: #095093;
             border: none;
             padding: 12px;
             width: 100%;
@@ -102,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             cursor: pointer;
         }
         form button:hover {
-            background: #45a049;
+            background: #203bb1;
         }
         label {
             display: block;
@@ -139,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
 <form method="POST" action="">
-    <h2>Register for EasyBid</h2>
+    <h2>Registration Form</h2>
     <?= $message ?>
     <input type="text" name="username" placeholder="Username" required>
     <input type="email" name="email" placeholder="Email" required>

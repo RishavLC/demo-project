@@ -133,7 +133,8 @@ $stmt->close();
     <!-- Logo instead of Welcome -->
     <div class="logo-box">
       <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
-      <span class="logo-text">EasyBid</span>
+      <!-- <span class="logo-text">EasyBid</span> -->
+       <?= htmlspecialchars($username) ?>
     </div>
     <div class="toggle-btn">☰</div>
   </div>

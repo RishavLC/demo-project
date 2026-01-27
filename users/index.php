@@ -263,8 +263,14 @@ if (!$upcoming_result) {
     die('Upcoming SQL Error: ' . $conn->error);
 }
 
+$userStmt = $conn->prepare("SELECT username, email, photo FROM users WHERE id=?");
+$userStmt->bind_param("i", $user_id);
+$userStmt->execute();
+$user = $userStmt->get_result()->fetch_assoc();
 
+$profilePhoto = $user['photo'] ? "../uploads/".$user['photo'] : "../assets/default-user.png";
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -277,7 +283,8 @@ if (!$upcoming_result) {
     <!-- Logo instead of Welcome -->
     <div class="logo-box">
       <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
-      <span class="logo-text">EasyBid</span>
+      <!-- <span class="logo-text">EasyBid</span> -->
+       <?= htmlspecialchars($username) ?>
     </div>
     <div class="toggle-btn">☰</div>
   </div>
@@ -296,47 +303,59 @@ if (!$upcoming_result) {
 
 <div class="main-content">
 <!-- FULL WIDTH HEADER -->
-  <div class="header-wrapper">
+  <div class="header-wrapper" style="
+  position: fixed;
+  top: 1;
+  left: 240px; 
+  width: calc(100% - 220px);
+  z-index: 9999;
+  ">
     <div class="header">
-      <h2>Welcome, <?= htmlspecialchars($username) ?></h2>
+      <!-- <h2>Welcome, <?= htmlspecialchars($username) ?></h2> -->
+<h2></h2>
+      <div class="profile-wrapper" style="position:relative;">
+  
+  <div onclick="toggleProfile()" style="
+    display:flex;
+    align-items:center;
+    cursor:pointer;
+    gap:10px;
+  ">
+    <img src="<?= $profilePhoto ?>" style="
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      object-fit:cover;
+      border:2px solid #fff;
+    ">
+    <span><?= htmlspecialchars($user['username']) ?></span>
+  </div>
 
-      <!-- Notification Bell -->
-      <div class="notification-wrapper">
-        <div class="notification-bell" onclick="toggleDropdown()">
-          🔔
-          <?php if ($unread_count > 0) { ?>
-            <span class="badge"><?= $unread_count ?></span>
-          <?php } ?>
-        </div>
+  <div id="profileDropdown" style="
+    display:none;
+    position:absolute;
+    right:0;
+    top:50px;
+    background:#fff;
+    color:#000;
+    width:220px;
+    border-radius:8px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    z-index:9999;
+  ">
+    <a href="../users/profile.php" style="display:block;padding:10px;text-decoration:none;color:#000;">👤 My Profile</a>
+    <a href="../users/edit_profile.php" style="display:block;padding:10px;text-decoration:none;color:#000;">✏️ Edit Profile</a>
+    <hr>
+    <a href="../auth/logout.php" style="display:block;padding:10px;color:red;text-decoration:none;">🚪 Logout</a>
+  </div>
 
-        <div id="notificationDropdown" class="notification-dropdown">
-          <?php
-          $noti_sql = "SELECT * FROM notifications 
-                       WHERE user_id=? 
-                       ORDER BY created_at DESC 
-                       LIMIT 5";
-          $stmt = $conn->prepare($noti_sql);
-          $stmt->bind_param("i", $user_id);
-          $stmt->execute();
-          $noti_result = $stmt->get_result();
+</div>
 
-          if ($noti_result->num_rows > 0) {
-            while ($n = $noti_result->fetch_assoc()) {
-              echo "<p>".htmlspecialchars($n['message'])."</p>";
-            }
-          } else {
-            echo "<p>No notifications</p>";
-          }
-          ?>
-          <a href="../admin/notifications.php" class="view-all">View All</a>
-          <a href="../admin/mark_notifications.php" class="mark-read">Mark All as Read</a>
-        </div>
-      </div>
     </div>
   </div>
 
 <!-- Summary cards -->
-<div class="summary-cards">
+<div class="summary-cards" style="margin-top: 60px;">
   <div class="summary-card">
     <h3><?= $participated ?></h3>
     <p>Participated Auctions</p>
@@ -586,5 +605,18 @@ if ($end_time <= $now) {
 </div>
 
 <script src="../assets/script.js"></script>
+<script>
+function toggleProfile() {
+  const d = document.getElementById("profileDropdown");
+  d.style.display = d.style.display === "block" ? "none" : "block";
+}
+
+document.addEventListener("click", function(e){
+  if (!e.target.closest(".profile-wrapper")) {
+    document.getElementById("profileDropdown").style.display = "none";
+  }
+});
+</script>
+
 </body>
 </html>

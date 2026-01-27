@@ -75,3 +75,16 @@ el.innerText = "Rs. " + data[id];
 }
 
 setInterval(updatePrices, 3000);
+
+
+//profile toggle
+function toggleProfile() {
+  const d = document.getElementById("profileDropdown");
+  d.style.display = d.style.display === "block" ? "none" : "block";
+}
+
+document.addEventListener("click", function(e){
+  if (!e.target.closest(".profile-wrapper")) {
+    document.getElementById("profileDropdown").style.display = "none";
+  }
+});

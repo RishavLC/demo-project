@@ -5,9 +5,19 @@ include "../common/config.php";
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'user') {
     die("Unauthorized");
 }
-
 $user_id = $_SESSION['user_id'];
 
+/* Fetch username */
+$user_sql = "SELECT username FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($username);
+$stmt->fetch();
+$stmt->close();
+
+
+// FETCH FEEDBACK
 $result = $conn->prepare("
 SELECT f.id, a.title AS item_title, f.status, f.created_at
 FROM auction_feedback f
@@ -44,7 +54,8 @@ a { text-decoration: none; color: #007bff; }
     <!-- Logo instead of Welcome -->
     <div class="logo-box">
       <img src="../images/logo.jpeg" alt="EasyBid Logo" class="logo-img">
-      <span class="logo-text">EasyBid</span>
+      <!-- <span class="logo-text">EasyBid</span> -->
+       <?= htmlspecialchars($username) ?>
     </div>
     <div class="toggle-btn">☰</div>
   </div>

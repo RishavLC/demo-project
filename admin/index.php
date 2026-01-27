@@ -28,6 +28,12 @@ $sql = "SELECT r.id, r.title, r.description, u.username
         ORDER BY r.id DESC
         LIMIT 10";
 $result = $conn->query($sql);
+
+$active_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status='active'")->fetch_assoc()['total'];
+$upcoming_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status='upcoming'")->fetch_assoc()['total'];
+$closed_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status='closed'")->fetch_assoc()['total'];
+$rejected_auctions = $conn->query("SELECT COUNT(*) total FROM auction_items WHERE status='rejected'")->fetch_assoc()['total'];
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -119,6 +125,34 @@ th {
   max-width:380px;
   margin:40px auto;
 }
+.charts-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap; 
+  margin-top: 40px;
+}
+
+.chart-box {
+height: 300px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  flex: 1 1 45%; /* grow/shrink, min-width ~45% */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  
+  display: flex;           /* make it a flex container */
+  flex-direction: column;  /* stack title + canvas vertically */
+  justify-content: center; /* vertically center content */
+  align-items: center;     /* horizontally center content */
+}
+
+.chart-box canvas {
+  max-width: 100%;
+  height: 200px; /* you can adjust height */
+}
+
 </style>
 </head>
 
@@ -204,7 +238,19 @@ th {
 
 </div>
 
-<canvas id="auctionChart"></canvas>
+<div class="charts-container">
+  <div class="chart-box">
+    <h3>User Status Overview</h3>
+    <canvas id="userChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h3>Auction Status Overview</h3>
+    <canvas id="auctionStatusChart"></canvas>
+  </div>
+</div>
+
+
 <!-- 
 <h2>Recent Records</h2>
 
@@ -230,22 +276,64 @@ th {
 </div>
 <script src="../assets/script.js"></script>
 <script>
-new Chart(document.getElementById('auctionChart'), {
-  type:'doughnut',
-  data:{
-    labels:['Active','Upcoming','Closed'],
-    datasets:[{
-      data:[<?= $active_auctions ?>,<?= $upcoming_auctions ?>,<?= $closed_auctions ?>],
-      backgroundColor:['#27ae60','#f39c12','#e74c3c']
+new Chart(document.getElementById('userChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Active Users', 'Suspended Users', 'Banned Users'],
+    datasets: [{
+      data: [<?= $active_users ?>, <?= $suspended_users ?>, <?= $banned_users ?>],
+      backgroundColor: ['#27ae60', '#f39c12', '#e74c3c']
     }]
   },
-  options:{ plugins:{ legend:{ position:'bottom' } } }
+  options: {
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: { enabled: true }
+    }
+  }
 });
+
 
 function toggleDropdown(id){
   document.getElementById(id).classList.toggle("show");
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('auctionStatusChart'), {
+  type: 'bar', // You can also use 'doughnut' if you prefer
+  data: {
+    labels: ['Active', 'Closed', 'Upcoming', 'Rejected'],
+    datasets: [{
+      label: 'Number of Auctions',
+      data: [
+        <?= $active_auctions ?>,
+        <?= $closed_auctions ?>,
+        <?= $upcoming_auctions ?>,
+        <?= $rejected_auctions ?>
+      ],
+      backgroundColor: [
+        '#27ae60', // green
+        '#2c3e50', // dark
+        '#f39c12', // yellow/orange
+        '#e74c3c'  // red
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true }
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Auctions Count' } },
+      x: { title: { display: true, text: 'Status' } }
+    }
+  }
+});
+</script>
+
 
 </body>
 </html>
