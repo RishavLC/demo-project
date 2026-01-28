@@ -130,6 +130,16 @@ $chatStmt->close();
 </div>
 <div class="main-content">
 <h2>My Bidding History</h2>
+<div style="margin-bottom:15px;">
+  <label for="statusFilter">Filter by status: </label>
+  <select id="statusFilter">
+    <option value="all">All</option>
+    <option value="pending">won</option>
+    <option value="lost">Lost</option>
+    <option value="ongoing">Ongoing</option>
+    <option value="paid">Paid</option>
+  </select>
+</div>
 
 <div class="grid">
 
@@ -165,29 +175,50 @@ $chatStmt->close();
     if ($row['end_time'] > date("Y-m-d H:i:s")) {
         $status = "<span class='ongoing'>Ongoing Auction</span>";
     } elseif ($row['winner_id'] == $user_id) {
-        $status = "<span class='winner'>You WON 🎉</span>";
+        $status = "<span class='winner'>WON</span>";
     } else {
-        $status = "<span class='loser'>You Lost ❌</span>";
+        $status = "<span class='loser'>Lost</span>";
     }
     $isEnded = ($row['end_time'] < date("Y-m-d H:i:s"));
     $isWinner = ($row['winner_id'] == $user_id);
 // check if already paid or not
-    $paid = false;
+   $paid = false;
 if ($isWinner && $isEnded) {
     $payCheck = $conn->prepare(
-        "SELECT status FROM payments WHERE user_id=? AND item_id=? AND status='success'"
+        "SELECT id 
+         FROM payments 
+         WHERE item_id = ? 
+           AND status = 'success'
+         LIMIT 1"
     );
-    $payCheck->bind_param("ii", $user_id, $row['id']);
+    $payCheck->bind_param("i", $row['id']);
     $payCheck->execute();
     $payCheck->store_result();
     $paid = $payCheck->num_rows > 0;
     $payCheck->close();
 }
-
-
+if ($paid) {
+            $voucherSql = $conn->prepare("
+                SELECT voucher_no 
+                FROM payments 
+                WHERE item_id=? AND user_id=? AND status='success' 
+                LIMIT 1
+            ");
+            $voucherSql->bind_param("ii", $row['id'], $user_id);
+            $voucherSql->execute();
+            $voucherNo = $voucherSql->get_result()->fetch_assoc()['voucher_no'] ?? '';
+            $voucherSql->close();
+        }
+    // Determine card status for filtering
+    $cardStatus = 'ongoing'; // default
+    if ($isEnded && $isWinner && $paid) $cardStatus = 'paid';
+    elseif ($isEnded && $isWinner && !$paid) $cardStatus = 'pending';
+    elseif ($isEnded && $isWinner) $cardStatus = 'won';
+    elseif ($isEnded && !$isWinner) $cardStatus = 'lost';
+    elseif (!$isEnded) $cardStatus = 'ongoing';
 ?>
 
-<div class="card">
+<div class="card" data-status="<?= $cardStatus ?>">
   <img src="<?= htmlspecialchars($imagePath) ?>" alt="Auction Image">
   <h3><?= htmlspecialchars($row['title']) ?></h3>
   <p><strong>Seller:</strong> <?= htmlspecialchars($row['seller']) ?></p>
@@ -214,15 +245,34 @@ if ($isWinner && $isEnded) {
         </a>
     </div>
 <?php endif; ?>
-
-  <?php if ($isEnded && $isWinner): ?>
+<?php if ($isEnded && $isWinner): ?>
     <?php if (!$paid): ?>
         <form action="../users/payment/payment_form.php" method="POST">
           <input type="hidden" name="item_id" value="<?= $row['id'] ?>">
           <button class="pay-btn">Pay Now</button>
         </form>
     <?php else: ?>
-        <p class="winner">Payment Completed ✅</p>
+        <!-- Payment is done, show voucher -->
+        <?php
+        // Fetch the voucher number
+        $voucherSql = $conn->prepare("
+            SELECT voucher_no 
+            FROM payments 
+            WHERE item_id=? AND user_id=? AND status='success' 
+            LIMIT 1
+        ");
+        $voucherSql->bind_param("ii", $row['id'], $user_id);
+        $voucherSql->execute();
+        $voucherNo = $voucherSql->get_result()->fetch_assoc()['voucher_no'] ?? '';
+        $voucherSql->close();
+        ?>
+        <?php if ($voucherNo): ?>
+            <a href="../users/payment/payment_voucher.php?v=<?= urlencode($voucherNo) ?>" 
+               class="pay-btn" 
+               style="background:#2ecc71;margin-top:5px;display:inline-block; text-decoration:none;">
+                View Voucher
+            </a>
+        <?php endif; ?>
     <?php endif; ?>
 <?php endif; ?>
 
@@ -233,5 +283,20 @@ if ($isWinner && $isEnded) {
 </div>
 </div>
 <script src="../assets/script.js"></script>
+<script>
+const filter = document.getElementById('statusFilter');
+const cards = document.querySelectorAll('.grid .card');
+
+filter.addEventListener('change', () => {
+  const value = filter.value;
+  cards.forEach(card => {
+    if (value === 'all' || card.dataset.status === value) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+</script>
 </body>
 </html>

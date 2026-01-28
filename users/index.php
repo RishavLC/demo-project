@@ -19,14 +19,14 @@ $conn->query("UPDATE auction_items
               SET status='closed' 
               WHERE status='active' AND end_time <= NOW()");
 
-/* 🔹 Fetch user’s name */
-$user_sql = "SELECT username FROM users WHERE id = ?";
-$stmt = $conn->prepare($user_sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($username);
-$stmt->fetch();
-$stmt->close();
+  /* 🔹 Fetch user’s name */
+  $user_sql = "SELECT username FROM users WHERE id = ?";
+  $stmt = $conn->prepare($user_sql);
+  $stmt->bind_param("i", $user_id);
+  $stmt->execute();
+  $stmt->bind_result($username);
+  $stmt->fetch();
+  $stmt->close();
 
 /* 🔹 2. Fetch Active Auctions (others only, not expired) with search + sort + pagination */
 

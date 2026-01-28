@@ -375,7 +375,7 @@ td:last-child {
 <h2>📦 Auction Overview</h2>
 
 <div class="section"><h3>Pending</h3><?php renderTable($pending,'pending',$p_pending,$pendingPages); ?></div>
-<div class="section"><h3>Pending-Reapplied Items</h3>
+<div class="section"><h3>Reapplied Items</h3>
 <?php renderTable($reapplied,'reapplied',$p_reapplied ?? 1,$reappliedPages); ?>
 </div>
 <div class="section"><h3>Active</h3><?php renderTable($active,'active',$p_active,$activePages); ?></div>

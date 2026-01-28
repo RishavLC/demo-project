@@ -170,7 +170,7 @@ tr:nth-child(even) { background:#f2f6fc; }
 
 <table>
 <tr>
-    <th>#</th>
+    <th>S.N</th>
     <th>Image</th>
     <th>Item</th>
     <th>Seller</th>

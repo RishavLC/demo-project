@@ -28,7 +28,16 @@ $sql = "
            WHERE b.item_id = ai.id
            ORDER BY b.bid_amount DESC
            LIMIT 1
-         ) AS winner_name
+         ) AS winner_name,
+         (
+  SELECT p.status
+  FROM payments p
+  WHERE p.item_id = ai.id
+    AND p.status = 'success'
+  ORDER BY p.created_at DESC
+  LIMIT 1
+) AS payment_status
+
   FROM auction_items ai
   WHERE ai.seller_id = ?
   ORDER BY ai.created_at DESC
@@ -163,6 +172,7 @@ $result = $stmt->get_result();
           <th>Status</th>
           <th>Bid History</th>
           <th>Messages</th>
+          <th>Payment</th>
         </tr>
       </thead>
       <tbody>
@@ -277,7 +287,26 @@ if (!empty($row['image_path'])) {
 </div>
 
 </td>
-          
+         <td>
+<?php if ($row['status'] !== 'closed'): ?>
+
+    <span style="color:#999;">—</span>
+
+<?php else: ?>
+
+    <?php if ($row['payment_status'] === 'success'): ?>
+        <span style="color:#27ae60;font-weight:bold;">
+             Paid
+        </span>
+    <?php else: ?>
+        <span style="color:#e67e22;font-weight:bold;">
+            Pending
+        </span>
+    <?php endif; ?>
+
+<?php endif; ?>
+</td>
+ 
         </tr>
         <?php endwhile; ?>
       </tbody>

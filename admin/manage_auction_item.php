@@ -253,15 +253,45 @@ textarea {
 <?php if($item['status'] === 'pending_reapply'): ?>
 <p style="color:#ff6f00;"><strong>⚠ Reapplied item pending review</strong></p>
 <?php endif; ?>
-<form method="POST">
-  <div class="actions">
-    <button name="approve" class="btn approve">Approve</button>
-    <button name="reject" class="btn reject">Reject</button>
-  </div>
 
-  <label><strong>Reject reason</strong></label>
-  <textarea name="reason"></textarea>
-</form>
+<div class="actions">
+  <form method="POST" style="display:inline;">
+    <button name="approve" class="btn approve">Approve</button>
+  </form>
+  <button class="btn reject" onclick="openRejectModal()">Reject</button>
+</div>
+
+<!-- REJECTION MODAL -->
+<div id="rejectModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:20px; border-radius:8px; width:400px; position:relative;">
+    <h3>Reject Auction</h3>
+    <form method="POST">
+      <div>
+        <p><strong>Select a reason:</strong></p>
+        <label><input type="radio" name="reason" value="Invalid item" required> Invalid item</label><br>
+        <label><input type="radio" name="reason" value="Prohibited item"> Prohibited item</label><br>
+        <label><input type="radio" name="reason" value="Suspicious activity"> Suspicious activity</label><br>
+        <label><input type="radio" name="reason" value="Other"> Pricing</label>
+      </div>
+
+      <div style="margin-top:15px; display:flex; justify-content:space-between;">
+        <button type="submit" name="reject" class="btn reject">Submit</button>
+        <button type="button" class="btn" onclick="closeRejectModal()">Cancel</button>
+      </div>
+    </form>
+
+    <button onclick="closeRejectModal()" style="position:absolute; top:8px; right:12px; background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+  </div>
+</div>
+
+<script>
+function openRejectModal() {
+  document.getElementById('rejectModal').style.display = 'flex';
+}
+function closeRejectModal() {
+  document.getElementById('rejectModal').style.display = 'none';
+}
+</script>
 
 <?php else: ?>
 <p><em>Already reviewed.</em></p>
@@ -269,6 +299,7 @@ textarea {
 <p><strong>Reason:</strong> <?= htmlspecialchars($item['rejection_reason']) ?></p>
 <?php endif; ?>
 <?php endif; ?>
+
 
 </div>
 </div>
