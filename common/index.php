@@ -385,7 +385,7 @@ if (!empty($row['image_path']) && file_exists($imgPath)) {
 
         <h3><?php echo htmlspecialchars($row['title']); ?></h3>
         <p>Starting Price: Rs. <?php echo number_format($row['start_price'], 2); ?></p>
-        <a href="login.php">Bid Now</a>
+        <a href="../auth/login.php">Bid Now</a>
       </div>
     <?php } } else { ?>
       <p>No active auctions found.</p>
