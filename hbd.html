@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday 🎉</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        height: 100vh;
+        background: linear-gradient(120deg, #ff6ec4, #7873f5);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-align: center;
+    }
+
+    .container {
+        z-index: 2;
+        animation: fadeIn 2s ease-in-out;
+    }
+
+    h1 {
+        font-size: 3.5rem;
+        animation: glow 1.5s infinite alternate;
+    }
+
+    h2 {
+        margin-top: 10px;
+        font-size: 2rem;
+        animation: slideUp 2s ease-in-out;
+    }
+
+    p {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        opacity: 0;
+        animation: fadeText 3s forwards 2s;
+    }
+
+    button {
+        margin-top: 30px;
+        padding: 12px 30px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 30px;
+        background: #fff;
+        color: #ff4e91;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        transform: scale(1.1);
+        background: #ffe6f2;
+    }
+
+    /* Balloons */
+    .balloon {
+        position: absolute;
+        bottom: -150px;
+        width: 60px;
+        height: 80px;
+        border-radius: 50%;
+        animation: float 10s infinite ease-in;
+    }
+
+    .balloon::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 60px;
+        background: white;
+        top: 80px;
+        left: 50%;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-120vh); }
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 10px #fff; }
+        to { text-shadow: 0 0 25px yellow, 0 0 40px pink; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeText {
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="container">
+    <h1>🎂 Happy Birthday 🎉</h1>
+    <h2>Dear My Best Friend 💖</h2>
+    <p>
+        May your day be filled with love, laughter, surprises,  
+        and all the happiness you deserve! 🌟  
+        Stay awesome always 😎🎁
+    </p>
+    <button onclick="launchConfetti()">Celebrate 🎆</button>
+</div>
+
+<!-- Balloons -->
+<div class="balloon" style="left:10%; background:#ff4e91;"></div>
+<div class="balloon" style="left:30%; background:#ffd166; animation-delay:2s;"></div>
+<div class="balloon" style="left:50%; background:#06d6a0; animation-delay:4s;"></div>
+<div class="balloon" style="left:70%; background:#4cc9f0; animation-delay:1s;"></div>
+<div class="balloon" style="left:90%; background:#f72585; animation-delay:3s;"></div>
+
+<script>
+    // Confetti animation
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = [];
+
+    function launchConfetti() {
+        for (let i = 0; i < 300; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 6 + 2,
+                dx: Math.random() * 4 - 2,
+                dy: Math.random() * 4 + 1,
+                color: `hsl(${Math.random() * 360},100%,50%)`
+            });
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+
+            p.x += p.dx;
+            p.y += p.dy;
+
+            if (p.y > canvas.height) particles.splice(i, 1);
+        });
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>
+
+</body>
+</html>
